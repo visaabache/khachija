@@ -56,6 +56,16 @@ const BAD_AGENT = /(sqlmap|nikto|nuclei|masscan|zgrab|wpscan|acunetix|nessus|ope
 // Addresses of the old WordPress shop, sent to their new home so links and Google results keep working.
 const OLD_PATHS = { '/shop/': '/de/shop', '/about-us/': '/de/about', '/contact-us/': '/de/contact', '/privacy-policy/': '/de/datenschutz', '/refund-policy/': '/de/widerruf', '/term-of-use/': '/de/agb', '/cart/': '/de/cart', '/checkout/': '/de/checkout', '/my-account/': '/de/', '/wishlist/': '/de/shop' };
 
+// "22337 Hamburg" (or "Hamburg 22337", "1010 Wien", "1012 AB Amsterdam") → { zip, city }. The postcode is needed by DHL.
+export function splitCity(text) {
+  const t = String(text || '').replace(/\s+/g, ' ').trim();
+  let m = t.match(/^((?:[A-Z]{1,2}-)?\d{4,5}(?:\s?[A-Z]{2})?|\d{2}-\d{3}|\d{3}\s\d{2})[\s,]+(.+)$/i);
+  if (m) return { zip: m[1].toUpperCase(), city: m[2] };
+  m = t.match(/^(.+?)[\s,]+((?:[A-Z]{1,2}-)?\d{4,5})$/i);
+  if (m) return { zip: m[2].toUpperCase(), city: m[1] };
+  return { zip: '', city: t };
+}
+
 // Where each old WordPress product now lives: oils and serums, soaps, masks and peelings.
 function oldProduct(path) {
   if (/argan|rosemary|prickly-pear-oil|oil/.test(path)) return '/de/c/oele-seren';
@@ -394,33 +404,32 @@ async function handleApi(request, env, url, ctx) {
     if (!(await botCheck(env, settings, body.cf_token, request))) return json({ error: 'bot' }, 403);
     const orderLang = LANGS.includes(body.lang) ? body.lang : lang;
     const f = {
-      first_name: clean(body.first_name, 60),
-      last_name: clean(body.last_name, 60),
+      first_name: clean(body.name, 120),
+      last_name: '',
       email: clean(body.email, 254).toLowerCase(),
-      street: clean(body.street, 120),
-      address2: clean(body.address2, 120),
-      zip: clean(body.zip, 10).toUpperCase(),
-      city: clean(body.city, 80),
+      street: clean(body.street, 160),
+      address2: '',
+      ...splitCity(clean(body.city, 90)),
       country: clean(body.country, 2).toUpperCase(),
       note: clean(body.note, 500),
     };
     const phone = normalizePhone(body.phone);
     const method = String(body.payment || '');
     const errors = {};
-    if (f.first_name.length < 1) errors.first_name = 'required';
-    if (f.last_name.length < 1) errors.last_name = 'required';
-    if (!validEmail(f.email)) errors.email = 'email';
-    if (phone === null) errors.phone = 'phone';
+    if (f.first_name.length < 2) errors.name = 'required';
+    if (f.email && !validEmail(f.email)) errors.email = 'email';
+    if (!phone) errors.phone = phone === null ? 'phone' : 'required';
     if (f.street.length < 3) errors.street = 'required';
-    if (f.city.length < 2) errors.city = 'required';
+    if (f.city.length < 2) errors.city = errors.city || 'required';
     if (!shippingCountries(settings).includes(f.country)) errors.country = 'required';
-    else if (!validZip(f.zip, f.country)) errors.zip = 'zip';
+    else if (!validZip(f.zip, f.country)) errors.city = 'zip';
     if (!paymentMethods(settings, env, f.country).includes(method)) errors.payment = 'payment';
     if (body.terms !== true) errors.terms = 'terms';
     if (Object.keys(errors).length) return json({ error: 'invalid', fields: errors }, 422);
 
     // Fake-order protection: at most 3 orders per email address and 6 per visitor each hour, 15 per visitor a day.
-    const recent = await db.prepare("SELECT COUNT(*) AS n FROM orders WHERE email = ? AND created_at > datetime('now', '-1 hour')").bind(f.email).first();
+    // Fake-order protection: at most 3 orders per phone number an hour.
+    const recent = await db.prepare("SELECT COUNT(*) AS n FROM orders WHERE phone = ? AND created_at > datetime('now', '-1 hour')").bind(phone).first();
     if (recent.n >= 3) return json({ error: 'too_many' }, 429);
     const visitor = `order:${await visitorId(request, env.ADMIN_PASSWORD || 'khachija')}`;
     if ((await recentHits(db, visitor, 3600)) >= 6 || (await recentHits(db, visitor, 86400)) >= 15) return json({ error: 'too_many' }, 429);
@@ -459,7 +468,7 @@ async function handleApi(request, env, url, ctx) {
       // The CHECK (stock >= 0) on products makes this fail, and the whole order roll back, if stock ran out meanwhile.
       statements.push(db.prepare('UPDATE products SET stock = stock - ? WHERE id = ? AND stock IS NOT NULL').bind(l.qty, l.id));
     }
-    if (body.newsletter === true) statements.push(db.prepare('INSERT OR IGNORE INTO subscribers (email, lang) VALUES (?, ?)').bind(f.email, orderLang));
+    if (body.newsletter === true && f.email) statements.push(db.prepare('INSERT OR IGNORE INTO subscribers (email, lang) VALUES (?, ?)').bind(f.email, orderLang));
     try {
       await db.batch(statements);
       await addHit(db, visitor);

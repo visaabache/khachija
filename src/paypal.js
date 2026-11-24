@@ -86,7 +86,7 @@ export async function createPaypalOrder(env, settings, origin, order, items) {
     ],
     payment_source: {
       paypal: {
-        email_address: order.email,
+        ...(order.email ? { email_address: order.email } : {}),
         experience_context: {
           brand_name: store.slice(0, 127),
           locale: LOCALES[order.lang] || 'de-DE',

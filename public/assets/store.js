@@ -529,9 +529,10 @@
       clearErrors();
       const f = co.elements;
       const errors = {};
-      for (const k of ['email', 'first_name', 'last_name', 'street', 'zip', 'city']) if (!f[k].value.trim()) errors[k] = 'required';
+      for (const k of ['name', 'phone', 'street', 'city']) if (!f[k].value.trim()) errors[k] = 'required';
       if (f.email.value && !f.email.checkValidity()) errors.email = 'email';
-      if (f.country.value === 'DE' && f.zip.value && !/^\d{5}$/.test(f.zip.value.trim())) errors.zip = 'zip';
+      if (f.phone.value.trim() && f.phone.value.replace(/\D/g, '').length < 7) errors.phone = 'phone';
+      if (f.country.value === 'DE' && f.city.value.trim() && !/\b\d{5}\b/.test(f.city.value)) errors.city = 'zip';
       if (!method()) errors.payment = 'payment';
       if (!f.terms.checked) errors.terms = 'terms';
       if (Object.keys(errors).length) {
@@ -547,11 +548,8 @@
           items: load(),
           email: f.email.value,
           phone: f.phone.value,
-          first_name: f.first_name.value,
-          last_name: f.last_name.value,
+          name: f.name.value,
           street: f.street.value,
-          address2: f.address2.value,
-          zip: f.zip.value,
           city: f.city.value,
           country: f.country.value,
           note: f.note.value,

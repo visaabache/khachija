@@ -235,13 +235,13 @@ export function alertEmail({ order, items, origin, cfg, settings }) {
   const pay = T.de.pay[order.payment_method]?.[0] || order.payment_method;
   const body = `${h1(`Neue Bestellung · ${money(order.total, 'de')}`)}
 <p style="margin:0;color:${C.muted};">Bestellung <strong dir="ltr" style="color:${C.ink}">${esc(order.number)}</strong> · ${esc(pay)} · ${esc(T.de.paymentStatus[order.payment_status] || order.payment_status)} · Sprache ${esc(order.lang.toUpperCase())}</p>
-${box(`${addressHtml(order, 'de')}<br><a href="mailto:${esc(order.email)}" style="color:${C.green};">${esc(order.email)}</a>${order.phone ? ` · <a href="tel:${esc(order.phone)}" style="color:${C.green};">${esc(displayPhone(order.phone))}</a>` : ''}${order.note ? `<br><em>„${esc(order.note)}“</em>` : ''}`)}
+${box(`${addressHtml(order, 'de')}<br>${order.email ? `<a href="mailto:${esc(order.email)}" style="color:${C.green};">${esc(order.email)}</a> · ` : ''}${order.phone ? `<a href="tel:${esc(order.phone)}" style="color:${C.green};">${esc(displayPhone(order.phone))}</a>` : ''}${order.note ? `<br><em>„${esc(order.note)}“</em>` : ''}`)}
 ${itemsTable('de', order, items)}
 ${button(`${origin}/admin/#order-${order.id}`, 'Im Admin öffnen')}`;
   return {
     subject: `🛍️ Neue Bestellung ${order.number} · ${money(order.total, 'de')} · ${pay}`,
     html: frame({ lang: 'de', origin, cfg, settings, preheader: `${fullName(order)}, ${order.city}, ${money(order.total, 'de')}`, body }),
-    text: `Neue Bestellung ${order.number}\n${fullName(order)} · ${order.email} ${order.phone || ''}\n${order.street}, ${order.zip} ${order.city}, ${order.country}\n${items.map((i) => `- ${i.name}${i.option ? ` (${i.option})` : ''} x${i.qty}`).join('\n')}\nGesamt: ${money(order.total, 'de')} · ${pay}\n\n${origin}/admin/`,
+    text: `Neue Bestellung ${order.number}\n${fullName(order)} · ${order.phone || ''} ${order.email || ''}\n${order.street}, ${order.zip} ${order.city}, ${order.country}\n${items.map((i) => `- ${i.name}${i.option ? ` (${i.option})` : ''} x${i.qty}`).join('\n')}\nGesamt: ${money(order.total, 'de')} · ${pay}\n\n${origin}/admin/`,
   };
 }
 
@@ -254,19 +254,21 @@ export async function sendOrderEmails(env, settings, origin, order, items) {
   const cfg = emailConfig(env, settings);
   if (!cfg.on) return;
   const args = { order, items, origin, cfg, settings };
-  const jobs = [sendEmail(env, cfg, { to: order.email, toName: fullName(order), replyTo: cfg.replyTo, ...confirmationEmail(args) })];
-  if (validEmail(cfg.notify)) jobs.push(sendEmail(env, cfg, { to: cfg.notify, replyTo: order.email, ...alertEmail(args) }));
+  const jobs = [];
+  // The customer's confirmation only when they gave an email address (it is optional at checkout).
+  if (validEmail(order.email)) jobs.push(sendEmail(env, cfg, { to: order.email, toName: fullName(order), replyTo: cfg.replyTo, ...confirmationEmail(args) }));
+  if (validEmail(cfg.notify)) jobs.push(sendEmail(env, cfg, { to: cfg.notify, ...(validEmail(order.email) ? { replyTo: order.email } : {}), ...alertEmail(args) }));
   await sendAll(env, cfg, jobs);
 }
 
 export async function sendPaidEmail(env, settings, origin, order, items) {
   const cfg = emailConfig(env, settings);
-  if (!cfg.on || settings.email_status_updates === '0') return;
+  if (!cfg.on || !validEmail(order.email) || settings.email_status_updates === '0') return;
   await sendAll(env, cfg, [sendEmail(env, cfg, { to: order.email, toName: fullName(order), replyTo: cfg.replyTo, ...paidEmail({ order, items, origin, cfg, settings }) })]);
 }
 
 export async function sendStatusEmail(env, settings, origin, order, items) {
   const cfg = emailConfig(env, settings);
-  if (!cfg.on || !STATUS_EMAILS.includes(order.status) || settings.email_status_updates === '0') return;
+  if (!cfg.on || !validEmail(order.email) || !STATUS_EMAILS.includes(order.status) || settings.email_status_updates === '0') return;
   await sendAll(env, cfg, [sendEmail(env, cfg, { to: order.email, toName: fullName(order), replyTo: cfg.replyTo, ...statusEmail({ order, items, origin, cfg, settings }) })]);
 }

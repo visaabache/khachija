@@ -1061,3 +1061,11 @@ const SEO = {
   },
 };
 for (const l of ['de', 'en', 'ar']) Object.assign(T[l], SEO[l]);
+
+// Short checkout: full name, phone, address, postcode + city, country; email optional.
+const CHECKOUT = {
+  de: { fullName: 'Vor- und Nachname', phoneReq: 'Telefonnummer', cityZip: 'PLZ und Ort', cityZipHint: 'z. B. 22337 Hamburg', emailOpt: 'E-Mail (optional)', emailHint: 'Wenn Sie Ihre E-Mail angeben, erhalten Sie die Bestellbestätigung automatisch per E-Mail.', street: 'Straße und Hausnummer', addressTitle: 'Ihre Angaben' },
+  en: { fullName: 'Full name', phoneReq: 'Phone number', cityZip: 'Postcode and city', cityZipHint: 'e.g. 22337 Hamburg', emailOpt: 'Email (optional)', emailHint: 'If you enter your email, you’ll receive the order confirmation automatically.', street: 'Street and house number', addressTitle: 'Your details' },
+  ar: { fullName: 'الاسم الكامل', phoneReq: 'رقم الهاتف', cityZip: 'الرمز البريدي والمدينة', cityZipHint: 'مثلًا 22337 Hamburg', emailOpt: 'البريد الإلكتروني (اختياري)', emailHint: 'إذا أدخلت بريدك الإلكتروني، يصلك تأكيد الطلب تلقائيًا.', street: 'الشارع ورقم المنزل', addressTitle: 'معلوماتك' },
+};
+for (const l of ['de', 'en', 'ar']) Object.assign(T[l], CHECKOUT[l]);

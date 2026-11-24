@@ -9,7 +9,7 @@ import { giroCodeSvg, formatIban } from './girocode.js';
 import { trackingUrl } from './email.js';
 import {
   LANGS, HREFLANG, LOCALE, turnstileKey, esc, money, unitPrice, contentLabel, productName, productField, productDesc, productImages, productOptions,
-  liveBundles, bundleTitle, optionGroupName, shippingCountries, countryName, paymentMethods, parseJSON,
+  liveBundles, bundleTitle, optionGroupName, shippingCountries, countryName, paymentMethods, parseJSON, displayPhone,
 } from './lib.js';
 
 const PLACEHOLDER = '/assets/placeholder.svg';
@@ -654,22 +654,20 @@ export function checkoutPage(ctx) {
   ${stepsBar(lang, 1)}
   <form id="checkout" class="checkout" novalidate>
     <div class="co-main">
-      <fieldset class="co-step"><legend><span class="co-n">1</span>${esc(t.contactTitle)}</legend>
-        ${field('email', t.email, 'type="email" autocomplete="email" required maxlength="254" dir="ltr"')}
-        <p class="hint">${esc(t.emailHint)}</p>
-        ${field('phone', t.phone, 'type="tel" autocomplete="tel" inputmode="tel" maxlength="24" dir="ltr"')}
-      </fieldset>
-      <fieldset class="co-step"><legend><span class="co-n">2</span>${esc(t.addressTitle)}</legend>
-        <div class="row2">${field('first_name', t.firstName, 'autocomplete="given-name" required maxlength="60"')}${field('last_name', t.lastName, 'autocomplete="family-name" required maxlength="60"')}</div>
-        ${field('street', t.street, 'autocomplete="address-line1" required maxlength="120"')}
-        ${field('address2', `${t.address2} · ${t.address2Hint}`, 'autocomplete="address-line2" maxlength="120"')}
-        <div class="row-zip">${field('zip', t.zip, 'autocomplete="postal-code" required maxlength="10" inputmode="numeric" dir="ltr"')}${field('city', t.city, 'autocomplete="address-level2" required maxlength="80"')}</div>
+      <fieldset class="co-step"><legend><span class="co-n">1</span>${esc(t.addressTitle)}</legend>
+        ${field('name', t.fullName, 'autocomplete="name" required maxlength="120"')}
+        ${field('phone', t.phoneReq, 'type="tel" autocomplete="tel" inputmode="tel" required maxlength="24" dir="ltr"')}
+        ${field('street', t.street, 'autocomplete="street-address" required maxlength="160"')}
+        ${field('city', t.cityZip, 'autocomplete="address-level2" required maxlength="90"')}
+        <p class="hint">${esc(t.cityZipHint)}</p>
         <label class="fl fl-select"><select name="country" autocomplete="country" required data-country>${countries.map((c) => `<option value="${c}">${esc(countryName(c, lang))}</option>`).join('')}</select><span>${esc(t.country)}</span></label>
+        ${field('email', t.emailOpt, 'type="email" autocomplete="email" maxlength="254" dir="ltr"')}
+        <p class="hint">${esc(t.emailHint)}</p>
       </fieldset>
-      <fieldset class="co-step"><legend><span class="co-n">3</span>${esc(t.shippingTitle)}</legend>
+      <fieldset class="co-step"><legend><span class="co-n">2</span>${esc(t.shippingTitle)}</legend>
         <div class="ship-opt">${icon('truck', 26)}<div><strong>${esc(t.shippingDhl)}</strong><span>${esc(t.shippingDays(String(settings.delivery_days || '2-4').replace('-', '–')))}</span></div><b data-ship-price>…</b></div>
       </fieldset>
-      <fieldset class="co-step"><legend><span class="co-n">4</span>${esc(t.paymentTitle)}</legend>
+      <fieldset class="co-step"><legend><span class="co-n">3</span>${esc(t.paymentTitle)}</legend>
         <div class="pay-opts">${methods
           .filter((m) => anyMethod.includes(m) || (m === 'cod' && available.includes('cod')))
           .map((m, i) => `<label class="pay-opt" data-method="${m}"><input type="radio" name="payment" value="${m}"${i === 0 ? ' checked' : ''} required><span class="pay-radio"></span><span class="pay-text"><strong>${esc(t.pay[m][0])}${m === 'cod' && fee ? ` <small>${esc(t.codFee(money(fee, lang)))}</small>` : ''}</strong><span>${esc(t.pay[m][1])}</span></span><span class="pay-icon">${payIcon[m]}</span></label>`)
@@ -695,7 +693,7 @@ export function checkoutPage(ctx) {
   return layout(ctx, { title: t.checkout, path: '/checkout', body, noindex: true, page: 'checkout', minimal: true, track: { event: 'InitiateCheckout' } });
 }
 
-const ADDRESS = (o, lang) => `${esc(o.first_name)} ${esc(o.last_name)}<br>${esc(o.street)}${o.address2 ? `<br>${esc(o.address2)}` : ''}<br>${esc(o.zip)} ${esc(o.city)}<br>${esc(countryName(o.country, lang))}`;
+const ADDRESS = (o, lang) => `${esc(`${o.first_name} ${o.last_name}`.trim())}<br>${esc(o.street)}${o.address2 ? `<br>${esc(o.address2)}` : ''}<br>${esc(o.zip)} ${esc(o.city)}<br>${esc(countryName(o.country, lang))}`;
 
 export function orderPage(ctx, order, items, { paypalError = false } = {}) {
   const { lang, settings } = ctx;
@@ -743,7 +741,7 @@ export function orderPage(ctx, order, items, { paypalError = false } = {}) {
         <li class="vat"><span>${esc(order.vat ? t.js.vatIncl.replace('{amount}', money(order.vat, lang)) : t.js.vatSmall)}</span></li>
       </ul>
     </div>
-    <div class="card-box"><h2>${esc(t.deliverTo)}</h2><p>${ADDRESS(order, lang)}</p><p class="muted">${esc(order.email)}</p></div>
+    <div class="card-box"><h2>${esc(t.deliverTo)}</h2><p>${ADDRESS(order, lang)}</p><p class="muted" dir="ltr">${esc(displayPhone(order.phone || ''))}${order.email ? `<br>${esc(order.email)}` : ''}</p></div>
   </div>
   <p class="center actions"><a class="btn btn-ghost" href="/${lang}/shop">${esc(t.continueShopping)}</a></p>
 </section>`;

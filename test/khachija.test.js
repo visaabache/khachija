@@ -160,3 +160,11 @@ test('admin two-factor codes (TOTP, RFC 6238)', async () => {
   assert.ok(!(await validTotp(secret, await totpCode(secret, Math.floor(now / 30000) - 3), now))); // 90 s late is not
   assert.ok(!(await validTotp(secret, 'abcdef', now)));
 });
+
+test('checkout: postcode and city come from one field', async () => {
+  const { splitCity } = await import('../src/worker.js');
+  assert.deepEqual(splitCity('22337 Hamburg'), { zip: '22337', city: 'Hamburg' });
+  assert.deepEqual(splitCity(' Hamburg  22337 '), { zip: '22337', city: 'Hamburg' });
+  assert.deepEqual(splitCity('1012 AB Amsterdam'), { zip: '1012 AB', city: 'Amsterdam' });
+  assert.deepEqual(splitCity('Hamburg'), { zip: '', city: 'Hamburg' });
+});
