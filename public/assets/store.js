@@ -555,6 +555,32 @@
     });
   }
 
+  // Cooperative film: the silent loop plays only while it is on screen (never for visitors who asked for less motion);
+  // the full film opens in a dialog and loads only when asked for.
+  const loop = $('[data-loop]');
+  if (loop) {
+    if (reduceMotion || !('IntersectionObserver' in window)) loop.removeAttribute('data-loop');
+    else {
+      new IntersectionObserver(([e]) => {
+        if (e.isIntersecting) {
+          if (loop.preload === 'none') loop.preload = 'auto';
+          loop.play().catch(() => {});
+        } else loop.pause();
+      }, { rootMargin: '200px 0px' }).observe(loop);
+    }
+  }
+  const filmDialog = $('.film-dialog');
+  if (filmDialog) {
+    const film = filmDialog.querySelector('video');
+    $('[data-film-open]')?.addEventListener('click', () => {
+      filmDialog.showModal();
+      film.play().catch(() => {});
+    });
+    filmDialog.querySelector('[data-film-close]').addEventListener('click', () => filmDialog.close());
+    filmDialog.addEventListener('click', (e) => e.target === filmDialog && filmDialog.close());
+    filmDialog.addEventListener('close', () => film.pause());
+  }
+
   // Scroll reveals
   const reveals = $$('.reveal');
   if ('IntersectionObserver' in window && !reduceMotion) {

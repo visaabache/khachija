@@ -160,10 +160,10 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=1">
+<link rel="stylesheet" href="/assets/style.css?v=2">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=1" defer></script>
+<script src="/assets/store.js?v=2" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
 <a class="skip" href="#main">${esc(t.allProducts)}</a>
@@ -341,6 +341,17 @@ export function homePage(ctx, featured, latest, photos) {
 </section>
 <div class="wrap">${trustStrip(lang)}</div>
 ${cats}
+<section class="film-band" aria-labelledby="film-title">
+  <video class="film-bg" muted loop playsinline preload="none" poster="/assets/video/kooperative-poster.webp" aria-hidden="true" data-loop><source src="/assets/video/kooperative-loop.mp4" type="video/mp4"></video>
+  <div class="film-shade" aria-hidden="true"></div>
+  <div class="wrap film-text reveal">
+    ${kicker(t.film.kicker)}
+    <h2 id="film-title">${esc(t.film.title)}</h2>
+    <p>${esc(t.film.text)}</p>
+    <button type="button" class="btn btn-light btn-lg" data-film-open><span class="play" aria-hidden="true"></span>${esc(t.film.cta)} <small>· ${esc(t.film.length)}</small></button>
+  </div>
+</section>
+<dialog class="film-dialog" aria-label="${esc(t.film.title)}"><button type="button" class="film-close" data-film-close aria-label="${esc(t.close)}">${icon('close', 26)}</button><video controls playsinline preload="none" poster="/assets/video/kooperative-poster.webp"><source src="/assets/video/kooperative-film.mp4" type="video/mp4"></video></dialog>
 ${featured.length ? `<section class="section wrap">${sectionHead(t.featured, t.shop, `/${lang}/shop`, t.viewAll)}${grid(featured, ctx, t.noProducts)}</section>` : ''}
 <section class="story">
   <div class="wrap story-grid">

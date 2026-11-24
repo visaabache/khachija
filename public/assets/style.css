@@ -661,3 +661,22 @@ legend { padding: 0; margin-bottom: 10px; font-size: 0.78rem; letter-spacing: 0.
   .btn { letter-spacing: 0.1em; padding: 0 18px; }
   .buy-row .add-btn span { white-space: nowrap; }
 }
+
+/* Cooperative film band */
+.film-band { position: relative; min-height: 560px; display: grid; align-items: center; overflow: hidden; background: var(--green-3) url('/assets/video/kooperative-poster.webp') center / cover; color: #fff; }
+.film-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.film-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(26, 53, 41, 0.92) 0%, rgba(26, 53, 41, 0.65) 45%, rgba(26, 53, 41, 0.15) 100%); }
+[dir='rtl'] .film-shade { background: linear-gradient(270deg, rgba(26, 53, 41, 0.92) 0%, rgba(26, 53, 41, 0.65) 45%, rgba(26, 53, 41, 0.15) 100%); }
+.film-text { position: relative; padding: 80px 0; }
+.film-text > * { max-width: 520px; }
+.film-text h2 { color: #fff; }
+.film-text p { color: rgba(244, 234, 216, 0.88); margin-bottom: 28px; }
+.film-text .kicker { color: var(--gold-2); }
+.film-text small { font-size: 0.7rem; opacity: 0.8; letter-spacing: 0.08em; }
+.play { width: 0; height: 0; border-style: solid; border-width: 7px 0 7px 12px; border-color: transparent transparent transparent currentColor; }
+[dir='rtl'] .play { border-width: 7px 12px 7px 0; border-color: transparent currentColor transparent transparent; }
+@media (max-width: 700px) { .film-band { min-height: 520px; align-items: end; } .film-shade { background: linear-gradient(0deg, rgba(26, 53, 41, 0.95) 0%, rgba(26, 53, 41, 0.6) 55%, rgba(26, 53, 41, 0.1) 100%); } .film-text { padding: 60px 0 46px; } }
+.film-dialog { width: min(1100px, 94vw); padding: 0; border: 0; background: #000; overflow: visible; }
+.film-dialog::backdrop { background: rgba(15, 12, 8, 0.85); backdrop-filter: blur(4px); }
+.film-dialog video { display: block; width: 100%; height: auto; max-height: 86vh; }
+.film-close { position: absolute; top: -48px; inset-inline-end: 0; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.15); color: #fff; display: grid; place-items: center; }
