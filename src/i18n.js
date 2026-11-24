@@ -1069,3 +1069,6 @@ const CHECKOUT = {
   ar: { fullName: 'الاسم الكامل', phoneReq: 'رقم الهاتف', cityZip: 'الرمز البريدي والمدينة', cityZipHint: 'مثلًا 22337 Hamburg', emailOpt: 'البريد الإلكتروني (اختياري)', emailHint: 'إذا أدخلت بريدك الإلكتروني، يصلك تأكيد الطلب تلقائيًا.', street: 'الشارع ورقم المنزل', addressTitle: 'معلوماتك' },
 };
 for (const l of ['de', 'en', 'ar']) Object.assign(T[l], CHECKOUT[l]);
+
+// Footer credit for the agency that built the shop.
+for (const [l, v] of Object.entries({ de: 'Website von', en: 'Website by', ar: 'تصميم وتطوير' })) T[l].madeBy = v;
