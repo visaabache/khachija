@@ -810,11 +810,18 @@
       <h1>${L.sellerSpace}</h1>
       <p class="muted">${L.loginHint}</p>
       <label>${L.password}<input type="password" name="password" autocomplete="current-password" required autofocus dir="ltr"></label>
+      <label class="totp-field" hidden>${{ ar: 'رمز التحقق (تطبيق المصادقة)', fr: 'Code de vérification (application d’authentification)', en: 'Verification code (authenticator app)' }[lang]}<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" dir="ltr" placeholder="123456"></label>
       <div class="ts-box"></div>
       <button class="btn btn-lg login-go"><span>${L.signIn}</span></button>
       <p class="error" hidden></p>
     </form>`;
     const f = document.getElementById('login');
+    fetch('/api/admin/login-config', { credentials: 'same-origin' }).then((r) => r.json()).then((c) => {
+      if (!c.totp) return;
+      const box = f.querySelector('.totp-field');
+      box.hidden = false;
+      box.querySelector('input').required = true;
+    }).catch(() => {});
     const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
     // A slight 3D tilt of the card that follows the mouse (computers only).
     if (!calm && matchMedia('(pointer: fine)').matches) {
@@ -835,7 +842,7 @@
       p.hidden = true;
       f.classList.add('busy');
       try {
-        await api('/login', { method: 'POST', body: { password: f.password.value, cf_token: await loginToken(f) } });
+        await api('/login', { method: 'POST', body: { password: f.password.value, code: f.code.value, cf_token: await loginToken(f) } });
         f.classList.remove('busy');
         f.classList.add('ok');
         if (!calm) await new Promise((r) => setTimeout(r, 520));

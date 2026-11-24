@@ -148,3 +148,15 @@ test('PayPal: creates the order with matching totals, captures and checks the am
     globalThis.fetch = realFetch;
   }
 });
+
+test('admin two-factor codes (TOTP, RFC 6238)', async () => {
+  const { totpCode, validTotp } = await import('../src/admin.js');
+  const secret = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'; // "12345678901234567890"
+  assert.equal(await totpCode(secret, 1), '287082');
+  assert.equal(await totpCode(secret, 37037036), '081804');
+  const now = 1111111109 * 1000;
+  assert.ok(await validTotp(secret, await totpCode(secret, Math.floor(now / 30000)), now));
+  assert.ok(await validTotp(secret, await totpCode(secret, Math.floor(now / 30000) - 1), now)); // 30 s late is fine
+  assert.ok(!(await validTotp(secret, await totpCode(secret, Math.floor(now / 30000) - 3), now))); // 90 s late is not
+  assert.ok(!(await validTotp(secret, 'abcdef', now)));
+});

@@ -25,6 +25,11 @@
   //   { "pattern": "khachija-shop.de", "custom_domain": true },
   //   { "pattern": "www.khachija-shop.de", "custom_domain": true }
   // ],
+  // Cloudflare rate limiter: at most 120 API requests a minute per visitor (stricter limits for orders and
+  // logins are in the code). Free on all plans.
+  "ratelimits": [{ "name": "RATE_LIMIT", "namespace_id": "4210", "simple": { "limit": 120, "period": 60 } }],
+  // Preview URLs for single versions are off, so only the deployed shop answers.
+  "preview_urls": false,
   "workers_dev": true,
   "observability": { "enabled": true }
 }

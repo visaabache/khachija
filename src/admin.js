@@ -22,6 +22,36 @@ const SETTING_KEYS = [
   'legal_name', 'legal_company', 'legal_address', 'legal_vat_id', 'legal_register',
 ];
 
+// Two-factor login (TOTP, RFC 6238): a 6-digit code from an authenticator app, on top of the password.
+// Switched on by the ADMIN_TOTP_SECRET secret (base32). A code is accepted 30 s before and after its time.
+function base32(text) {
+  const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits = '';
+  for (const ch of String(text).toUpperCase().replace(/[^A-Z2-7]/g, '')) bits += abc.indexOf(ch).toString(2).padStart(5, '0');
+  const out = new Uint8Array(Math.floor(bits.length / 8));
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(bits.slice(i * 8, i * 8 + 8), 2);
+  return out;
+}
+
+export async function totpCode(secret, step) {
+  const key = await crypto.subtle.importKey('raw', base32(secret), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+  const msg = new ArrayBuffer(8);
+  new DataView(msg).setUint32(4, step);
+  new DataView(msg).setUint32(0, Math.floor(step / 2 ** 32));
+  const h = new Uint8Array(await crypto.subtle.sign('HMAC', key, msg));
+  const o = h[h.length - 1] & 15;
+  const n = ((h[o] & 127) << 24) | (h[o + 1] << 16) | (h[o + 2] << 8) | h[o + 3];
+  return String(n % 1e6).padStart(6, '0');
+}
+
+export async function validTotp(secret, code, now = Date.now()) {
+  const c = String(code || '').replace(/\s/g, '');
+  if (!/^\d{6}$/.test(c)) return false;
+  const step = Math.floor(now / 30000);
+  for (const d of [-1, 0, 1]) if ((await totpCode(secret, step + d)) === c) return true;
+  return false;
+}
+
 async function hmacKey(secret) {
   return crypto.subtle.importKey('raw', new TextEncoder().encode(`admin-session:${secret}`), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
 }
@@ -83,7 +113,7 @@ export async function handleAdmin(request, env, url, ctx) {
   // The login page asks which anti-bot check to show (the public Turnstile key, or none).
   if (path === '/login-config' && method === 'GET') {
     const settings = await getSettings(env.DB);
-    return json({ turnstile: env.TURNSTILE_SECRET ? turnstileKey(settings) : '' });
+    return json({ turnstile: env.TURNSTILE_SECRET ? turnstileKey(settings) : '', totp: Boolean(env.ADMIN_TOTP_SECRET) });
   }
   if (path === '/login' && method === 'POST') {
     const bucket = `login:${await visitorId(request, secret)}`;
@@ -95,19 +125,22 @@ export async function handleAdmin(request, env, url, ctx) {
       await addHit(env.DB, bucket);
       return json({ error: 'bot' }, 403);
     }
-    if (!(await samePassword(String(b.password || '').slice(0, 200), secret))) {
+    // Wrong password or wrong 2FA code get the same answer, so a guesser can't tell which one failed.
+    const passOk = await samePassword(String(b.password || '').slice(0, 200), secret);
+    const codeOk = !env.ADMIN_TOTP_SECRET || (await validTotp(env.ADMIN_TOTP_SECRET, b.code));
+    if (!passOk || !codeOk) {
       await addHit(env.DB, bucket);
       await new Promise((r) => setTimeout(r, 800));
       return json({ error: 'wrong_password' }, 401);
     }
-    const token = await makeSession(secret);
+    const token = await makeSession(secret + (env.ADMIN_TOTP_SECRET || ''));
     await env.DB.prepare('DELETE FROM rate_hits WHERE bucket = ?').bind(bucket).run();
     return json({ ok: true }, 200, { 'set-cookie': `${COOKIE}=${token}; Path=/api/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_DAYS * 86400}` });
   }
   if (path === '/logout' && method === 'POST') {
     return json({ ok: true }, 200, { 'set-cookie': `${COOKIE}=; Path=/api/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=0` });
   }
-  if (!(await validSession(getCookie(request, COOKIE), secret))) return json({ error: 'unauthorized' }, 401);
+  if (!(await validSession(getCookie(request, COOKIE), secret + (env.ADMIN_TOTP_SECRET || '')))) return json({ error: 'unauthorized' }, 401);
   // Writes must be JSON (or an image upload), which a cross-site form cannot send; the cookie is SameSite=Strict too.
   if (method !== 'GET' && path !== '/images' && !(request.headers.get('content-type') || '').includes('application/json')) {
     return json({ error: 'bad_request' }, 400);
@@ -116,7 +149,7 @@ export async function handleAdmin(request, env, url, ctx) {
   const db = env.DB;
   let m;
 
-  if (path === '/me') return json({ ok: true, images: true, r2: Boolean(env.IMAGES), emails: Boolean(env.BREVO_API_KEY), ai: Boolean(env.ANTHROPIC_API_KEY), turnstile: Boolean(env.TURNSTILE_SECRET), paypal: Boolean(env.PAYPAL_CLIENT_ID && env.PAYPAL_SECRET), weak_password: secret.length < 12 });
+  if (path === '/me') return json({ ok: true, images: true, r2: Boolean(env.IMAGES), emails: Boolean(env.BREVO_API_KEY), ai: Boolean(env.ANTHROPIC_API_KEY), turnstile: Boolean(env.TURNSTILE_SECRET), paypal: Boolean(env.PAYPAL_CLIENT_ID && env.PAYPAL_SECRET), totp: Boolean(env.ADMIN_TOTP_SECRET), weak_password: secret.length < 12 });
 
   // AI description writer: the seller reviews the text before saving it.
   if (path === '/ai/describe' && method === 'POST') {

@@ -31,7 +31,7 @@ const SECURITY_HEADERS = {
   'referrer-policy': 'strict-origin-when-cross-origin',
   'x-frame-options': 'DENY',
   'permissions-policy': 'camera=(), microphone=(), geolocation=(), usb=()',
-  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  'strict-transport-security': 'max-age=63072000; includeSubDomains; preload',
   'cross-origin-opener-policy': 'same-origin-allow-popups',
   'content-security-policy': CSP,
 };
@@ -71,6 +71,29 @@ function indexable(env, url) {
   return Boolean(site) && site === url.origin;
 }
 
+// Cloudflare's built-in rate limiter (the RATE_LIMIT binding in wrangler.jsonc): a fast first line in front of the
+// database-backed limits. Without the binding (local development) everything is allowed.
+async function overLimit(env, request, kind) {
+  if (!env.RATE_LIMIT) return false;
+  const ip = request.headers.get('cf-connecting-ip') || 'local';
+  try {
+    const { success } = await env.RATE_LIMIT.limit({ key: `${kind}:${ip}` });
+    return !success;
+  } catch {
+    return false;
+  }
+}
+
+// Headers for static files (images, CSS, scripts, the admin app); the pages set their own.
+const FILE_HEADERS = {
+  'x-content-type-options': 'nosniff',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'strict-transport-security': 'max-age=63072000; includeSubDomains; preload',
+  'cross-origin-resource-policy': 'same-origin',
+  'permissions-policy': 'camera=(), microphone=(), geolocation=(), usb=(), interest-cohort=()',
+};
+const ADMIN_CSP = "default-src 'self'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://challenges.cloudflare.com; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -88,6 +111,9 @@ export default {
       return Response.redirect(`${site}${path}${url.search}`, 301);
     }
     try {
+      if (path.startsWith('/api/') && (await overLimit(env, request, path.startsWith('/api/admin/login') ? 'login' : 'api'))) {
+        return json({ error: 'too_many' }, 429, { 'retry-after': '60' });
+      }
       if (path.startsWith('/api/admin/')) return await handleAdmin(request, env, url, ctx);
       if (path.startsWith('/api/')) return await handleApi(request, env, url, ctx);
       if (path.startsWith('/img/')) return await serveImage(env, path.slice(5), request);
@@ -104,10 +130,19 @@ export default {
         if (!m[2]) return Response.redirect(`${url.origin}/${m[1]}/${url.search}`, 301);
         return await storefront(request, env, url, m[1], m[2].replace(/(.)\/$/, '$1'), ctx);
       }
+      if (path === '/.well-known/security.txt') {
+        const expires = new Date(Date.now() + 300 * 864e5).toISOString();
+        return new Response(`Contact: mailto:info@khachija-shop.de\nExpires: ${expires}\nPreferred-Languages: de, en, ar\nCanonical: ${site}/.well-known/security.txt\n`, { headers: { 'content-type': 'text/plain; charset=utf-8', ...FILE_HEADERS } });
+      }
       const asset = await env.ASSETS.fetch(request);
-      if (indexable(env, url)) return asset;
       const res = new Response(asset.body, asset);
-      res.headers.set('x-robots-tag', 'noindex');
+      for (const [k, v] of Object.entries(FILE_HEADERS)) res.headers.set(k, v);
+      if (path.startsWith('/admin')) {
+        res.headers.set('content-security-policy', ADMIN_CSP);
+        res.headers.set('x-frame-options', 'DENY');
+        res.headers.set('cache-control', 'no-store');
+        res.headers.set('x-robots-tag', 'noindex, nofollow');
+      } else if (!indexable(env, url)) res.headers.set('x-robots-tag', 'noindex');
       return res;
     } catch (err) {
       console.error(err);
