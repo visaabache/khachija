@@ -874,3 +874,134 @@ const ar = {
 };
 
 export const T = { de, en, ar };
+
+// Texts for the advanced sections (video hero, values ticker, ritual finder, production story, editorial About page).
+const PLUS = {
+  de: {
+    heroScroll: 'Entdecken',
+    heroFilm: 'Film ansehen',
+    marquee: ['Handgemacht in Marokko', 'Von Frauenkooperativen', '100 % natürlich', 'Ohne Parabene & Silikone', 'Fair bezahlt', 'Versand aus Hamburg'],
+    ritualImgs: ['/assets/p/aker-fassi-seife-1.webp', '/assets/p/nila-seife-1.webp', '/assets/p/sidr-1.webp', '/assets/p/rizinusoel-1.webp', '/assets/p/serum-2.webp'],
+    finder: {
+      kicker: 'Ihr persönliches Ritual',
+      title: 'Der Ritual-Finder',
+      text: 'Drei kurze Fragen, und wir stellen Ihr persönliches Pflegeritual aus unseren Produkten zusammen.',
+      start: 'Ritual finden',
+      step: (a, b) => `Frage ${a} von ${b}`,
+      back: 'Zurück',
+      restart: 'Neu starten',
+      q: [
+        ['Was möchten Sie pflegen?', [['body', 'Körper', 'Für ein samtweiches Hautgefühl'], ['face', 'Gesicht', 'Für einen klaren, frischen Teint'], ['hair', 'Haare', 'Für Glanz und Kraft']]],
+        ['Was wünschen Sie sich?', [['cleanse', 'Reinigen & Peelen', 'Das klassische Hammam'], ['clarify', 'Klären & Strahlen', 'Frische und Leuchtkraft'], ['firm', 'Straffen & Glätten', 'Ein glattes Hautbild'], ['nourish', 'Nähren & Pflegen', 'Reichhaltige Pflege']]],
+        ['Wie viel Zeit nehmen Sie sich?', [['quick', '10 Minuten', 'Ein schnelles Ritual'], ['ritual', 'Eine Auszeit', 'Das ganze Ritual']]],
+      ],
+      result: 'Ihr Ritual',
+      resultText: 'Diese Produkte passen zu Ihren Wünschen. Ein Klick, und das ganze Ritual liegt im Warenkorb.',
+      addAll: 'Ganzes Ritual in den Warenkorb',
+      added: 'Ihr Ritual liegt im Warenkorb',
+    },
+    process: {
+      kicker: 'Von der Frucht zur Pflege',
+      title: 'So entstehen unsere Produkte',
+      text: 'Jeder Schritt passiert in der Kooperative, mit den Händen und dem Wissen der Frauen.',
+      steps: [['ernte', 'Die Ernte', 'Die Früchte werden unter den Arganbäumen von Hand gesammelt.'], ['trocknung', 'Trocknung in der Sonne', 'Die Früchte trocknen langsam in der marokkanischen Sonne.'], ['knacken', 'Von Hand geknackt', 'Die Frauen öffnen jede Nuss mit einem Stein, wie seit Generationen.'], ['sortieren', 'Sortieren', 'Nur die besten Kerne werden weiterverarbeitet.'], ['roesten', 'Rösten', 'Ein Teil der Kerne wird schonend geröstet.'], ['abfuellen', 'Abfüllen', 'Jede Flasche wird sorgfältig gefüllt und etikettiert.'], ['fertig', 'Bereit für Sie', 'Aus der Kooperative direkt nach Hamburg und zu Ihnen.']],
+    },
+    aboutX: {
+      hello: 'Salam, ich bin',
+      chaptersTitle: 'Vom Atlas nach Hamburg',
+      chapters: [
+        ['01', 'Meine Wurzeln', 'Ich bin eine Frau aus Marokko und Nachfahrin der Berber. In meinem Heimatdorf bin ich zwischen Arganbäumen und Kakteenfeigen aufgewachsen.'],
+        ['02', 'Die Frauen der Kooperative', 'Die Berberfrauen meines Dorfes betreiben gemeinsam einen naturnahen Hof und ein eigenes Unternehmen, das sie selbstständig führen. Sie ernten, verarbeiten und sichern so ihr Einkommen und das ihrer Familien.'],
+        ['03', 'Hamburg, meine zweite Heimat', 'Seit vielen Jahren lebe ich in Deutschland. Mit Khachija bringe ich die Produkte der Frauen zu Ihnen, und ich stehe zu 100 % hinter jedem einzelnen.'],
+      ],
+      quote: 'Jedes Produkt erzählt eine Geschichte: die Geschichte von leidenschaftlichen, geschickten Frauen, die eine jahrhundertealte Tradition bewahren.',
+      filmCta: 'Den Film über die Kooperative ansehen',
+      shopTitle: 'Bringen Sie das Ritual nach Hause',
+    },
+  },
+  en: {
+    heroScroll: 'Discover',
+    heroFilm: 'Watch the film',
+    marquee: ['Handmade in Morocco', 'By women’s cooperatives', '100% natural', 'No parabens or silicones', 'Fairly paid', 'Shipped from Hamburg'],
+    ritualImgs: ['/assets/p/aker-fassi-seife-1.webp', '/assets/p/nila-seife-1.webp', '/assets/p/sidr-1.webp', '/assets/p/rizinusoel-1.webp', '/assets/p/serum-2.webp'],
+    finder: {
+      kicker: 'Your personal ritual',
+      title: 'The Ritual Finder',
+      text: 'Three quick questions, and we put together your personal care ritual from our products.',
+      start: 'Find my ritual',
+      step: (a, b) => `Question ${a} of ${b}`,
+      back: 'Back',
+      restart: 'Start again',
+      q: [
+        ['What would you like to care for?', [['body', 'Body', 'For velvet-soft skin'], ['face', 'Face', 'For a clear, fresh complexion'], ['hair', 'Hair', 'For shine and strength']]],
+        ['What do you wish for?', [['cleanse', 'Cleanse & exfoliate', 'The classic hammam'], ['clarify', 'Clarify & glow', 'Freshness and radiance'], ['firm', 'Firm & smooth', 'Smoother-looking skin'], ['nourish', 'Nourish & care', 'Rich care']]],
+        ['How much time do you have?', [['quick', '10 minutes', 'A quick ritual'], ['ritual', 'Me-time', 'The full ritual']]],
+      ],
+      result: 'Your ritual',
+      resultText: 'These products match your wishes. One click and the whole ritual is in your bag.',
+      addAll: 'Add the whole ritual to bag',
+      added: 'Your ritual is in your bag',
+    },
+    process: {
+      kicker: 'From fruit to care',
+      title: 'How our products are made',
+      text: 'Every step happens in the cooperative, with the hands and the knowledge of the women.',
+      steps: [['ernte', 'The harvest', 'The fruit is gathered by hand under the argan trees.'], ['trocknung', 'Drying in the sun', 'The fruit dries slowly in the Moroccan sun.'], ['knacken', 'Cracked by hand', 'The women open every nut with a stone, as they have for generations.'], ['sortieren', 'Sorting', 'Only the best kernels are processed further.'], ['roesten', 'Roasting', 'Some of the kernels are gently roasted.'], ['abfuellen', 'Bottling', 'Every bottle is carefully filled and labelled.'], ['fertig', 'Ready for you', 'From the cooperative straight to Hamburg and to you.']],
+    },
+    aboutX: {
+      hello: 'Salam, I am',
+      chaptersTitle: 'From the Atlas to Hamburg',
+      chapters: [
+        ['01', 'My roots', 'I am a woman from Morocco and a descendant of the Berbers. I grew up in my home village among argan trees and prickly pears.'],
+        ['02', 'The women of the cooperative', 'The Berber women of my village run a nature-based farm together and their own company, which they lead independently. They harvest, process and so secure their income and their families’.'],
+        ['03', 'Hamburg, my second home', 'I have lived in Germany for many years. With Khachija I bring the women’s products to you, and I stand 100% behind every one of them.'],
+      ],
+      quote: 'Every product tells a story: the story of passionate, skilled women who keep a centuries-old tradition alive.',
+      filmCta: 'Watch the film about the cooperative',
+      shopTitle: 'Bring the ritual home',
+    },
+  },
+  ar: {
+    heroScroll: 'اكتشفي',
+    heroFilm: 'شاهدي الفيلم',
+    marquee: ['صنع يدوي في المغرب', 'من تعاونيات نسائية', 'طبيعي 100٪', 'بدون بارابين وسيليكون', 'أجر عادل', 'الشحن من هامبورغ'],
+    ritualImgs: ['/assets/p/aker-fassi-seife-1.webp', '/assets/p/nila-seife-1.webp', '/assets/p/sidr-1.webp', '/assets/p/rizinusoel-1.webp', '/assets/p/serum-2.webp'],
+    finder: {
+      kicker: 'طقسك الشخصي',
+      title: 'مكتشف الطقوس',
+      text: 'ثلاثة أسئلة قصيرة، ونجمع لك طقس العناية الخاص بك من منتجاتنا.',
+      start: 'اكتشفي طقسك',
+      step: (a, b) => `السؤال ${a} من ${b}`,
+      back: 'رجوع',
+      restart: 'البدء من جديد',
+      q: [
+        ['بماذا تريدين العناية؟', [['body', 'الجسم', 'لبشرة ناعمة كالحرير'], ['face', 'الوجه', 'لبشرة صافية ومنتعشة'], ['hair', 'الشعر', 'للمعان والقوة']]],
+        ['ماذا تتمنين؟', [['cleanse', 'التنظيف والتقشير', 'الحمام المغربي الكلاسيكي'], ['clarify', 'التنقية والإشراق', 'انتعاش وإشراقة'], ['firm', 'الشد والتمليس', 'مظهر بشرة أنعم'], ['nourish', 'التغذية والعناية', 'عناية غنية']]],
+        ['كم من الوقت لديك؟', [['quick', '10 دقائق', 'طقس سريع'], ['ritual', 'وقت للاسترخاء', 'الطقس الكامل']]],
+      ],
+      result: 'طقسك',
+      resultText: 'هذه المنتجات تناسب رغباتك. بنقرة واحدة يصبح الطقس كاملًا في سلتك.',
+      addAll: 'أضيفي الطقس كاملًا إلى السلة',
+      added: 'طقسك في السلة',
+    },
+    process: {
+      kicker: 'من الثمرة إلى العناية',
+      title: 'هكذا تُصنع منتجاتنا',
+      text: 'كل خطوة تتم في التعاونية، بأيدي النساء ومعرفتهن.',
+      steps: [['ernte', 'الجني', 'تُجمع الثمار يدويًا تحت أشجار الأركان.'], ['trocknung', 'التجفيف تحت الشمس', 'تجف الثمار ببطء تحت الشمس المغربية.'], ['knacken', 'الكسر يدويًا', 'تفتح النساء كل حبة بحجر، كما يفعلن منذ أجيال.'], ['sortieren', 'الفرز', 'لا تُعالج إلا أفضل الحبوب.'], ['roesten', 'التحميص', 'يُحمص جزء من الحبوب بلطف.'], ['abfuellen', 'التعبئة', 'تُملأ كل قارورة وتُلصق عليها البطاقة بعناية.'], ['fertig', 'جاهز لك', 'من التعاونية مباشرة إلى هامبورغ وإليك.']],
+    },
+    aboutX: {
+      hello: 'السلام عليكم، أنا',
+      chaptersTitle: 'من الأطلس إلى هامبورغ',
+      chapters: [
+        ['01', 'جذوري', 'أنا امرأة من المغرب ومن أصول أمازيغية. كبرت في قريتي بين أشجار الأركان والصبار.'],
+        ['02', 'نساء التعاونية', 'تدير النساء الأمازيغيات في قريتي مزرعة طبيعية جماعية وشركتهن الخاصة باستقلالية. يجنين ويحولن ويضمنّ بذلك دخلهن ودخل أسرهن.'],
+        ['03', 'هامبورغ، وطني الثاني', 'أعيش في ألمانيا منذ سنوات طويلة. مع خديجة أحمل منتجات النساء إليك، وأقف بنسبة 100٪ وراء كل واحد منها.'],
+      ],
+      quote: 'كل منتج يحكي قصة: قصة نساء شغوفات وماهرات يحافظن على تقليد عمره قرون.',
+      filmCta: 'شاهدي الفيلم عن التعاونية',
+      shopTitle: 'أحضري الطقس إلى بيتك',
+    },
+  },
+};
+for (const l of ['de', 'en', 'ar']) Object.assign(T[l], PLUS[l]);

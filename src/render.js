@@ -160,12 +160,13 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=2">
+<link rel="stylesheet" href="/assets/style.css?v=3">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=2" defer></script>
+<script src="/assets/store.js?v=3" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
+<div class="scroll-progress" aria-hidden="true"></div>
 <a class="skip" href="#main">${esc(t.allProducts)}</a>
 ${minimal ? '' : `<div class="announce" role="region" aria-label="${esc(announcement[0] || store)}"><div class="announce-track" data-rotate>${announcement.map((a, i) => `<span${i ? ' hidden' : ''}>${esc(a)}</span>`).join('')}</div></div>`}
 <header class="top" data-header>
@@ -264,7 +265,7 @@ export function productCard(p, ctx, i = 0) {
   const unit = unitPrice(p, lang);
   const content = contentLabel(p);
   return `<article class="card reveal" style="--d:${(i % 4) * 80}ms">
-  <a href="/${lang}/p/${esc(p.slug)}" class="card-img${isPackshot(img) ? ' packshot' : ''}" tabindex="-1" aria-hidden="true">
+  <a href="/${lang}/p/${esc(p.slug)}" class="card-img${isPackshot(img) ? ' packshot' : ''}" tabindex="-1" aria-hidden="true" data-vt="p${p.id}" data-tilt>
     <img src="${esc(small(img))}"${srcset(img)} sizes="(min-width: 900px) 25vw, 50vw" alt="" loading="lazy" width="480" height="600">
     ${imgs[1] ? `<img class="alt" src="${esc(small(imgs[1]))}" alt="" loading="lazy" width="480" height="600">` : ''}
     ${soldOut ? `<span class="badge muted">${esc(t.outOfStock)}</span>` : onSale ? `<span class="badge">−${Math.round((1 - p.price / p.compare_price) * 100)} %</span>` : ''}
@@ -308,54 +309,69 @@ function orgLd(ctx) {
   };
 }
 
-export function homePage(ctx, featured, latest, photos) {
+export function homePage(ctx, featured, latest, photos, all = []) {
   const { lang, categories, settings } = ctx;
   const t = T[lang];
   const h = t.hero;
   const title = settings[`hero_title_${lang}`] || h.title;
   const text = settings[`hero_text_${lang}`] || h.text;
-  const [p1, p2, p3] = photos.hero;
+  // Headline words rise one after the other.
+  const words = esc(title).split(/\s+/).map((w, i) => `<span class="w" style="--i:${i}"><span>${w}</span></span>`).join(' ');
+  const marquee = t.marquee.map((m) => `<span>${ornament()}${esc(m)}</span>`).join('');
   const cats = categories.length
     ? `<section class="section wrap">${sectionHead(t.shopByCategory, t.categories)}
-    <div class="arches">${categories
-      .map((c, i) => `<a class="arch reveal" style="--d:${i * 90}ms" href="/${lang}/c/${esc(c.slug)}"><span class="arch-img"><img src="${esc(small(c.image || PLACEHOLDER))}" alt="" loading="lazy" width="480" height="600"></span><span class="arch-name">${esc(catName(c, lang))}</span><span class="arch-more">${icon('arrow', 16)}</span></a>`)
+    <div class="panels">${categories
+      .map((c, i) => `<a class="panel reveal" style="--d:${i * 90}ms" href="/${lang}/c/${esc(c.slug)}"><img src="${esc(c.image || PLACEHOLDER)}" alt="" loading="lazy" width="1000" height="1250"><span class="panel-n">0${i + 1}</span><span class="panel-name">${esc(catName(c, lang))}</span><span class="panel-go">${icon('arrow', 18)}</span></a>`)
       .join('')}</div></section>`
     : '';
-  const body = `<section class="hero">
-  <div class="hero-star" aria-hidden="true"></div>
-  <div class="wrap hero-grid">
-    <div class="hero-text">
-      ${kicker(h.kicker)}
-      <h1>${esc(title)}</h1>
-      <p class="lead">${esc(text)}</p>
-      <div class="hero-ctas"><a class="btn btn-lg" href="/${lang}/shop">${esc(h.cta)} ${icon('arrow', 20)}</a><a class="btn btn-ghost btn-lg" href="/${lang}/about">${esc(h.cta2)}</a></div>
-      ${payBadges()}
-    </div>
-    <div class="hero-art" aria-hidden="true">
-      <span class="hero-frame f1"><img src="${esc(p1)}" alt="" width="1000" height="1250" fetchpriority="high"></span>
-      <span class="hero-frame f2"><img src="${esc(small(p2))}" alt="" width="480" height="600"></span>
-      <span class="hero-frame f3"><img src="${esc(small(p3))}" alt="" width="480" height="600"></span>
-      <img class="hero-seal" src="/assets/brand/symbol-gold.svg" alt="" width="120" height="120">
-    </div>
+  // Products the Ritual Finder can pick from (only those for sale).
+  const finderData = all
+    .filter((p) => !(p.stock != null && p.stock <= 0) && !productOptions(p).length)
+    .map((p) => ({ id: p.id, slug: p.slug, name: productName(p, lang), price: p.price, image: small(productImages(p)[0] || PLACEHOLDER), sub: productField(p, 'subtitle', lang) }));
+  const f = t.finder;
+  const body = `<section class="hero-v" data-hero>
+  <video class="hero-video" autoplay muted loop playsinline preload="auto" poster="/assets/video/kooperative-poster.webp" aria-hidden="true" data-loop><source src="/assets/video/kooperative-loop.mp4" type="video/mp4"></video>
+  <div class="hero-veil" aria-hidden="true"></div>
+  <img class="hero-v-star" src="/assets/brand/symbol-gold.svg" alt="" aria-hidden="true" width="600" height="600">
+  <div class="wrap hero-v-in">
+    ${kicker(h.kicker)}
+    <h1 class="split">${words}</h1>
+    <p class="lead">${esc(text)}</p>
+    <div class="hero-ctas"><a class="btn btn-gold btn-lg" href="/${lang}/shop">${esc(h.cta)} ${icon('arrow', 20)}</a><button type="button" class="btn btn-light btn-lg" data-film-open><span class="play" aria-hidden="true"></span>${esc(t.heroFilm)} <small>· ${esc(t.film.length)}</small></button></div>
   </div>
+  <a class="hero-scroll" href="#after-hero" aria-label="${esc(t.heroScroll)}"><span>${esc(t.heroScroll)}</span><i></i></a>
 </section>
-<div class="wrap">${trustStrip(lang)}</div>
+<div class="marquee" aria-hidden="true"><div class="marquee-track">${marquee}${marquee}</div></div>
+<div id="after-hero"></div>
 ${cats}
-<section class="film-band" aria-labelledby="film-title">
-  <video class="film-bg" muted loop playsinline preload="none" poster="/assets/video/kooperative-poster.webp" aria-hidden="true" data-loop><source src="/assets/video/kooperative-loop.mp4" type="video/mp4"></video>
-  <div class="film-shade" aria-hidden="true"></div>
-  <div class="wrap film-text reveal">
-    ${kicker(t.film.kicker)}
-    <h2 id="film-title">${esc(t.film.title)}</h2>
-    <p>${esc(t.film.text)}</p>
-    <button type="button" class="btn btn-light btn-lg" data-film-open><span class="play" aria-hidden="true"></span>${esc(t.film.cta)} <small>· ${esc(t.film.length)}</small></button>
+${featured.length ? `<section class="section wrap">${sectionHead(t.featured, t.shop, `/${lang}/shop`, t.viewAll)}${grid(featured, ctx, t.noProducts)}</section>` : ''}
+<section class="ritual-scroll" data-ritual>
+  <div class="wrap ritual-grid">
+    <div class="ritual-sticky">
+      <div class="ritual-stage">${t.ritualImgs.map((u, i) => `<img src="${esc(u)}" alt="" loading="lazy" width="1000" height="1250" class="${i ? '' : 'on'}" data-ritual-img="${i}">`).join('')}<span class="ritual-count"><b data-ritual-n>1</b> / ${t.ritual.length}</span></div>
+    </div>
+    <div class="ritual-text">
+      ${kicker(t.ritualKicker)}
+      <h2>${esc(t.ritualTitle)}</h2>
+      <ol>${t.ritual.map(([h2, x], i) => `<li data-ritual-step="${i}"${i ? '' : ' class="on"'}><span class="step-n">${i + 1}</span><div><h3>${esc(h2)}</h3><p>${esc(x)}</p></div></li>`).join('')}</ol>
+    </div>
   </div>
 </section>
-<dialog class="film-dialog" aria-label="${esc(t.film.title)}"><button type="button" class="film-close" data-film-close aria-label="${esc(t.close)}">${icon('close', 26)}</button><video controls playsinline preload="none" poster="/assets/video/kooperative-poster.webp"><source src="/assets/video/kooperative-film.mp4" type="video/mp4"></video></dialog>
-${featured.length ? `<section class="section wrap">${sectionHead(t.featured, t.shop, `/${lang}/shop`, t.viewAll)}${grid(featured, ctx, t.noProducts)}</section>` : ''}
+<section class="finder-sec" id="ritual-finder">
+  <div class="wrap finder-wrap">
+    <div class="finder-intro reveal">${kicker(f.kicker)}<h2>${esc(f.title)}</h2><p>${esc(f.text)}</p></div>
+    <div class="finder card-box reveal" data-finder>
+      <div class="finder-start"><img src="/assets/brand/symbol-gold.svg" alt="" width="90" height="90"><button type="button" class="btn btn-lg" data-finder-go>${esc(f.start)} ${icon('arrow', 20)}</button></div>
+      ${f.q.map(([q, opts], qi) => `<fieldset class="finder-q" data-q="${qi}" hidden><p class="finder-step">${esc(f.step(qi + 1, f.q.length))}</p><legend>${esc(q)}</legend><div class="finder-opts">${opts.map(([v, l, d]) => `<button type="button" data-a="${v}"><strong>${esc(l)}</strong><span>${esc(d)}</span></button>`).join('')}</div>${qi ? `<button type="button" class="link-btn finder-back" data-finder-back>${esc(f.back)}</button>` : ''}</fieldset>`).join('')}
+      <div class="finder-result" hidden><p class="finder-step">${esc(f.result)}</p><p>${esc(f.resultText)}</p><ul class="finder-list" data-finder-list></ul><p class="finder-total" data-finder-total></p><button type="button" class="btn btn-lg btn-block" data-finder-add>${icon('bag', 20)} ${esc(f.addAll)}</button><button type="button" class="link-btn finder-back" data-finder-restart>${esc(f.restart)}</button></div>
+    </div>
+  </div>
+  <script type="application/json" id="finder-data">${JSON.stringify({ products: finderData, added: f.added }).replace(/</g, '\\u003c')}</script>
+</section>
+${processStrip(lang)}
 <section class="story">
   <div class="wrap story-grid">
-    <div class="story-img reveal"><span class="arch-frame"><img src="${esc(photos.story)}" alt="" loading="lazy" width="1000" height="1250"></span></div>
+    <div class="story-img reveal"><span class="arch-frame parallax"><img src="${esc(photos.story)}" alt="" loading="lazy" width="1000" height="1250"></span></div>
     <div class="story-text reveal" style="--d:120ms">
       ${kicker(t.storyKicker)}
       <h2>${esc(t.storyTitle)}</h2>
@@ -365,31 +381,32 @@ ${featured.length ? `<section class="section wrap">${sectionHead(t.featured, t.s
     </div>
   </div>
 </section>
-<section class="section wrap ritual">
-  ${sectionHead(t.ritualTitle, t.ritualKicker)}
-  <ol class="ritual-steps">${t.ritual.map(([h2, x], i) => `<li class="reveal" style="--d:${i * 90}ms"><span class="step-n">${i + 1}</span><h3>${esc(h2)}</h3><p>${esc(x)}</p></li>`).join('')}</ol>
-</section>
 ${latest.length ? `<section class="section wrap">${sectionHead(t.newArrivals, t.shop, `/${lang}/shop`, t.viewAll)}${grid(latest, ctx, t.noProducts)}</section>` : ''}
-<section class="banner reveal">
-  <div class="wrap banner-grid">
-    <div class="banner-text">${kicker(t.bannerKicker)}<h2>${esc(t.bannerTitle)}</h2><p>${esc(t.bannerText)}</p><a class="btn" href="/${lang}/shop">${esc(t.bannerCta)} ${icon('arrow', 20)}</a></div>
-    <div class="banner-imgs">${photos.banner.map((u, i) => `<span class="arch-frame a${i + 1}"><img src="${esc(small(u))}" alt="" loading="lazy" width="480" height="600"></span>`).join('')}</div>
-  </div>
-</section>
-<section class="section wrap values">
-  ${sectionHead(t.valuesTitle)}
-  <ul class="values-grid">${t.values.map(([h2, x], i) => `<li class="reveal" style="--d:${i * 80}ms">${ornament('val-orn')}<h3>${esc(h2)}</h3><p>${esc(x)}</p></li>`).join('')}</ul>
-</section>
 <section class="section wrap faq-news">
   <div class="faq reveal"><h2>${esc(t.faqTitle)}</h2><div class="accordion">${t.faq.map(([q, a]) => `<details><summary>${esc(q)}${icon('plus', 18)}</summary><div>${esc(a)}</div></details>`).join('')}</div></div>
   ${newsletterBox(lang)}
-</section>`;
+</section>
+${filmDialog(t)}`;
   const lds = [
     orgLd(ctx),
     { '@context': 'https://schema.org', '@type': 'WebSite', name: settings.store_name || 'Khachija', url: `${ctx.origin}/${lang}/`, inLanguage: lang, potentialAction: { '@type': 'SearchAction', target: `${ctx.origin}/${lang}/shop?q={search_term_string}`, 'query-input': 'required name=search_term_string' } },
     { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: t.faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) },
+    { '@context': 'https://schema.org', '@type': 'VideoObject', name: t.film.title, description: t.film.text, thumbnailUrl: `${ctx.origin}/assets/video/kooperative-poster.webp`, contentUrl: `${ctx.origin}/assets/video/kooperative-film.mp4`, uploadDate: '2026-11-24', duration: 'PT5M7S' },
   ];
-  return layout(ctx, { title: '', path: '/', body, page: 'home', lds, preload: p1 });
+  return layout(ctx, { title: '', path: '/', body, page: 'home', lds });
+}
+
+function filmDialog(t) {
+  return `<dialog class="film-dialog" aria-label="${esc(t.film.title)}"><button type="button" class="film-close" data-film-close aria-label="${esc(t.close)}">${icon('close', 26)}</button><video controls playsinline preload="none" poster="/assets/video/kooperative-poster.webp"><source src="/assets/video/kooperative-film.mp4" type="video/mp4"></video></dialog>`;
+}
+
+// "From fruit to care": the real production steps, with frames from the cooperative's film.
+function processStrip(lang) {
+  const pr = T[lang].process;
+  return `<section class="process-sec">
+  <div class="wrap process-head reveal">${kicker(pr.kicker)}<h2>${esc(pr.title)}</h2><p>${esc(pr.text)}</p></div>
+  <div class="process-track" data-drag>${pr.steps.map(([img, h, x], i) => `<figure class="process-card reveal" style="--d:${i * 70}ms"><img src="/assets/story/${img}.webp" alt="" loading="lazy" width="848" height="478"><figcaption><span>0${i + 1}</span><strong>${esc(h)}</strong>${esc(x)}</figcaption></figure>`).join('')}</div>
+</section>`;
 }
 
 function newsletterBox(lang) {
@@ -525,7 +542,7 @@ export function productPage(ctx, p, category, related) {
   const body = `<nav class="crumbs wrap" aria-label="breadcrumb"><a href="/${lang}/">${esc(t.home)}</a><span>/</span>${category ? `<a href="/${lang}/c/${esc(category.slug)}">${esc(catName(category, lang))}</a><span>/</span>` : ''}<span aria-current="page">${esc(name)}</span></nav>
 <section class="wrap product">
   <div class="gallery" aria-label="${esc(name)}">
-    <div class="gallery-track">${images.map((u, i) => `<figure class="${isPackshot(u) ? 'packshot' : ''}"><img src="${esc(u)}" alt="${esc(name)}${i ? ` ${i + 1}` : ''}" width="1000" height="1250"${i ? ' loading="lazy"' : ' fetchpriority="high"'}></figure>`).join('')}</div>
+    <div class="gallery-track">${images.map((u, i) => `<figure class="${isPackshot(u) ? 'packshot' : ''}"${i ? '' : ` style="view-transition-name: p${p.id}"`}><img src="${esc(u)}" alt="${esc(name)}${i ? ` ${i + 1}` : ''}" width="1000" height="1250"${i ? ' loading="lazy"' : ' fetchpriority="high"'}></figure>`).join('')}</div>
     ${images.length > 1 ? `<button type="button" class="gal-arrow gal-prev" data-gal="-1" aria-label="‹">${icon('chevronL', 22)}</button><button type="button" class="gal-arrow gal-next" data-gal="1" aria-label="›">${icon('chevronR', 22)}</button><div class="thumbs">${images.map((u, i) => `<button type="button" data-go="${i}"${i === 0 ? ' class="on"' : ''} aria-label="${i + 1}"><img src="${esc(small(u))}" alt="" width="96" height="120" loading="lazy"></button>`).join('')}</div>` : ''}
   </div>
   <div class="product-info">
@@ -722,21 +739,36 @@ export function legalPage(ctx, kind) {
   return layout(ctx, { title: doc.title, description: `${doc.title} · ${settings.store_name || 'Khachija'}`, path: `/${kind}`, body, page: 'legal' });
 }
 
-export function aboutPage(ctx, photos) {
+export function aboutPage(ctx, photos, products = []) {
   const { lang, settings } = ctx;
   const t = T[lang];
   const a = t.aboutPage;
+  const ab = t.aboutX;
   const portrait = settings.founder_photo || photos.about[0];
-  const body = `<section class="page-hero about-hero"><div class="wrap narrow center">${kicker(a.kicker)}<h1>${esc(a.title)}</h1><p class="lead">${esc(a.lead)}</p></div></section>
-<section class="wrap section about-founder">
-  <div class="about-img reveal"><span class="arch-frame"><img src="${esc(portrait)}" alt="" width="1000" height="1250" loading="lazy"></span><img class="about-seal" src="/assets/brand/symbol-gold.svg" alt="" width="110" height="110"></div>
-  <div class="about-text reveal" style="--d:120ms"><h2>${esc(a.founderTitle)}</h2>${a.founder.map((x) => `<p>${esc(x)}</p>`).join('')}<p class="sign">${esc(t.storySign)}</p></div>
+  const body = `<section class="about-x">
+  <div class="wrap about-x-grid">
+    <div class="about-x-text">
+      ${kicker(a.kicker)}
+      <p class="about-hello">${esc(ab.hello)}</p>
+      <h1 class="about-name">Khadija<span>Hakki</span></h1>
+      <p class="lead">${esc(a.lead)}</p>
+      <button type="button" class="btn btn-ghost btn-lg" data-film-open><span class="play" aria-hidden="true"></span>${esc(ab.filmCta)}</button>
+    </div>
+    <div class="about-x-img"><span class="arch-frame parallax"><img src="${esc(portrait)}" alt="Khadija Hakki" width="1000" height="1250" fetchpriority="high"></span><img class="about-seal" src="/assets/brand/symbol-gold.svg" alt="" width="120" height="120"></div>
+  </div>
+  <span class="about-x-word" aria-hidden="true">Khachija</span>
 </section>
+<section class="wrap section chapters">
+  ${sectionHead(ab.chaptersTitle, a.kicker)}
+  <ol class="chapter-list">${ab.chapters.map(([n, h, x], i) => `<li class="reveal" style="--d:${i * 100}ms"><span class="chapter-n">${n}</span><div><h3>${esc(h)}</h3><p>${esc(x)}</p></div></li>`).join('')}</ol>
+</section>
+<section class="quote-band"><div class="wrap narrow center reveal"><img src="/assets/brand/symbol-gold.svg" alt="" width="60" height="60"><blockquote>${esc(ab.quote)}</blockquote><p class="sign">${esc(t.storySign)}</p></div></section>
+${processStrip(lang)}
 <section class="story about-mission"><div class="wrap narrow center reveal">${kicker(a.missionTitle)}<p class="mission">${esc(a.mission)}</p></div></section>
 <section class="wrap section"><ul class="values-grid three">${a.pillars.map(([h, x], i) => `<li class="reveal" style="--d:${i * 80}ms">${ornament('val-orn')}<h3>${esc(h)}</h3><p>${esc(x)}</p></li>`).join('')}</ul></section>
-<section class="wrap section about-gallery">${photos.about.slice(1, 5).map((u, i) => `<span class="arch-frame reveal" style="--d:${i * 80}ms"><img src="${esc(small(u))}" alt="" width="480" height="600" loading="lazy"></span>`).join('')}</section>
-<section class="wrap section center"><a class="btn btn-lg" href="/${lang}/shop">${esc(a.cta)} ${icon('arrow', 20)}</a></section>`;
-  return layout(ctx, { title: a.title, description: a.lead.slice(0, 160), path: '/about', body, page: 'about', lds: [orgLd(ctx)] });
+${products.length ? `<section class="section wrap">${sectionHead(ab.shopTitle, t.shop, `/${lang}/shop`, t.viewAll)}${grid(products, ctx, '')}</section>` : ''}
+${filmDialog(t)}`;
+  return layout(ctx, { title: a.title, description: a.lead.slice(0, 160), path: '/about', body, page: 'about', lds: [orgLd(ctx)], image: portrait });
 }
 
 export function contactPage(ctx) {

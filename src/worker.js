@@ -120,7 +120,8 @@ async function storefront(request, env, url, lang, rest, exec) {
     const ids = new Set(featured.results.map((p) => p.id));
     const fresh = latest.results.filter((p) => !ids.has(p.id));
     const rows4 = (list) => (list.length >= 4 ? list.slice(0, list.length - (list.length % 4)) : list);
-    res = html(homePage(ctx, rows4(featured.results), rows4((fresh.length >= 4 ? fresh : latest.results).slice(0, 4)), PHOTOS));
+    const all = await db.prepare('SELECT * FROM products WHERE active = 1 ORDER BY sort, id').all();
+    res = html(homePage(ctx, rows4(featured.results), rows4((fresh.length >= 4 ? fresh : latest.results).slice(0, 4)), PHOTOS, all.results));
   } else if (rest === '/shop' || rest.startsWith('/c/')) {
     let cat = null;
     if (rest.startsWith('/c/')) {
@@ -176,7 +177,8 @@ async function storefront(request, env, url, lang, rest, exec) {
     ]);
     res = html(blogPostPage(ctx, post, others.results, latest.results));
   } else if (rest === '/about') {
-    res = html(aboutPage(ctx, PHOTOS));
+    const picks = await db.prepare('SELECT * FROM products WHERE active = 1 AND featured = 1 ORDER BY sort, id LIMIT 4').all();
+    res = html(aboutPage(ctx, PHOTOS, picks.results));
   } else if (rest === '/contact') {
     res = html(contactPage(ctx));
   } else if (LEGAL_PAGES.includes(rest.slice(1))) {

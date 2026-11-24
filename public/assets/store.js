@@ -572,13 +572,148 @@
   const filmDialog = $('.film-dialog');
   if (filmDialog) {
     const film = filmDialog.querySelector('video');
-    $('[data-film-open]')?.addEventListener('click', () => {
+    $$('[data-film-open]').forEach((b) => b.addEventListener('click', () => {
       filmDialog.showModal();
       film.play().catch(() => {});
-    });
+    }));
     filmDialog.querySelector('[data-film-close]').addEventListener('click', () => filmDialog.close());
     filmDialog.addEventListener('click', (e) => e.target === filmDialog && filmDialog.close());
     filmDialog.addEventListener('close', () => film.pause());
+  }
+
+  // Ritual scroll story: the picture follows the step in the middle of the screen.
+  const ritual = $('[data-ritual]');
+  if (ritual && 'IntersectionObserver' in window) {
+    const steps = $$('[data-ritual-step]', ritual);
+    const imgs = $$('[data-ritual-img]', ritual);
+    const n = $('[data-ritual-n]', ritual);
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          const i = Number(e.target.dataset.ritualStep);
+          steps.forEach((s) => s.classList.toggle('on', s === e.target));
+          imgs.forEach((im, k) => im.classList.toggle('on', k === i));
+          if (n) n.textContent = i + 1;
+        }),
+      { rootMargin: '-45% 0px -45% 0px' },
+    );
+    steps.forEach((s) => io.observe(s));
+  }
+
+  // Ritual Finder: three questions, then a ritual of products added to the bag in one click.
+  const finder = $('[data-finder]');
+  if (finder) {
+    const data = JSON.parse(document.getElementById('finder-data')?.textContent || '{}');
+    const bySlug = new Map((data.products || []).map((p) => [p.slug, p]));
+    const RULES = {
+      body: { cleanse: ['schwarze-seife-eukalyptus', 'nila-peeling', 'kessa-handschuh-schwarz', 'rizinusoel'], clarify: ['nila-seife', 'nila-peeling', 'schwarze-seife-nilla', 'rizinusoel'], firm: ['anti-cellulite-kaffeeseife', 'anti-cellulite-serum', 'nila-peeling'], nourish: ['schwarze-seife-aker-fassi', 'rizinusoel', 'tebrima-mit-kraeutern'] },
+      face: { cleanse: ['aker-fassi-seife', 'tebrima-mit-kraeutern', 'maske-nilla'], clarify: ['nila-seife', 'maske-nilla', 'tebrima-mit-kraeutern'], firm: ['aker-fassi-seife', 'tebrima-mit-kraeutern', 'rizinusoel'], nourish: ['aker-fassi-seife', 'tebrima-mit-kraeutern', 'rizinusoel'] },
+      hair: { cleanse: ['sidr-pulver', 'henna-pulver', 'rizinusoel'], clarify: ['sidr-pulver', 'henna-pulver', 'rizinusoel'], firm: ['henna-pulver', 'sidr-pulver', 'rizinusoel'], nourish: ['rizinusoel', 'henna-pulver', 'sidr-pulver'] },
+    };
+    const answers = [];
+    const qs = $$('[data-q]', finder);
+    const startBox = $('.finder-start', finder);
+    const result = $('.finder-result', finder);
+    let picks = [];
+    const show = (i) => {
+      startBox.hidden = true;
+      result.hidden = true;
+      qs.forEach((q, k) => (q.hidden = k !== i));
+      qs[i]?.querySelector('button[data-a]')?.focus({ preventScroll: true });
+    };
+    const finish = () => {
+      const [area, wish, time] = answers;
+      const list = (RULES[area]?.[wish] || []).map((sl) => bySlug.get(sl)).filter(Boolean);
+      picks = list.slice(0, time === 'quick' ? 2 : 3);
+      qs.forEach((q) => (q.hidden = true));
+      result.hidden = false;
+      $('[data-finder-list]', finder).innerHTML = picks
+        .map((p, i) => `<li style="--d:${i * 120}ms"><a href="/${lang}/p/${esc(p.slug)}"><img src="${esc(p.image)}" alt="" width="64" height="80"><span><strong>${esc(p.name)}</strong><small>${esc(p.sub || '')}</small></span></a><b>${money(p.price)}</b></li>`)
+        .join('');
+      $('[data-finder-total]', finder).innerHTML = `<span>${esc(i18n.total)}</span><strong>${money(picks.reduce((sum, p) => sum + p.price, 0))}</strong>`;
+    };
+    $('[data-finder-go]', finder).addEventListener('click', () => show(0));
+    qs.forEach((q, qi) => {
+      q.addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-a]');
+        if (b) {
+          answers[qi] = b.dataset.a;
+          if (qi + 1 < qs.length) show(qi + 1);
+          else finish();
+        }
+        if (e.target.closest('[data-finder-back]')) show(qi - 1);
+      });
+    });
+    $('[data-finder-restart]', finder).addEventListener('click', () => {
+      answers.length = 0;
+      show(0);
+    });
+    $('[data-finder-add]', finder).addEventListener('click', () => {
+      picks.forEach((p) => add({ id: p.id, qty: 1, option: '', name: p.name, price: p.price, image: p.image, slug: p.slug }));
+      showDrawer('cart') || toast(data.added);
+    });
+  }
+
+  // Product cards lean towards the pointer, with a gold shine (pointer devices only).
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches && !reduceMotion) {
+    $$('[data-tilt]').forEach((el) => {
+      el.addEventListener('pointermove', (e) => {
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
+        el.style.setProperty('--rx', `${(0.5 - y) * 7}deg`);
+        el.style.setProperty('--ry', `${(x - 0.5) * 9}deg`);
+        el.style.setProperty('--mx', `${x * 100}%`);
+      });
+      el.addEventListener('pointerleave', () => {
+        el.style.setProperty('--rx', '0deg');
+        el.style.setProperty('--ry', '0deg');
+      });
+    });
+  }
+
+  // Smooth page transitions (View Transitions): the clicked product photo flows into the product page.
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href*="/p/"]');
+    const img = a?.closest('.card')?.querySelector('[data-vt]');
+    if (img) img.style.viewTransitionName = img.dataset.vt;
+  });
+  addEventListener('pageshow', () => $$('[data-vt]').forEach((el) => (el.style.viewTransitionName = '')));
+
+  // The production strip can be dragged sideways with the mouse.
+  $$('[data-drag]').forEach((el) => {
+    let down = null;
+    el.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      down = { x: e.clientX, left: el.scrollLeft };
+      el.classList.add('dragging');
+    });
+    addEventListener('pointerup', () => {
+      down = null;
+      el.classList.toggle('dragging', false);
+    });
+    el.addEventListener('pointermove', (e) => down && (el.scrollLeft = down.left - (e.clientX - down.x)));
+  });
+
+  // Video hero: the picture drifts slightly slower than the page.
+  const hero = $('[data-hero]');
+  if (hero && !reduceMotion) {
+    const vid = hero.querySelector('.hero-video');
+    let ticking = false;
+    addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          const y = Math.min(scrollY, innerHeight);
+          vid.style.transform = `translate3d(0, ${y * 0.3}px, 0) scale(${1 + y / 4000})`;
+          ticking = false;
+        });
+      },
+      { passive: true },
+    );
   }
 
   // Scroll reveals
