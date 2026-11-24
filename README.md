@@ -41,6 +41,8 @@ npm run dev                           # http://localhost:8787  (admin: /admin/)
 
 `npm test` runs the tests.
 
+**Live (test address):** https://khachija.visa-abache.workers.dev · admin at /admin/. Every push to `main` deploys automatically (Cloudflare Workers Builds).
+
 ## Put it online (Cloudflare, free plan)
 
 ```bash
