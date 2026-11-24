@@ -1072,5 +1072,11 @@ for (const l of ['de', 'en', 'ar']) Object.assign(T[l], CHECKOUT[l]);
 
 for (const [l, v] of Object.entries({ de: 'Entdecken', en: 'Discover', ar: 'اكتشفي' })) T[l].discover = v;
 
+for (const [l, v] of Object.entries({
+  de: ['Nach oben wischen', 'Weiterscrollen', 'Weiter zu den Produkten'],
+  en: ['Swipe up', 'Keep scrolling', 'On to the products'],
+  ar: ['اسحبي للأعلى', 'تابعي التمرير', 'تابعي إلى المنتجات'],
+})) [T[l].hsSwipe, T[l].hsScroll, T[l].hsDone] = v;
+
 // Footer credit for the agency that built the shop.
 for (const [l, v] of Object.entries({ de: 'Website von', en: 'Website by', ar: 'تصميم وتطوير' })) T[l].madeBy = v;

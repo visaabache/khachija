@@ -761,6 +761,8 @@
       const x = slides[0].offsetLeft - slides[i].offsetLeft;
       track.style.transform = `translate3d(${x}px, 0, 0)`;
       slides.forEach((s, k) => s.classList.toggle('on', k === i));
+      $$('.hs-dots i', hs).forEach((d, k) => d.classList.toggle('on', k === i));
+      hs.classList.toggle('hs-last', i === slides.length - 1);
       if (num) num.textContent = String(i + 1).padStart(2, '0');
     };
     const update = () => {

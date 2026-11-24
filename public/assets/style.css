@@ -943,3 +943,42 @@ body::after {
   .hs-head h2 { font-size: 1.6rem; }
   .hs-head .kicker { margin-bottom: 6px; }
 }
+
+/* ── Scroll / swipe hint under the category slider ── */
+.hs-hint { display: none; }
+.hs-on .hs-hint { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: auto; padding: 18px 0 6px; color: var(--muted); }
+.hs-dots { display: flex; gap: 8px; }
+.hs-dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--line); transition: width 0.5s var(--ease), background 0.5s; }
+.hs-dots i.on { width: 26px; background: var(--gold); }
+.hs-cue { display: flex; align-items: center; gap: 12px; font-size: 0.74rem; letter-spacing: 0.14em; text-transform: uppercase; }
+[lang='ar'] .hs-cue { letter-spacing: 0; font-size: 0.85rem; }
+/* A mouse with a moving wheel on computers, a finger swiping up on touch screens. */
+.cue-mouse { position: relative; width: 20px; height: 30px; border: 1.5px solid currentColor; border-radius: 11px; }
+.cue-mouse i { position: absolute; top: 6px; left: 50%; width: 3px; height: 6px; margin-left: -1.5px; border-radius: 2px; background: var(--gold); animation: wheel 1.6s var(--ease) infinite; }
+@keyframes wheel { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(9px); opacity: 0; } 100% { opacity: 0; } }
+.cue-finger { display: grid; color: var(--gold); animation: swipeup 1.8s var(--ease) infinite; }
+@keyframes swipeup { 0% { transform: translateY(10px); opacity: 0; } 25% { opacity: 1; } 70% { transform: translateY(-12px); opacity: 1; } 100% { transform: translateY(-14px); opacity: 0; } }
+.cue-finger, .cue-touch { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .cue-mouse, .cue-wheel { display: none; }
+  .cue-finger { display: grid; }
+  .cue-touch { display: inline; }
+}
+.cue-done { display: none; }
+.hs-last .cue-next, .hs-last .cue-mouse, .hs-last .cue-finger { display: none; }
+.hs-last .cue-done { display: inline-flex; align-items: center; gap: 8px; color: var(--green); }
+.hs-last .cue-done::after { content: '↓'; font-size: 1.1rem; animation: bob 1.4s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(4px); } }
+@media (max-width: 799px) { .hs-on .hs-hint { padding-bottom: 10px; } }
+@media (prefers-reduced-motion: reduce) { .cue-mouse i, .cue-finger, .hs-last .cue-done::after { animation: none; } }
+/* Fit slider + hint inside the pinned screen: the card takes the space left over. */
+.hs-on .hs-track { flex: 1 1 auto; min-height: 0; align-items: center; }
+.hs-on .hs-slide { min-height: 0; height: min(560px, 100%); }
+.hs-on .hs-hint { flex: none; margin-top: 0; padding: 14px 0 0; gap: 10px; }
+@media (max-width: 799px) {
+  .hs-on .hs-slide { height: 100%; grid-template-rows: minmax(90px, 1fr) auto; }
+  .hs-on .hs-hint { padding: 10px 0 2px; gap: 8px; }
+  .hs-on .hs-sticky { padding-bottom: 10px; }
+}
+.hs-on .hs-slide { overflow: hidden; grid-template-rows: minmax(0, 1fr); }
+.hs-cue { white-space: nowrap; }

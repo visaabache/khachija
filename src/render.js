@@ -164,10 +164,10 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=7">
+<link rel="stylesheet" href="/assets/style.css?v=10">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=5" defer></script>
+<script src="/assets/store.js?v=6" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
 <div class="scroll-progress" aria-hidden="true"></div>
@@ -369,6 +369,13 @@ export function homePage(ctx, featured, latest, photos, all = []) {
       </article>`;
       })
       .join('')}</div>
+    <div class="hs-hint" aria-hidden="true">
+      <span class="hs-dots">${categories.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</span>
+      <span class="hs-cue">
+        <i class="cue-mouse"><i></i></i><i class="cue-finger"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 10.5V9a1.5 1.5 0 0 1 3 0v2"/><path d="M15 10.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7l-2.3-3.6a1.5 1.5 0 0 1 2.5-1.6L9 15"/></svg></i>
+        <span class="cue-next cue-touch">${esc(t.hsSwipe)}</span><span class="cue-next cue-wheel">${esc(t.hsScroll)}</span><span class="cue-done">${esc(t.hsDone)}</span>
+      </span>
+    </div>
   </div>
 </section>`
     : '';
