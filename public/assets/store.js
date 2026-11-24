@@ -160,6 +160,7 @@
     document.body.classList.add('locked');
     if (name === 'search') setTimeout(() => d.querySelector('input')?.focus(), 200);
     if (name === 'cart') renderMini();
+    if (name === 'recent') renderRecent();
     return true;
   }
   $$('[data-drawer]').forEach((b) =>
@@ -228,6 +229,33 @@
       box.innerHTML = `<p class="form-error">${esc(i18n.error)}</p>`;
     }
   }
+
+  // Recently viewed products (kept in this browser only).
+  function renderRecent() {
+    const box = $('[data-view="recent"]');
+    if (!box) return;
+    let list = [];
+    try {
+      list = JSON.parse(localStorage.getItem('kh.seen.v2') || '[]').filter((x) => x && x.slug);
+    } catch {}
+    box.innerHTML = list.length
+      ? `<ul class="lines-list">${list.map((p) => `<li class="line"><a class="line-img" href="/${lang}/p/${esc(p.slug)}"><img src="${esc(p.image)}" alt="" width="80" height="100" loading="lazy"></a><div class="line-main"><a class="line-name" href="/${lang}/p/${esc(p.slug)}">${esc(p.name)}</a></div><strong class="line-total">${money(p.price)}</strong></li>`).join('')}</ul>`
+      : `<div class="cart-empty"><img src="/assets/brand/symbol-gold.svg" alt="" width="70" height="70"><p>${esc(i18n.recentEmpty)}</p><a class="btn" href="/${lang}/shop">${esc(i18n.startShopping)}</a></div>`;
+  }
+
+  // Share this page: the phone's share sheet, or copy the link.
+  $$('[data-share-page]').forEach((b) =>
+    b.addEventListener('click', async () => {
+      const data = { title: document.title, url: location.href };
+      try {
+        if (navigator.share) await navigator.share(data);
+        else {
+          await navigator.clipboard.writeText(location.href);
+          toast(i18n.copied);
+        }
+      } catch {}
+    }),
+  );
 
   // Cart page
   async function renderCartPage() {
@@ -324,8 +352,9 @@
       new IntersectionObserver(([e]) => bar.classList.toggle('on', !e.isIntersecting && e.boundingClientRect.top < 0)).observe(addBtn);
     }
     try {
-      const seen = JSON.parse(localStorage.getItem('kh.seen') || '[]').filter((s) => s !== buy.dataset.slug);
-      localStorage.setItem('kh.seen', JSON.stringify([buy.dataset.slug, ...seen].slice(0, 12)));
+      const me = { slug: buy.dataset.slug, name: buy.dataset.name, price: Number(buy.dataset.price), image: small(buy.dataset.image) };
+      const seen = JSON.parse(localStorage.getItem('kh.seen.v2') || '[]').filter((x) => x && x.slug !== me.slug);
+      localStorage.setItem('kh.seen.v2', JSON.stringify([me, ...seen].slice(0, 12)));
     } catch {}
   }
 

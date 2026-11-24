@@ -1,6 +1,7 @@
 // Storefront text in German (main language), English and Arabic. Keys under "js" are also sent to the browser.
 
 const de = {
+  searchTab: 'Suche',
   dir: 'ltr',
   locale: 'de-DE',
   langName: 'Deutsch',
@@ -292,6 +293,7 @@ const de = {
 };
 
 const en = {
+  searchTab: 'Search',
   dir: 'ltr',
   locale: 'en-GB',
   langName: 'English',
@@ -583,6 +585,7 @@ const en = {
 };
 
 const ar = {
+  searchTab: 'بحث',
   dir: 'rtl',
   locale: 'ar',
   langName: 'العربية',

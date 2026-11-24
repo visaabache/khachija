@@ -851,3 +851,24 @@ body::after {
 .quote-band img { margin: 0 auto 20px; }
 .quote-band blockquote { margin: 0; font: italic 400 clamp(1.6rem, 3.4vw, 2.6rem)/1.35 var(--serif); color: var(--ink); text-wrap: balance; }
 .quote-band .sign { color: var(--gold) !important; }
+
+/* ── Phone tab bar and side rail ── */
+.tabbar { display: none; }
+@media (max-width: 999px) {
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); background: rgba(251, 248, 242, 0.96); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-top: 1px solid var(--line); box-shadow: 0 -10px 30px -20px rgba(42, 33, 24, 0.35); }
+  .tabbar a { position: relative; display: grid; justify-items: center; gap: 3px; padding: 6px 0; text-decoration: none; color: var(--muted); font-size: 0.7rem; letter-spacing: 0.02em; }
+  .tabbar a[aria-current] { color: var(--green); font-weight: 500; }
+  .tabbar a[aria-current]::before { content: ''; position: absolute; top: -6px; width: 26px; height: 2px; background: var(--gold); }
+  .tabbar .cart-count { top: 0; inset-inline-end: calc(50% - 22px); }
+  body:not(.minimal) { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+  .wa-widget { bottom: calc(82px + env(safe-area-inset-bottom)); }
+  .page-product .wa-widget { bottom: calc(146px + env(safe-area-inset-bottom)); }
+  .buy-bar { bottom: calc(64px + env(safe-area-inset-bottom)); }
+  .toast { bottom: calc(90px + env(safe-area-inset-bottom)); }
+}
+.side-rail { position: fixed; inset-inline-end: 0; top: 50%; translate: 0 -50%; z-index: 34; display: grid; background: rgba(251, 248, 242, 0.96); border: 1px solid var(--line); border-inline-end: 0; box-shadow: var(--shadow); }
+.side-rail button { width: 46px; height: 48px; display: grid; place-items: center; border: 0; background: none; color: var(--ink); }
+.side-rail button + button { border-top: 1px solid var(--line); }
+.side-rail button:hover { color: var(--gold); background: var(--sand); }
+.page-checkout .side-rail { display: none; }
+@media (max-width: 699px) { .side-rail { top: 58%; } .side-rail button { width: 40px; height: 42px; } .side-rail svg { width: 20px; height: 20px; } }

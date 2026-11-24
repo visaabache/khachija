@@ -63,6 +63,10 @@ const ICONS = {
   cash: '<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/>',
   box: '<path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/>',
   sparkle: '<path d="M12 3c.7 4.4 2.6 6.3 7 7-4.4.7-6.3 2.6-7 7-.7-4.4-2.6-6.3-7-7 4.4-.7 6.3-2.6 7-7Z"/>',
+  history: '<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5v4h4"/><path d="M12 7.5V12l3 2"/>',
+  share: '<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4M8.2 13.2l7.6 4"/>',
+  home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/>',
+  grid: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/>',
 };
 export function icon(name, size = 22) {
@@ -160,10 +164,10 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=3">
+<link rel="stylesheet" href="/assets/style.css?v=4">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=3" defer></script>
+<script src="/assets/store.js?v=4" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
 <div class="scroll-progress" aria-hidden="true"></div>
@@ -199,7 +203,15 @@ ${minimal ? '' : `<div class="drawer-back" data-drawer-close hidden></div>
 <aside class="drawer drawer-cart" id="cart-panel" aria-label="${esc(t.cart)}" hidden>
   <div class="drawer-head"><strong>${esc(t.cart)} <span class="cart-count-inline" data-count></span></strong><button type="button" class="icon-btn" data-drawer-close aria-label="${esc(t.close)}">${icon('close', 24)}</button></div>
   <div class="mini-cart" data-view="mini"></div>
-</aside>`}
+</aside>
+<aside class="drawer drawer-cart" id="recent-panel" aria-label="${esc(t.recent)}" hidden>
+  <div class="drawer-head"><strong>${esc(t.recent)}</strong><button type="button" class="icon-btn" data-drawer-close aria-label="${esc(t.close)}">${icon('close', 24)}</button></div>
+  <div class="mini-cart" data-view="recent"></div>
+</aside>
+<div class="side-rail" aria-label="${esc(t.recent)}">
+  <button type="button" data-drawer="recent" aria-label="${esc(t.recent)}" title="${esc(t.recent)}">${icon('history', 24)}</button>
+  <button type="button" data-share-page aria-label="${esc(t.share)}" title="${esc(t.share)}">${icon('share', 24)}</button>
+</div>`}
 <main id="main">
 ${body}
 </main>
@@ -222,6 +234,12 @@ ${body}
   </div>`}
   <div class="wrap foot-bottom"><span>© ${new Date().getUTCFullYear()} ${esc(store)} · ${esc(t.rights)}</span>${minimal ? `<span class="foot-links">${LEGAL_PAGES.map((k) => `<a href="/${lang}/${k}">${esc(t.legal[k])}</a>`).join(' · ')}</span>` : ''}${pixels ? `<button type="button" class="link-btn" data-consent-open>${esc(t.cookieSettings)}</button>` : ''}<span class="langs">${langLinks}</span></div>
 </footer>
+${minimal ? '' : `<nav class="tabbar" aria-label="${esc(t.shop)}">
+  <a href="/${lang}/"${page === 'home' ? ' aria-current="page"' : ''}>${icon('home', 24)}<span>${esc(t.home)}</span></a>
+  <a href="/${lang}/shop"${page === 'shop' ? ' aria-current="page"' : ''}>${icon('grid', 24)}<span>${esc(t.shop)}</span></a>
+  <a href="/${lang}/cart" data-drawer="cart"${page === 'cart' ? ' aria-current="page"' : ''} class="tab-cart">${icon('bag', 24)}<span>${esc(t.cart)}</span><span class="cart-count" hidden>0</span></a>
+  <a href="/${lang}/shop" data-drawer="search">${icon('search', 24)}<span>${esc(t.searchTab || t.search)}</span></a>
+</nav>`}
 ${minimal || !wa ? '' : waWidget(ctx, product)}
 <div class="toast" role="status" aria-live="polite" hidden></div>
 ${pixels ? `<div class="consent-bar" id="consent" role="dialog" aria-label="${esc(t.cookieSettings)}" hidden><p>${esc(t.consentAds)} <a href="/${lang}/datenschutz">${esc(t.legal.datenschutz)}</a></p><div><button type="button" class="btn btn-ghost" data-consent="no">${esc(t.refuse)}</button><button type="button" class="btn" data-consent="yes">${esc(t.accept)}</button></div></div>` : ''}
