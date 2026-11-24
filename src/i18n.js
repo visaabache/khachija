@@ -1008,3 +1008,56 @@ const PLUS = {
   },
 };
 for (const l of ['de', 'en', 'ar']) Object.assign(T[l], PLUS[l]);
+
+// SEO texts for the shop and category pages: a short introduction at the top and a longer text under the products.
+const SEO = {
+  de: {
+    shopIntro: 'Marokkanische Naturkosmetik online kaufen: Schwarze Seife, Nila, Henna, Sidr und Rizinusöl, von Hand gemacht von Frauenkooperativen in Marokko.',
+    shopText: '<h2>Marokkanische Naturkosmetik aus Frauenkooperativen</h2><p>Bei Khachija finden Sie traditionelle Schönheitsprodukte aus Marokko: schwarze Seife (Savon Beldi) für das Hammam-Ritual, blaues Nila aus der Sahara, Henna- und Sidr-Pulver für die Haarpflege, die Kräutermischung Tabrima und reines Rizinusöl. Alle Produkte werden von Frauenkooperativen in Marokko von Hand hergestellt und aus Hamburg versendet.</p><h2>Versand aus Hamburg</h2><p>Wir liefern mit DHL innerhalb von 2–4 Werktagen in ganz Deutschland, ab 49 € versandkostenfrei. Bezahlen Sie bequem mit PayPal, per Überweisung oder per Nachnahme.</p>',
+    catIntro: {
+      'seifen-hammam': 'Schwarze Seife, Nila-Seife und Aker-Fasi-Seife für das marokkanische Hammam-Ritual zu Hause.',
+      'masken-peelings': 'Nila Peeling, Maske und die Kräutermischung Tabrima: traditionelle marokkanische Gesichts- und Körperpflege.',
+      'haar-kraeuter': 'Reines Henna-Pulver und Sidr-Pulver für natürliche Haarpflege nach marokkanischer Tradition.',
+      'oele-seren': 'Kaltgepresstes Rizinusöl und Anti-Cellulite-Serum für die tägliche Körper- und Haarpflege.',
+    },
+    catText: {
+      'seifen-hammam': '<h2>Schwarze Seife kaufen: das Herz des Hammams</h2><p>Die marokkanische schwarze Seife, auch Savon Beldi genannt, ist eine weiche, pastenartige Seife und der erste Schritt jedes Hammam-Rituals. Auf die feuchte, warme Haut aufgetragen, bereitet sie die Haut auf das Peeling mit dem Kessa-Handschuh vor. Bei Khachija gibt es die schwarze Seife mit Eukalyptus, mit Aker Fasi und mit Nila.</p><h2>Nila-Seife und Aker-Fasi-Seife</h2><p>Für die tägliche Pflege von Gesicht und Körper bieten wir handgemachte Seifenstücke an: die blaue Nila-Seife aus dem Süden Marokkos und die Aker-Fasi-Seife mit dem traditionellen Rot aus Fès. Dazu die belebende Kaffee-Anti-Cellulite-Seife für die Massage.</p>',
+      'masken-peelings': '<h2>Nila Peeling: das blaue Geheimnis der Sahara</h2><p>Nila ist ein traditionelles Schönheitsmittel aus dem Süden Marokkos. Unser Nila Peeling (Gommage) löst sanft abgestorbene Hautschüppchen und schenkt ein klares, frisches Hautgefühl, für alle Hauttypen.</p><h2>Tabrima: die Kräutermaske der Großmütter</h2><p>Tabrima ist eine traditionelle marokkanische Kräutermischung. Mit Wasser oder Rosenwasser angerührt, wird sie als Maske für Gesicht und Körper verwendet und hinterlässt ein weiches, gepflegtes Hautgefühl.</p>',
+      'haar-kraeuter': '<h2>Henna Pulver für die Haare</h2><p>Henna ist eines der ältesten Schönheitsmittel der Welt. Unser fein gemahlenes Henna-Pulver eignet sich für die Haarpflege, für Körperkunst und traditionelle Rituale. Mit warmem Wasser zu einer Paste angerührt, pflegt und färbt es das Haar auf natürliche Weise.</p><h2>Sidr Pulver: die sanfte Pflanzenwäsche</h2><p>Sidr-Pulver wird aus den Blättern des Sidr-Baums gewonnen und ist seit Jahrhunderten Teil orientalischer Schönheitsrituale. Als milde Paste für Haar und Haut ist es eine natürliche Alternative zu herkömmlichen Produkten.</p>',
+      'oele-seren': '<h2>Rizinusöl für Haare, Wimpern und Haut</h2><p>Unser 100 % natürliches Rizinusöl ist ein reichhaltiges, dickflüssiges Pflegeöl. Traditionell wird es für die Pflege von Haaren, Wimpern, Augenbrauen und trockener Haut verwendet. Die praktische Pipettenflasche macht die Dosierung einfach.</p><h2>Anti-Cellulite-Serum</h2><p>Das Serum wird bei der Massage eingearbeitet und hinterlässt ein glattes, gepflegtes Hautgefühl. Ideal in Kombination mit der Kaffee-Anti-Cellulite-Seife.</p>',
+    },
+  },
+  en: {
+    shopIntro: 'Buy Moroccan natural cosmetics online: black soap, nila, henna, sidr and castor oil, handmade by women’s cooperatives in Morocco.',
+    shopText: '<h2>Moroccan natural cosmetics from women’s cooperatives</h2><p>Khachija brings you traditional beauty products from Morocco: black soap (savon beldi) for the hammam ritual, blue nila from the Sahara, henna and sidr powder for hair care, the herbal blend Tabrima and pure castor oil. Every product is handmade by women’s cooperatives in Morocco and shipped from Hamburg.</p><h2>Shipped from Hamburg</h2><p>DHL delivery in 2–4 working days across Germany, free from €49. Pay with PayPal, bank transfer or cash on delivery.</p>',
+    catIntro: {
+      'seifen-hammam': 'Black soap, nila soap and aker fassi soap for the Moroccan hammam ritual at home.',
+      'masken-peelings': 'Nila scrub, mask and the herbal blend Tabrima: traditional Moroccan face and body care.',
+      'haar-kraeuter': 'Pure henna powder and sidr powder for natural hair care in the Moroccan tradition.',
+      'oele-seren': 'Castor oil and anti-cellulite serum for daily body and hair care.',
+    },
+    catText: {
+      'seifen-hammam': '<h2>Buy black soap: the heart of the hammam</h2><p>Moroccan black soap, or savon beldi, is a soft, paste-like soap and the first step of every hammam ritual. Applied to damp, warm skin, it prepares the skin for exfoliation with a kessa glove. Khachija offers black soap with eucalyptus, with aker fassi and with nila.</p>',
+      'masken-peelings': '<h2>Nila scrub: the blue secret of the Sahara</h2><p>Nila is a traditional beauty ingredient from southern Morocco. Our nila gommage gently removes dead skin and leaves the skin feeling clear and fresh, for all skin types. Tabrima, a traditional herbal blend, is used as a mask for face and body.</p>',
+      'haar-kraeuter': '<h2>Henna powder for hair</h2><p>Henna is one of the oldest beauty ingredients in the world. Our finely ground henna powder suits hair care, body art and traditional rituals. Sidr powder, from the leaves of the sidr tree, makes a mild paste for hair and skin.</p>',
+      'oele-seren': '<h2>Castor oil for hair, lashes and skin</h2><p>Our 100% natural castor oil is a rich, thick care oil, traditionally used for hair, lashes, brows and dry skin. The anti-cellulite serum is massaged in for smoother-feeling skin.</p>',
+    },
+  },
+  ar: {
+    shopIntro: 'اشتري مستحضرات التجميل المغربية الطبيعية: الصابون البلدي، النيلة، الحناء، السدر وزيت الخروع، مصنوعة يدويًا من تعاونيات نسائية في المغرب.',
+    shopText: '<h2>مستحضرات تجميل مغربية طبيعية من تعاونيات نسائية</h2><p>تقدم لك خديجة منتجات الجمال المغربية التقليدية: الصابون البلدي لطقس الحمام، النيلة الزرقاء من الصحراء، الحناء والسدر للعناية بالشعر، خليط التبريمة وزيت الخروع الخالص. كل المنتجات مصنوعة يدويًا من طرف تعاونيات نسائية في المغرب وتُشحن من هامبورغ.</p>',
+    catIntro: {
+      'seifen-hammam': 'الصابون البلدي وصابون النيلة وصابون عكر الفاسي لطقس الحمام المغربي في بيتك.',
+      'masken-peelings': 'تقشير وقناع النيلة وخليط التبريمة: عناية مغربية تقليدية بالوجه والجسم.',
+      'haar-kraeuter': 'مسحوق الحناء والسدر الخالص للعناية الطبيعية بالشعر حسب التقاليد المغربية.',
+      'oele-seren': 'زيت الخروع وسيروم السيلوليت للعناية اليومية بالجسم والشعر.',
+    },
+    catText: {
+      'seifen-hammam': '<h2>الصابون البلدي: قلب الحمام المغربي</h2><p>الصابون البلدي صابون طري يشبه العجينة، وهو الخطوة الأولى في كل طقس حمام. يُوضع على بشرة مبللة ودافئة ليهيئها للتقشير بالكيس.</p>',
+      'masken-peelings': '<h2>تقشير النيلة: السر الأزرق للصحراء</h2><p>النيلة مكون تجميلي تقليدي من جنوب المغرب. تقشير النيلة يزيل الجلد الميت بلطف ويمنح البشرة إحساسًا بالصفاء والانتعاش.</p>',
+      'haar-kraeuter': '<h2>مسحوق الحناء للشعر</h2><p>الحناء من أقدم مستحضرات الجمال في العالم. والسدر المستخرج من أوراق شجرة السدر يصبح عجينة لطيفة للشعر والبشرة.</p>',
+      'oele-seren': '<h2>زيت الخروع للشعر والرموش والبشرة</h2><p>زيت الخروع الطبيعي زيت غني وكثيف يُستعمل تقليديًا للعناية بالشعر والرموش والحواجب والبشرة الجافة.</p>',
+    },
+  },
+};
+for (const l of ['de', 'en', 'ar']) Object.assign(T[l], SEO[l]);

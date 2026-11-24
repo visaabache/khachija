@@ -872,3 +872,8 @@ body::after {
 .side-rail button:hover { color: var(--gold); background: var(--sand); }
 .page-checkout .side-rail { display: none; }
 @media (max-width: 699px) { .side-rail { top: 58%; } .side-rail button { width: 40px; height: 42px; } .side-rail svg { width: 20px; height: 20px; } }
+
+/* SEO text under category listings */
+.seo-text { max-width: 820px; margin: 70px auto 0; padding-top: 40px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: 0.95rem; }
+.seo-text h2 { font-size: 1.6rem; margin-top: 1.2em; }
+.seo-text h2:first-child { margin-top: 0; }

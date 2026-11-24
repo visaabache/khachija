@@ -164,7 +164,7 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=4">
+<link rel="stylesheet" href="/assets/style.css?v=5">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
 <script src="/assets/store.js?v=4" defer></script>
@@ -307,6 +307,13 @@ function trustStrip(lang) {
   return `<ul class="trust">${t.trust.map(([ic, title, text], i) => `<li class="reveal" style="--d:${i * 80}ms">${icon(ic, 28)}<div><strong>${esc(title)}</strong><span>${esc(text)}</span></div></li>`).join('')}</ul>`;
 }
 
+// "Schmuckshöhe 13, 22337 Hamburg, Deutschland" → a schema.org PostalAddress.
+function postalAddress(text) {
+  const m = String(text).match(/^(.+?),\s*(\d{4,5})\s+([^,]+)(?:,\s*(.+))?$/);
+  if (!m) return String(text);
+  return { '@type': 'PostalAddress', streetAddress: m[1], postalCode: m[2], addressLocality: m[3], addressCountry: /deutschland|germany/i.test(m[4] || 'DE') ? 'DE' : m[4] };
+}
+
 function orgLd(ctx) {
   const { origin, settings } = ctx;
   const sameAs = ['instagram', 'facebook', 'tiktok'].map((k) => socialUrl(k, settings[k])).filter(Boolean);
@@ -319,7 +326,10 @@ function orgLd(ctx) {
     image: `${origin}${BRAND_OG}`,
     ...(settings.contact_email ? { email: settings.contact_email } : {}),
     ...(settings.phone ? { telephone: settings.phone } : {}),
-    ...(settings.legal_address ? { address: settings.legal_address } : {}),
+    ...(settings.legal_address ? { address: postalAddress(settings.legal_address) } : {}),
+    contactPoint: { '@type': 'ContactPoint', contactType: 'customer service', availableLanguage: ['German', 'English', 'Arabic'], ...(settings.contact_email ? { email: settings.contact_email } : {}), ...(settings.phone ? { telephone: settings.phone } : {}) },
+    hasMerchantReturnPolicy: { '@type': 'MerchantReturnPolicy', applicableCountry: 'DE', returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow', merchantReturnDays: 14, returnMethod: 'https://schema.org/ReturnByMail', returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility' },
+    founder: { '@type': 'Person', name: settings.legal_name || 'Khadija Hakki' },
     currenciesAccepted: 'EUR',
     paymentAccepted: 'PayPal, Bank transfer, Cash on delivery',
     areaServed: 'DE',
@@ -411,7 +421,7 @@ ${filmDialog(t)}`;
     { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: t.faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) },
     { '@context': 'https://schema.org', '@type': 'VideoObject', name: t.film.title, description: t.film.text, thumbnailUrl: `${ctx.origin}/assets/video/kooperative-poster.webp`, contentUrl: `${ctx.origin}/assets/video/kooperative-film.mp4`, uploadDate: '2026-11-24', duration: 'PT5M7S' },
   ];
-  return layout(ctx, { title: '', path: '/', body, page: 'home', lds });
+  return layout(ctx, { title: '', path: '/', body, page: 'home', lds, preload: '/assets/video/kooperative-poster.webp' });
 }
 
 function filmDialog(t) {
@@ -439,7 +449,7 @@ function newsletterBox(lang) {
   </form>`;
 }
 
-export function listingPage(ctx, { title, path, products, q = '', sort = '', description = '', image = '', seoTitle = '', metaDescription = '', current = '' }) {
+export function listingPage(ctx, { title, path, products, q = '', sort = '', description = '', image = '', seoTitle = '', metaDescription = '', current = '', seoText = '' }) {
   const { lang, categories } = ctx;
   const t = T[lang];
   const sortOpts = [['', t.sortNew], ['price_asc', t.sortPriceAsc], ['price_desc', t.sortPriceDesc]];
@@ -458,6 +468,7 @@ export function listingPage(ctx, { title, path, products, q = '', sort = '', des
     <noscript><button class="btn btn-small">OK</button></noscript>
   </form>
   ${grid(products, ctx, q ? t.noResults : t.noProducts)}
+  ${seoText && !q ? `<div class="seo-text">${seoText}</div>` : ''}
 </section>`;
   const query = new URLSearchParams();
   if (q) query.set('q', q);

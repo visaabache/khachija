@@ -43,6 +43,18 @@ npm run dev                           # http://localhost:8787  (admin: /admin/)
 
 **Live (test address):** https://khachija.visa-abache.workers.dev · admin at /admin/. Every push to `main` deploys automatically (Cloudflare Workers Builds).
 
+## Launch day: switching to khachija-shop.de
+
+Until then the shop runs on the workers.dev test address, which tells search engines not to index it (`noindex` and a `Disallow: /` robots.txt), so Google never sees two copies of the shop. On launch day:
+
+1. Add `khachija-shop.de` to Cloudflare and point the netcup nameservers to it (see Domain above).
+2. In `wrangler.jsonc` set `"SITE_URL": "https://khachija-shop.de"` and uncomment the `routes`; push and deploy. From then on: canonical links, hreflang, sitemap, structured data, emails and PayPal's return address use the domain, the pages become indexable, and `www.` and the workers.dev address redirect to it.
+3. [Google Search Console](https://search.google.com/search-console): add the domain (DNS verification in Cloudflare, or paste the code in admin → Settings → Google), then submit `https://khachija-shop.de/sitemap.xml`.
+4. [Google Merchant Center](https://merchants.google.com): add the feed `https://khachija-shop.de/merchant-feed.xml` for free listings in Google Shopping.
+5. The old WordPress addresses (`/shop/`, `/about-us/`, `/product/…`) already redirect (301) to the new pages, so existing Google results keep working.
+
+SEO content: keyword texts for the shop and each category (`src/i18n.js`, `shopText` / `catText`), and the magazine articles in `seed/posts-seo.sql` (Schwarze Seife, Nila, Sidr, Rizinusöl).
+
 ## Put it online (Cloudflare, free plan)
 
 ```bash

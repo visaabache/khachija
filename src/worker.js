@@ -56,6 +56,21 @@ const BAD_AGENT = /(sqlmap|nikto|nuclei|masscan|zgrab|wpscan|acunetix|nessus|ope
 // Addresses of the old WordPress shop, sent to their new home so links and Google results keep working.
 const OLD_PATHS = { '/shop/': '/de/shop', '/about-us/': '/de/about', '/contact-us/': '/de/contact', '/privacy-policy/': '/de/datenschutz', '/refund-policy/': '/de/widerruf', '/term-of-use/': '/de/agb', '/cart/': '/de/cart', '/checkout/': '/de/checkout', '/my-account/': '/de/', '/wishlist/': '/de/shop' };
 
+// Where each old WordPress product now lives: oils and serums, soaps, masks and peelings.
+function oldProduct(path) {
+  if (/argan|rosemary|prickly-pear-oil|oil/.test(path)) return '/de/c/oele-seren';
+  if (/soap|seife/.test(path)) return '/de/c/seifen-hammam';
+  if (/peeling|scrub|mask/.test(path)) return '/de/c/masken-peelings';
+  return '/de/shop';
+}
+
+// Only the shop's own domain (SITE_URL) is indexed by search engines. The workers.dev test address and any other
+// host answer with "noindex", so Google never sees two copies of the shop.
+function indexable(env, url) {
+  const site = String(env.SITE_URL || '').trim().replace(/\/+$/, '');
+  return Boolean(site) && site === url.origin;
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -63,7 +78,9 @@ export default {
     const agent = request.headers.get('user-agent') || '';
     if (BAD_AGENT.test(agent)) return new Response('Forbidden', { status: 403 });
     if (OLD_PATHS[path]) return Response.redirect(`${url.origin}${OLD_PATHS[path]}`, 301);
-    if (path.startsWith('/product/')) return Response.redirect(`${url.origin}/de/shop`, 301);
+    if (path.startsWith('/product/')) return Response.redirect(`${url.origin}${oldProduct(path)}`, 301);
+    if (path.startsWith('/product-category/')) return Response.redirect(`${url.origin}/de/shop`, 301);
+    if (path === '/feed/' || path === '/comments/feed/') return Response.redirect(`${url.origin}/de/blog`, 301);
     if (PROBE.test(path)) return new Response('Not found', { status: 404, headers: { 'cache-control': 'public, max-age=86400' } });
     if (path.startsWith('/api/') && request.method !== 'GET' && request.method !== 'HEAD' && !agent) return json({ error: 'bad_request' }, 400);
     const site = siteOrigin(env, url);
@@ -78,6 +95,7 @@ export default {
       if (path === '/sitemap.xml') return await sitemap(env, site);
       if (path === '/merchant-feed.xml') return await merchantFeed(env, site, url.searchParams.get('lang'));
       if (path === '/robots.txt') {
+        if (!indexable(env, url)) return new Response('User-agent: *\nDisallow: /\n', { headers: { 'content-type': 'text/plain' } });
         return new Response(`User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\nDisallow: /*/cart\nDisallow: /*/checkout\nDisallow: /*/order/\nDisallow: /*/paypal/\nSitemap: ${site}/sitemap.xml\n`, { headers: { 'content-type': 'text/plain' } });
       }
       if (path === '/') return new Response(null, { status: 302, headers: { location: `/${pickLang(request)}/`, vary: 'accept-language, cookie' } });
@@ -86,7 +104,11 @@ export default {
         if (!m[2]) return Response.redirect(`${url.origin}/${m[1]}/${url.search}`, 301);
         return await storefront(request, env, url, m[1], m[2].replace(/(.)\/$/, '$1'), ctx);
       }
-      return env.ASSETS.fetch(request);
+      const asset = await env.ASSETS.fetch(request);
+      if (indexable(env, url)) return asset;
+      const res = new Response(asset.body, asset);
+      res.headers.set('x-robots-tag', 'noindex');
+      return res;
     } catch (err) {
       console.error(err);
       if (path.startsWith('/api/')) return json({ error: 'server' }, 500);
@@ -147,7 +169,8 @@ async function storefront(request, env, url, lang, rest, exec) {
         title: cat ? catName(cat, lang) : t.allProducts,
         seoTitle: cat ? t.catSeoTitle(catName(cat, lang)) : t.shopSeoTitle,
         metaDescription: cat ? t.catSeoDesc(catName(cat, lang)) : t.shopSeoDesc,
-        description: cat ? t.catSeoDesc(catName(cat, lang)) : t.tagline,
+        description: cat ? t.catIntro?.[cat.slug] || t.catSeoDesc(catName(cat, lang)) : t.shopIntro || t.tagline,
+        seoText: cat ? t.catText?.[cat.slug] || '' : t.shopText || '',
         path: cat ? `/c/${cat.slug}` : '/shop',
         products: rows.results,
         q,
@@ -200,6 +223,7 @@ async function storefront(request, env, url, lang, rest, exec) {
     return html(notFoundPage(ctx), 404);
   }
   res.headers.append('set-cookie', `lang=${lang}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`);
+  if (!indexable(env, url)) res.headers.set('x-robots-tag', 'noindex');
   let csp = pixelCsp(CSP, settings);
   if (turnstileKey(settings)) csp = csp.replace("script-src 'self'", "script-src 'self' https://challenges.cloudflare.com").replace('frame-src ', 'frame-src https://challenges.cloudflare.com ');
   res.headers.set('content-security-policy', csp);
