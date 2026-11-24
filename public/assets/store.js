@@ -120,6 +120,10 @@
   // Header: shadow once the page scrolls; rotating announcement.
   const header = $('[data-header]');
   const onScroll = () => header?.classList.toggle('scrolled', scrollY > 10);
+  // The real header height (one or two rows), for sections that pin themselves under it.
+  const setHdr = () => header && document.documentElement.style.setProperty('--hdr', `${header.offsetHeight}px`);
+  setHdr();
+  addEventListener('resize', setHdr);
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
   const rot = $('[data-rotate]');
@@ -741,6 +745,42 @@
       },
       { passive: true },
     );
+  }
+
+  // Categories slider: while the section is pinned, the scroll position picks the slide (one step per slide).
+  const hs = $('[data-hscroll]');
+  if (hs && !reduceMotion) {
+    const track = $('[data-hs-track]', hs);
+    const slides = $$('[data-hs-slide]', hs);
+    const num = $('[data-hs-i]', hs);
+    const bar = $('[data-hs-bar]', hs);
+    let current = -1;
+    const go = (i) => {
+      if (i === current) return;
+      current = i;
+      const x = slides[0].offsetLeft - slides[i].offsetLeft;
+      track.style.transform = `translate3d(${x}px, 0, 0)`;
+      slides.forEach((s, k) => s.classList.toggle('on', k === i));
+      if (num) num.textContent = String(i + 1).padStart(2, '0');
+    };
+    const update = () => {
+      const r = hs.getBoundingClientRect();
+      const run = hs.offsetHeight - innerHeight;
+      const p = Math.min(1, Math.max(0, -r.top / (run || 1)));
+      if (bar) bar.style.transform = `scaleX(${(Math.min(slides.length - 1, Math.floor(p * slides.length)) + 1) / slides.length})`;
+      go(Math.min(slides.length - 1, Math.floor(p * slides.length * 0.999)));
+    };
+    let raf = 0;
+    addEventListener('scroll', () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    }, { passive: true });
+    addEventListener('resize', () => {
+      current = -1;
+      update();
+    });
+    hs.classList.add('hs-on');
+    update();
   }
 
   // Scroll reveals

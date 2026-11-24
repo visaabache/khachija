@@ -1070,5 +1070,7 @@ const CHECKOUT = {
 };
 for (const l of ['de', 'en', 'ar']) Object.assign(T[l], CHECKOUT[l]);
 
+for (const [l, v] of Object.entries({ de: 'Entdecken', en: 'Discover', ar: 'اكتشفي' })) T[l].discover = v;
+
 // Footer credit for the agency that built the shop.
 for (const [l, v] of Object.entries({ de: 'Website von', en: 'Website by', ar: 'تصميم وتطوير' })) T[l].madeBy = v;

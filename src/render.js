@@ -164,10 +164,10 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=6">
+<link rel="stylesheet" href="/assets/style.css?v=7">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=4" defer></script>
+<script src="/assets/store.js?v=5" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
 <div class="scroll-progress" aria-hidden="true"></div>
@@ -346,11 +346,31 @@ export function homePage(ctx, featured, latest, photos, all = []) {
   // Headline words rise one after the other.
   const words = esc(title).split(/\s+/).map((w, i) => `<span class="w" style="--i:${i}"><span>${w}</span></span>`).join(' ');
   const marquee = t.marquee.map((m) => `<span>${ornament()}${esc(m)}</span>`).join('');
+  // Categories: the section stays on screen while each scroll step slides in the next category.
   const cats = categories.length
-    ? `<section class="section wrap">${sectionHead(t.shopByCategory, t.categories)}
-    <div class="panels">${categories
-      .map((c, i) => `<a class="panel reveal" style="--d:${i * 90}ms" href="/${lang}/c/${esc(c.slug)}"><img src="${esc(c.image || PLACEHOLDER)}" alt="" loading="lazy" width="1000" height="1250"><span class="panel-n">0${i + 1}</span><span class="panel-name">${esc(catName(c, lang))}</span><span class="panel-go">${icon('arrow', 18)}</span></a>`)
-      .join('')}</div></section>`
+    ? `<section class="hscroll" data-hscroll style="--n:${categories.length}" aria-label="${esc(t.shopByCategory)}">
+  <div class="hs-sticky">
+    <div class="wrap hs-head">
+      <div>${kicker(t.categories)}<h2>${esc(t.shopByCategory)}</h2></div>
+      <div class="hs-count" aria-hidden="true"><b data-hs-i>01</b><span> / ${String(categories.length).padStart(2, '0')}</span><i class="hs-bar"><i data-hs-bar></i></i></div>
+    </div>
+    <div class="hs-track" data-hs-track>${categories
+      .map((c, i) => {
+        const items = all.filter((p) => p.category_id === c.id).slice(0, 3);
+        return `<article class="hs-slide${i ? '' : ' on'}" data-hs-slide>
+        <a class="hs-img" href="/${lang}/c/${esc(c.slug)}" tabindex="-1" aria-hidden="true"><img src="${esc(c.image || PLACEHOLDER)}" alt="" ${i ? 'loading="lazy"' : ''} width="1000" height="1250"></a>
+        <div class="hs-text">
+          <span class="hs-n">${String(i + 1).padStart(2, '0')}</span>
+          <h3><a href="/${lang}/c/${esc(c.slug)}">${esc(catName(c, lang))}</a></h3>
+          <p>${esc(t.catIntro?.[c.slug] || '')}</p>
+          ${items.length ? `<ul class="hs-products">${items.map((p) => `<li><a href="/${lang}/p/${esc(p.slug)}"><img src="${esc(small(productImages(p)[0] || PLACEHOLDER))}" alt="" loading="lazy" width="96" height="120"><span>${esc(productName(p, lang))}<b>${esc(money(p.price, lang))}</b></span></a></li>`).join('')}</ul>` : ''}
+          <a class="btn" href="/${lang}/c/${esc(c.slug)}">${esc(t.discover || t.viewAll)} ${icon('arrow', 18)}</a>
+        </div>
+      </article>`;
+      })
+      .join('')}</div>
+  </div>
+</section>`
     : '';
   // Products the Ritual Finder can pick from (only those for sale).
   const finderData = all
