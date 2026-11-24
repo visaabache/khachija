@@ -22,11 +22,11 @@ An online shop for Khadija Hakki's natural cosmetics, handmade by women's cooper
 
 ## Products
 
-The 11 products of the new range are in `seed/sample.sql`, with photos in `public/assets/p/` (white-background pack shots are named `*-pack.webp`). **Check before going live:**
+The products are in `seed/sample.sql`, with the prices and sizes from Khadija's price list, and photos in `public/assets/p/` (white-background pack shots are named `*-pack.webp`; `khadija.webp` is the founder photo on the home and About pages).
 
-- **Prices are placeholders.** Set the real prices in the admin.
-- **Sizes**: only the ones printed on the labels are filled in (100 g, 120 g). Add the content (ml or g) for the serum, the black soaps, the Nila scrub and the castor oil, so their unit price shows.
-- **Ingredients (INCI)**: required for cosmetics. Only the single-ingredient products are filled in (henna, sidr, castor oil). Add the lists printed on the packs for the others.
+- **11 products are online** with photos, prices (incl. VAT) and sizes, so every unit price shows.
+- **4 are hidden until they have photos**: Schwarze Seife Nilla (200 g, 10,00 €), Maske Nilla (100 g, 13,00 €), Kiss Noir Kessa-Handschuh (6,00 €) and Khol Flasche (no price yet). In the admin, open the product, add photos (and the Khol price), tick **Online** and save.
+- **Ingredients (INCI)** are required for cosmetics. Only henna, sidr and castor oil are filled in; add the lists printed on the packs for the others.
 - The descriptions only use what the labels say; adjust them freely (the "✨ AI" button in the product form can write new ones).
 
 ## Run it on your computer
