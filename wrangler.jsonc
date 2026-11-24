@@ -1,0 +1,30 @@
+// Cloudflare Worker for the Khachija store. See README.md for first-time setup.
+{
+  "name": "khachija",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    // The Worker renders the storefront pages itself and passes /assets/* and /admin/* on to the static files.
+    "run_worker_first": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "khachija",
+      // Create it with: npx wrangler d1 create khachija, then paste the printed id here.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // The shop's public address, used for canonical links, the sitemap, PayPal's return address and emails.
+  // Once khachija-shop.de is on this Cloudflare account, set it and uncomment the routes.
+  "vars": { "SITE_URL": "" },
+  // "routes": [
+  //   { "pattern": "khachija-shop.de", "custom_domain": true },
+  //   { "pattern": "www.khachija-shop.de", "custom_domain": true }
+  // ],
+  "workers_dev": true,
+  "observability": { "enabled": true }
+}

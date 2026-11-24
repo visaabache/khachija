@@ -1,0 +1,24 @@
+{
+  "name": "khachija",
+  "version": "1.0.0",
+  "description": "Khachija: Moroccan natural cosmetics shop for Germany (DE/EN/AR) on Cloudflare Workers + D1",
+  "scripts": {
+    "dev": "wrangler dev",
+    "db:migrate:local": "wrangler d1 migrations apply khachija --local",
+    "db:seed:local": "wrangler d1 execute khachija --local --file seed/sample.sql",
+    "db:migrate": "wrangler d1 migrations apply khachija --remote",
+    "db:seed": "wrangler d1 execute khachija --remote --file seed/sample.sql",
+    "deploy": "wrangler deploy",
+    "test": "node --test test/*.test.js",
+    "db:reset:local": "node -e \"require('fs').rmSync('.wrangler/state',{recursive:true,force:true})\" && npm run db:migrate:local && npm run db:seed:local"
+  },
+  "devDependencies": {
+    "wrangler": "^4.152.0"
+  },
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "qrcode-generator": "^2.0.4"
+  }
+}

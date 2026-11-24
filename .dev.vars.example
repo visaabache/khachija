@@ -1,0 +1,7 @@
+# Copy to .dev.vars for local development. In production use: npx wrangler secret put <NAME>
+ADMIN_PASSWORD=change-me
+# PayPal sandbox keys (developer.paypal.com → Apps & Credentials). Without them PayPal is hidden at checkout.
+# PAYPAL_CLIENT_ID=
+# PAYPAL_SECRET=
+# Optional: a URL that receives a JSON POST for every new order (Telegram bot, Make, Zapier, Slack…)
+# ORDER_WEBHOOK=

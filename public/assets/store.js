@@ -1,0 +1,566 @@
+// Storefront script: the cart (kept in localStorage), add to cart, the mini cart, the cart page and the checkout,
+// plus the gallery, drawers, delivery estimate, copy buttons, newsletter and scroll reveals.
+// Every price shown in the cart comes from the server (/api/quote), never from localStorage.
+(() => {
+  const KEY = 'kh.cart.v1';
+  const i18n = JSON.parse(document.getElementById('i18n')?.textContent || '{}');
+  const lang = i18n.lang || document.documentElement.lang || 'de';
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const fmt = new Intl.NumberFormat(lang === 'en' ? 'en-IE' : 'de-DE', { style: 'currency', currency: 'EUR', numberingSystem: 'latn' });
+  const money = (cents) => fmt.format((Math.round(cents) || 0) / 100);
+  const small = (url) => (/^\/assets\/p\/[a-z0-9-]+\.webp$/.test(url) && !url.endsWith('-sm.webp') ? url.replace(/\.webp$/, '-sm.webp') : url);
+  const track = (name, data) => window.shTrack?.(name, data);
+  const ICON = {
+    plus: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    minus: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+    arrow: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>',
+  };
+
+  // Cloudflare Turnstile (when the shop has it): loads only once someone starts filling in the checkout.
+  const TS_KEY = document.body.dataset.ts || '';
+  let tsReady = null;
+  function loadTurnstile() {
+    if (!TS_KEY) return Promise.resolve(null);
+    if (!tsReady) {
+      tsReady = new Promise((resolve) => {
+        window.__tsLoaded = () => resolve(window.turnstile);
+        const s = document.createElement('script');
+        s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=__tsLoaded';
+        s.async = true;
+        s.onerror = () => resolve(null);
+        document.head.appendChild(s);
+      });
+    }
+    return tsReady;
+  }
+  async function botToken(form) {
+    const ts = await loadTurnstile();
+    if (!ts) return '';
+    let box = form.querySelector('.ts-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'ts-box';
+      form.querySelector('.place-order')?.before(box);
+    }
+    return new Promise((resolve) => {
+      const done = (t) => resolve(t || '');
+      if (box.dataset.id) ts.remove(box.dataset.id);
+      box.dataset.id = ts.render(box, { sitekey: TS_KEY, appearance: 'interaction-only', size: 'flexible', language: lang, callback: done, 'error-callback': () => done(''), 'expired-callback': () => done('') });
+      setTimeout(() => done(''), 30000);
+    });
+  }
+  if (TS_KEY) document.addEventListener('focusin', (e) => e.target.closest?.('#checkout') && loadTurnstile(), { passive: true });
+
+  // Cart storage
+  function load() {
+    try {
+      const v = JSON.parse(localStorage.getItem(KEY) || '[]');
+      return Array.isArray(v) ? v.filter((i) => i && i.id) : [];
+    } catch {
+      return [];
+    }
+  }
+  function save(items) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(items));
+    } catch {}
+    badge();
+  }
+  function badge(bump) {
+    const n = load().reduce((s, i) => s + (i.qty || 0), 0);
+    $$('.cart-count').forEach((el) => {
+      el.textContent = n;
+      el.hidden = n === 0;
+      if (bump) {
+        el.classList.remove('bump');
+        void el.offsetWidth;
+        el.classList.add('bump');
+      }
+    });
+    $$('[data-count]').forEach((el) => (el.textContent = n ? `(${n})` : ''));
+  }
+  function add(item) {
+    const items = load();
+    const same = items.find((i) => i.id === item.id && (i.option || '') === (item.option || ''));
+    if (same) same.qty = Math.min(20, same.qty + item.qty);
+    else items.push(item);
+    save(items);
+    badge(true);
+    track('AddToCart', { value: (item.price * item.qty) / 100, items: [{ id: item.id, name: item.name, price: item.price / 100, qty: item.qty }] });
+  }
+
+  let toastTimer;
+  function toast(text) {
+    const el = $('.toast');
+    if (!el) return;
+    el.textContent = text;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => (el.hidden = true), 2600);
+  }
+
+  async function quote(extra = {}) {
+    const res = await fetch(`/api/quote?lang=${lang}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ items: load(), ...extra }) });
+    if (!res.ok) throw new Error('quote');
+    return res.json();
+  }
+  // Drops items the server no longer sells and caps quantities, so the stored cart matches the quote.
+  function syncCart(q) {
+    if (!q.issues?.length) return;
+    const valid = new Map(q.lines.map((l) => [`${l.id}|${l.option || ''}`, l.qty]));
+    save(load().filter((i) => valid.has(`${i.id}|${i.option || ''}`)).map((i) => ({ ...i, qty: valid.get(`${i.id}|${i.option || ''}`) })));
+    toast(q.issues.some((x) => x.issue === 'qty') ? i18n.issueQty : i18n.issueStock);
+  }
+
+  // Header: shadow once the page scrolls; rotating announcement.
+  const header = $('[data-header]');
+  const onScroll = () => header?.classList.toggle('scrolled', scrollY > 10);
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  const rot = $('[data-rotate]');
+  if (rot && rot.children.length > 1 && !reduceMotion) {
+    let k = 0;
+    setInterval(() => {
+      const kids = [...rot.children];
+      kids[k].hidden = true;
+      k = (k + 1) % kids.length;
+      kids[k].hidden = false;
+    }, 4500);
+  }
+
+  // Drawers (menu, search, cart)
+  const back = $('.drawer-back');
+  let openDrawer = null;
+  function closeDrawers() {
+    $$('.drawer').forEach((d) => d.classList.remove('open'));
+    setTimeout(() => {
+      $$('.drawer').forEach((d) => d.classList.contains('open') || (d.hidden = true));
+      if (back && !openDrawer) back.hidden = true;
+    }, 300);
+    back?.classList.remove('on');
+    document.body.classList.remove('locked');
+    openDrawer = null;
+  }
+  function showDrawer(name) {
+    const d = $(`#${name}-panel`);
+    if (!d) return false;
+    closeDrawers();
+    openDrawer = d;
+    d.hidden = false;
+    if (back) back.hidden = false;
+    requestAnimationFrame(() => {
+      d.classList.add('open');
+      back?.classList.add('on');
+    });
+    document.body.classList.add('locked');
+    if (name === 'search') setTimeout(() => d.querySelector('input')?.focus(), 200);
+    if (name === 'cart') renderMini();
+    return true;
+  }
+  $$('[data-drawer]').forEach((b) =>
+    b.addEventListener('click', (e) => {
+      if (b.dataset.drawer === 'cart' && document.body.classList.contains('page-cart')) return;
+      if (showDrawer(b.dataset.drawer)) e.preventDefault();
+    }),
+  );
+  $$('[data-drawer-close]').forEach((b) => b.addEventListener('click', closeDrawers));
+  addEventListener('keydown', (e) => e.key === 'Escape' && openDrawer && closeDrawers());
+
+  function freeBar(q) {
+    const free = q.freeOver || 0;
+    if (!free || !q.subtotal) return '';
+    const left = free - q.subtotal;
+    const pct = Math.min(100, Math.round((q.subtotal / free) * 100));
+    return `<div class="free-bar"><p>${left > 0 ? esc(i18n.freeLeft.replace('{amount}', money(left))) : esc(i18n.freeReached)}</p><span><i style="width:${pct}%"></i></span></div>`;
+  }
+  const lineHtml = (l, editable) => `<li class="line" data-id="${l.id}" data-option="${esc(l.option)}">
+    <a class="line-img" href="/${lang}/p/${esc(l.slug)}"><img src="${esc(small(l.image))}" alt="" width="80" height="100" loading="lazy"></a>
+    <div class="line-main">
+      <a class="line-name" href="/${lang}/p/${esc(l.slug)}">${esc(l.name)}</a>
+      ${l.optionLabel ? `<span class="line-opt">${esc(l.optionLabel)}</span>` : ''}
+      ${editable ? `<div class="line-row"><div class="qty qty-sm"><button type="button" data-q="-1" aria-label="−">${ICON.minus}</button><span>${l.qty}</span><button type="button" data-q="1" aria-label="+"${l.stock != null && l.qty >= l.stock ? ' disabled' : ''}>${ICON.plus}</button></div><button type="button" class="line-remove" data-remove aria-label="${esc(i18n.remove)}">${ICON.trash}</button></div>` : `<span class="line-opt">× ${l.qty}</span>`}
+    </div>
+    <strong class="line-total">${money(l.total)}</strong>
+  </li>`;
+  function bindLines(root, rerender) {
+    root.querySelectorAll('.line').forEach((li) => {
+      const id = Number(li.dataset.id);
+      const option = li.dataset.option || '';
+      const change = (fn) => {
+        save(fn(load()));
+        rerender();
+      };
+      li.querySelectorAll('[data-q]').forEach((b) =>
+        b.addEventListener('click', () => change((items) => items.map((i) => (i.id === id && (i.option || '') === option ? { ...i, qty: Math.max(1, Math.min(20, i.qty + Number(b.dataset.q))) } : i)))),
+      );
+      li.querySelector('[data-remove]')?.addEventListener('click', () => change((items) => items.filter((i) => !(i.id === id && (i.option || '') === option))));
+    });
+  }
+  const emptyHtml = () => `<div class="cart-empty"><img src="/assets/brand/symbol-gold.svg" alt="" width="70" height="70"><p>${esc(i18n.emptyCart)}</p><a class="btn" href="/${lang}/shop">${esc(i18n.startShopping)}</a></div>`;
+
+  // Mini cart (drawer)
+  async function renderMini() {
+    const box = $('[data-view="mini"]');
+    if (!box) return;
+    if (!load().length) {
+      box.innerHTML = emptyHtml();
+      return;
+    }
+    box.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
+    try {
+      const q = await quote();
+      syncCart(q);
+      if (!q.lines.length) {
+        box.innerHTML = emptyHtml();
+        return;
+      }
+      box.innerHTML = `${freeBar(q)}<ul class="lines-list">${q.lines.map((l) => lineHtml(l, true)).join('')}</ul>
+      <div class="mini-foot"><p class="mini-sub"><span>${esc(i18n.subtotal)}</span><strong>${money(q.subtotal)}</strong></p>
+      <a class="btn btn-block btn-lg" href="/${lang}/checkout">${ICON.lock} ${esc(i18n.toCheckout)}</a>
+      <a class="btn btn-ghost btn-block" href="/${lang}/cart">${esc(i18n.viewCart)}</a></div>`;
+      bindLines(box, renderMini);
+    } catch {
+      box.innerHTML = `<p class="form-error">${esc(i18n.error)}</p>`;
+    }
+  }
+
+  // Cart page
+  async function renderCartPage() {
+    const box = $('[data-view="cart"]');
+    const side = $('[data-view="cart-totals"]');
+    if (!box) return;
+    if (!load().length) {
+      box.innerHTML = emptyHtml();
+      if (side) side.hidden = true;
+      return;
+    }
+    try {
+      const q = await quote();
+      syncCart(q);
+      if (!q.lines.length) {
+        box.innerHTML = emptyHtml();
+        if (side) side.hidden = true;
+        return;
+      }
+      box.innerHTML = `<ul class="lines-list">${q.lines.map((l) => lineHtml(l, true)).join('')}</ul>`;
+      if (side) {
+        side.hidden = false;
+        side.innerHTML = `${freeBar(q)}<ul class="totals"><li><span>${esc(i18n.subtotal)}</span><span>${money(q.subtotal)}</span></li><li><span>${esc(i18n.shipping)}</span><span>${q.shipping ? money(q.shipping) : esc(i18n.free)}</span></li><li class="total"><span>${esc(i18n.total)}</span><span>${money(q.total)}</span></li><li class="vat"><span>${esc(q.vat ? i18n.vatIncl.replace('{amount}', money(q.vat)) : i18n.vatSmall)}</span></li></ul><a class="btn btn-lg btn-block" href="/${lang}/checkout">${ICON.lock} ${esc(i18n.toCheckout)}</a>`;
+      }
+      bindLines(box, renderCartPage);
+    } catch {
+      box.innerHTML = `<p class="form-error">${esc(i18n.error)}</p>`;
+    }
+  }
+  renderCartPage();
+
+  // Quick add buttons on product cards
+  $$('[data-add]').forEach((b) =>
+    b.addEventListener('click', () => {
+      add({ id: Number(b.dataset.add), qty: 1, option: '', name: b.dataset.name, price: Number(b.dataset.price), image: b.dataset.image, slug: b.dataset.slug });
+      b.classList.add('done');
+      setTimeout(() => b.classList.remove('done'), 1200);
+      showDrawer('cart') || toast(i18n.added);
+    }),
+  );
+
+  // Product page: options, quantity, offers, add to cart / buy now
+  const buy = $('form.buy');
+  if (buy) {
+    const qtyInput = buy.querySelector('input[name="qty"]');
+    buy.querySelectorAll('[data-step]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const max = Number(qtyInput.max) || 20;
+        qtyInput.value = Math.max(1, Math.min(max, (Number(qtyInput.value) || 1) + Number(b.dataset.step)));
+      }),
+    );
+    buy.querySelectorAll('fieldset.options').forEach((fs) =>
+      fs.addEventListener('change', (e) => {
+        const picked = fs.querySelector('[data-picked]');
+        if (picked) picked.textContent = `: ${e.target.value}`;
+        fs.classList.remove('missing');
+        const extra = [...buy.querySelectorAll('fieldset.options input:checked')].reduce((s, i) => s + Number(i.dataset.extra || 0), 0);
+        const unit = $('[data-unit]');
+        if (unit) unit.textContent = money(Number(buy.dataset.price) + extra);
+      }),
+    );
+    buy.querySelectorAll('input[name="offer"]').forEach((r) => r.addEventListener('change', () => (qtyInput.value = r.value)));
+    const choice = () => {
+      const groups = [...buy.querySelectorAll('fieldset.options')];
+      const missing = groups.find((g) => !g.querySelector('input:checked'));
+      if (missing) {
+        missing.classList.add('missing');
+        missing.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+        const err = buy.querySelector('.form-error');
+        if (err) {
+          err.textContent = i18n.chooseOption;
+          err.hidden = false;
+        }
+        return null;
+      }
+      return groups.map((g) => g.querySelector('input:checked').value).join(' / ');
+    };
+    const go = (where) => {
+      const option = choice();
+      if (option === null) return;
+      buy.querySelector('.form-error') && (buy.querySelector('.form-error').hidden = true);
+      add({ id: Number(buy.dataset.product), qty: Math.max(1, Number(qtyInput?.value) || 1), option, name: buy.dataset.name, price: Number(buy.dataset.price), image: buy.dataset.image, slug: buy.dataset.slug });
+      if (where === 'checkout') location.href = `/${lang}/checkout`;
+      else showDrawer('cart') || toast(i18n.added);
+    };
+    buy.addEventListener('submit', (e) => {
+      e.preventDefault();
+      go(e.submitter?.value || 'cart');
+    });
+    $('[data-buy-bar]')?.addEventListener('click', () => go('cart'));
+    const bar = $('.buy-bar');
+    const addBtn = buy.querySelector('.add-btn');
+    if (bar && addBtn && 'IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => bar.classList.toggle('on', !e.isIntersecting && e.boundingClientRect.top < 0)).observe(addBtn);
+    }
+    try {
+      const seen = JSON.parse(localStorage.getItem('kh.seen') || '[]').filter((s) => s !== buy.dataset.slug);
+      localStorage.setItem('kh.seen', JSON.stringify([buy.dataset.slug, ...seen].slice(0, 12)));
+    } catch {}
+  }
+
+  // Gallery: swipe (scroll snap), arrows and thumbnails
+  const gal = $('.gallery-track');
+  if (gal) {
+    const thumbs = $$('.thumbs button');
+    const index = () => Math.round(Math.abs(gal.scrollLeft) / gal.clientWidth);
+    const goTo = (i) => gal.scrollTo({ left: (document.dir === 'rtl' ? -1 : 1) * i * gal.clientWidth, behavior: reduceMotion ? 'auto' : 'smooth' });
+    gal.addEventListener('scroll', () => thumbs.forEach((t, i) => t.classList.toggle('on', i === index())), { passive: true });
+    thumbs.forEach((t) => t.addEventListener('click', () => goTo(Number(t.dataset.go))));
+    $$('[data-gal]').forEach((b) => b.addEventListener('click', () => goTo(Math.max(0, Math.min(thumbs.length - 1, index() + Number(b.dataset.gal))))));
+  }
+
+  // Delivery estimate: working days from tomorrow (Mon–Fri), e.g. "Do., 27. Nov. – Mo., 1. Dez."
+  $$('[data-eta]').forEach((el) => {
+    const [a, b] = String(el.dataset.eta || '2-4').split('-').map(Number);
+    const addDays = (n) => {
+      const d = new Date();
+      if (d.getHours() >= 14) n += 1; // orders after 2 pm leave the next day
+      while (n > 0) {
+        d.setDate(d.getDate() + 1);
+        if (d.getDay() !== 0 && d.getDay() !== 6) n--;
+      }
+      return d;
+    };
+    const f = new Intl.DateTimeFormat(lang === 'ar' ? 'ar' : lang === 'en' ? 'en-GB' : 'de-DE', { weekday: 'short', day: 'numeric', month: 'short', numberingSystem: 'latn' });
+    el.textContent = `${f.format(addDays(a || 2))} – ${f.format(addDays(b || a || 4))}`;
+  });
+
+  // Copy buttons (bank details, share link)
+  $$('[data-copy]').forEach((b) =>
+    b.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(b.dataset.copy);
+        b.classList.add('copied');
+        toast(i18n.copied);
+        setTimeout(() => b.classList.remove('copied'), 1500);
+      } catch {}
+    }),
+  );
+
+  // Sort menu: apply right away
+  $$('[data-autosubmit]').forEach((s) => s.addEventListener('change', () => s.form.submit()));
+
+  // Newsletter
+  $$('[data-newsletter]').forEach((f) =>
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = f.email.value.trim();
+      if (!f.email.checkValidity() || !email) return f.email.focus();
+      const btn = f.querySelector('button');
+      btn.disabled = true;
+      try {
+        const r = await fetch('/api/newsletter', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, lang, website: f.website.value }) });
+        if (!r.ok) throw new Error();
+        f.querySelector('.news-row').hidden = true;
+        f.querySelector('.news-done').hidden = false;
+      } catch {
+        btn.disabled = false;
+        toast(i18n.error);
+      }
+    }),
+  );
+
+  // WhatsApp widget
+  const wa = $('[data-wa]');
+  if (wa) {
+    const panel = wa.querySelector('.wa-panel');
+    const toggle = wa.querySelector('[data-wa-toggle]');
+    toggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      panel.hidden = !panel.hidden;
+      toggle.setAttribute('aria-expanded', String(!panel.hidden));
+    });
+    wa.querySelector('[data-wa-close]').addEventListener('click', () => {
+      panel.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  // Checkout
+  const co = $('#checkout');
+  if (co) {
+    let current = null;
+    const summary = $('[data-view="summary"]');
+    const err = co.querySelector('.form-error');
+    const btn = co.querySelector('.place-order');
+    const method = () => co.querySelector('input[name="payment"]:checked')?.value || '';
+    const updateMethods = (available) => {
+      co.querySelectorAll('.pay-opt').forEach((o) => {
+        const ok = available.includes(o.dataset.method);
+        o.hidden = !ok;
+        if (!ok && o.querySelector('input').checked) o.querySelector('input').checked = false;
+      });
+      if (!method()) {
+        const first = co.querySelector('.pay-opt:not([hidden]) input');
+        if (first) first.checked = true;
+      }
+      co.querySelectorAll('.pay-opt').forEach((o) => o.classList.toggle('on', o.querySelector('input').checked));
+      btn.querySelector('span').textContent = method() === 'paypal' ? btn.dataset.labelPaypal : btn.dataset.labelDefault;
+    };
+    async function renderSummary() {
+      if (!load().length) {
+        summary.innerHTML = emptyHtml();
+        btn.disabled = true;
+        return;
+      }
+      try {
+        const asked = method();
+        let q = await quote({ country: co.country.value, method: asked });
+        syncCart(q);
+        if (!q.lines.length) {
+          summary.innerHTML = emptyHtml();
+          btn.disabled = true;
+          return;
+        }
+        updateMethods(q.methods || []);
+        // Cash on delivery isn't offered abroad: when the chosen method changed, price the cart again (no COD fee).
+        if (method() !== asked) q = await quote({ country: co.country.value, method: method() });
+        current = q;
+        const s = q;
+        $('[data-ship-price]').textContent = s.shipsTo ? (s.shipping ? money(s.shipping) : i18n.free) : '—';
+        summary.innerHTML = `<ul class="lines-list compact">${s.lines.map((l) => lineHtml(l, false)).join('')}</ul>
+        ${freeBar(s)}
+        <ul class="totals"><li><span>${esc(i18n.subtotal)}</span><span>${money(s.subtotal)}</span></li>
+        <li><span>${esc(i18n.shipping)}</span><span>${s.shipsTo ? (s.shipping ? money(s.shipping) : esc(i18n.free)) : '—'}</span></li>
+        ${s.fee ? `<li><span>${esc(i18n.codFee)}</span><span>${money(s.fee)}</span></li>` : ''}
+        <li class="total"><span>${esc(i18n.total)}</span><span>${money(s.total)}</span></li>
+        <li class="vat"><span>${esc(s.vat ? i18n.vatIncl.replace('{amount}', money(s.vat)) : i18n.vatSmall)}</span></li></ul>
+        ${s.shipsTo ? '' : `<p class="form-error">${esc(i18n.noShipping)}</p>`}`;
+        btn.disabled = !s.shipsTo;
+      } catch {
+        summary.innerHTML = `<p class="form-error">${esc(i18n.error)}</p>`;
+      }
+    }
+    renderSummary().then(() => current && track('InitiateCheckout', { value: current.total / 100, items: current.lines.map((l) => ({ id: l.id, name: l.name, price: l.price / 100, qty: l.qty })) }));
+    co.country.addEventListener('change', renderSummary);
+    co.addEventListener('change', (e) => e.target.name === 'payment' && renderSummary());
+
+    const showError = (field, text) => {
+      const el = co.elements[field];
+      const wrap = (el?.length && !el.tagName ? el[0] : el)?.closest('label, .pay-opts, .check');
+      if (wrap) {
+        wrap.classList.add('invalid');
+        let m = wrap.parentElement.querySelector(`.field-error[data-for="${field}"]`);
+        if (!m) {
+          m = document.createElement('p');
+          m.className = 'field-error';
+          m.dataset.for = field;
+          wrap.after(m);
+        }
+        m.textContent = text;
+      }
+    };
+    const clearErrors = () => {
+      co.querySelectorAll('.invalid').forEach((x) => x.classList.remove('invalid'));
+      co.querySelectorAll('.field-error').forEach((x) => x.remove());
+      err.hidden = true;
+    };
+    co.addEventListener('input', (e) => {
+      const wrap = e.target.closest('.invalid');
+      if (wrap) {
+        wrap.classList.remove('invalid');
+        wrap.parentElement.querySelector(`.field-error[data-for="${e.target.name}"]`)?.remove();
+      }
+    });
+    const MSG = { required: i18n.required, email: i18n.badEmail, phone: i18n.badPhone, zip: i18n.badZip, terms: i18n.acceptTerms, payment: i18n.choosePayment };
+
+    co.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+      const f = co.elements;
+      const errors = {};
+      for (const k of ['email', 'first_name', 'last_name', 'street', 'zip', 'city']) if (!f[k].value.trim()) errors[k] = 'required';
+      if (f.email.value && !f.email.checkValidity()) errors.email = 'email';
+      if (f.country.value === 'DE' && f.zip.value && !/^\d{5}$/.test(f.zip.value.trim())) errors.zip = 'zip';
+      if (!method()) errors.payment = 'payment';
+      if (!f.terms.checked) errors.terms = 'terms';
+      if (Object.keys(errors).length) {
+        Object.entries(errors).forEach(([k, v]) => showError(k, MSG[v] || i18n.required));
+        co.querySelector('.invalid')?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+        return;
+      }
+      btn.disabled = true;
+      const label = btn.querySelector('span').textContent;
+      btn.querySelector('span').textContent = i18n.sending;
+      try {
+        const body = {
+          items: load(),
+          email: f.email.value,
+          phone: f.phone.value,
+          first_name: f.first_name.value,
+          last_name: f.last_name.value,
+          street: f.street.value,
+          address2: f.address2.value,
+          zip: f.zip.value,
+          city: f.city.value,
+          country: f.country.value,
+          note: f.note.value,
+          payment: method(),
+          terms: f.terms.checked,
+          newsletter: f.newsletter.checked,
+          website: f.website.value,
+          lang,
+          cf_token: await botToken(co),
+        };
+        const res = await fetch('/api/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          save([]);
+          location.href = data.url;
+          return;
+        }
+        if (data.error === 'invalid') Object.entries(data.fields || {}).forEach(([k, v]) => showError(k, MSG[v] || i18n.required));
+        else {
+          err.textContent = { too_many: i18n.tooMany, bot: i18n.botCheck, paypal: i18n.paypalError, cart_changed: i18n.issueStock }[data.error] || i18n.error;
+          err.hidden = false;
+          if (data.error === 'cart_changed') renderSummary();
+        }
+      } catch {
+        err.textContent = i18n.error;
+        err.hidden = false;
+      }
+      btn.disabled = false;
+      btn.querySelector('span').textContent = label;
+    });
+  }
+
+  // Scroll reveals
+  const reveals = $$('.reveal');
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    const io = new IntersectionObserver((entries) => entries.forEach((e) => e.isIntersecting && (e.target.classList.add('in'), io.unobserve(e.target))), { rootMargin: '0px 0px -8% 0px' });
+    reveals.forEach((el) => io.observe(el));
+  } else reveals.forEach((el) => el.classList.add('in'));
+
+  badge();
+})();
