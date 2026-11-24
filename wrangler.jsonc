@@ -14,7 +14,7 @@
       "binding": "DB",
       "database_name": "khachija",
       // Create it with: npx wrangler d1 create khachija, then paste the printed id here.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "c7b15f00-4de1-4db9-aa35-fa00c8e25c87",
       "migrations_dir": "migrations"
     }
   ],
