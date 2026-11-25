@@ -30,3 +30,6 @@ UPDATE products SET images='["/assets/p/tebrima-pack.webp","/assets/p/tebrima-1.
 
 -- Nila mask lifestyle photos (Nov 2026).
 UPDATE products SET images='["/assets/p/nila-maske-pack.webp","/assets/p/nila-maske-1.webp","/assets/p/nila-maske-2.webp","/assets/p/nila-maske-3.webp","/assets/p/nila-maske-4.webp","/assets/p/nila-maske-5.webp","/assets/p/nila-maske-6.webp"]' WHERE slug='maske-nilla';
+
+-- Gommage Nila lifestyle photos (Nov 2026).
+UPDATE products SET images='["/assets/p/nila-peeling-pack.webp","/assets/p/nila-peeling-1.webp","/assets/p/nila-peeling-2.webp"]' WHERE slug='nila-peeling';
