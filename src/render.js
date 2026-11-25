@@ -165,10 +165,10 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=23">
+<link rel="stylesheet" href="/assets/style.css?v=26">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=8" defer></script>
+<script src="/assets/store.js?v=9" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
 ${minimal ? '' : `<template id="welcome-tpl"><div class="welcome" aria-hidden="true"><div class="welcome-in"><span class="welcome-seal"><svg class="welcome-ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56"/></svg><img src="/assets/brand/symbol-gold.svg" alt="" width="84" height="84"></span><p class="welcome-hello">${esc(t.welcome[0])}</p><p class="welcome-name">${[...'KHACHIJA'].map((ch, i) => `<span style="--i:${i}">${ch}</span>`).join('')}</p><p class="welcome-line">${esc(t.welcome[1])}</p></div><span class="welcome-skip">${esc(t.welcome[2])}</span></div></template><script src="/assets/welcome.js?v=1"></script>`}
@@ -610,13 +610,14 @@ export function productPage(ctx, p, category, related) {
   const body = `<nav class="crumbs wrap" aria-label="breadcrumb"><a href="/${lang}/">${esc(t.home)}</a><span>/</span>${category ? `<a href="/${lang}/c/${esc(category.slug)}">${esc(catName(category, lang))}</a><span>/</span>` : ''}<span aria-current="page">${esc(name)}</span></nav>
 <section class="wrap product">
   <div class="gallery" aria-label="${esc(name)}">
+    <span class="gal-seal" aria-hidden="true"><img src="/assets/brand/symbol-gold.svg" alt="" width="30" height="30"><span>${esc(t.trust?.[1]?.[1] || 'Handmade')}</span></span>
     <div class="gallery-track">${images.map((u, i) => `<figure class="${isPackshot(u) ? 'packshot' : ''}"${i ? '' : ` style="view-transition-name: p${p.id}"`}><img src="${esc(u)}" alt="${esc(name)}${i ? ` ${i + 1}` : ''}" width="1000" height="1250"${i ? ' loading="lazy"' : ' fetchpriority="high"'}></figure>`).join('')}</div>
-    ${images.length > 1 ? `<button type="button" class="gal-arrow gal-prev" data-gal="-1" aria-label="‹">${icon('chevronL', 22)}</button><button type="button" class="gal-arrow gal-next" data-gal="1" aria-label="›">${icon('chevronR', 22)}</button><div class="thumbs">${images.map((u, i) => `<button type="button" data-go="${i}"${i === 0 ? ' class="on"' : ''} aria-label="${i + 1}"><img src="${esc(small(u))}" alt="" width="96" height="120" loading="lazy"></button>`).join('')}</div>` : ''}
+    ${images.length > 1 ? `<button type="button" class="gal-arrow gal-prev" data-gal="-1" aria-label="‹">${icon('chevronL', 22)}</button><button type="button" class="gal-arrow gal-next" data-gal="1" aria-label="›">${icon('chevronR', 22)}</button><span class="gal-count" aria-hidden="true"><b data-gal-i>1</b> / ${images.length}</span><div class="thumbs">${images.map((u, i) => `<button type="button" data-go="${i}"${i === 0 ? ' class="on"' : ''} aria-label="${i + 1}"><img src="${esc(small(u))}" alt="" width="96" height="120" loading="lazy"></button>`).join('')}</div>` : ''}
   </div>
   <div class="product-info">
     ${category ? kicker(catName(category, lang)) : ''}
     <h1>${esc(name)}</h1>
-    ${sub ? `<p class="subtitle">${esc(sub)}</p>` : ''}
+    ${sub ? `<p class="subtitle sub-chips">${sub.split(/\s+·\s+/).filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join('')}</p>` : ''}
     <div class="price-block">
       <p class="price big"><span data-unit>${esc(money(p.price, lang))}</span>${onSale ? ` <s>${esc(money(p.compare_price, lang))}</s> <span class="save">−${Math.round((1 - p.price / p.compare_price) * 100)} %</span>` : ''}</p>
       ${unit ? `<p class="unit">${esc(t.contents)}: ${esc(content)} · ${esc(t.unit)}: ${esc(unit)}</p>` : ''}
@@ -640,7 +641,7 @@ export function productPage(ctx, p, category, related) {
     <div class="share-row"><span>${esc(t.share)}</span><a class="share-btn" href="https://wa.me/?text=${encodeURIComponent(`${name} · ${url}`)}" rel="noopener" target="_blank" aria-label="WhatsApp">${waIcon(18)}</a><button class="share-btn" type="button" data-copy="${esc(url)}" aria-label="${esc(t.copyLink)}">${icon('link', 18)}</button></div>
   </div>
 </section>
-${soldOut ? '' : `<div class="buy-bar" aria-hidden="true"><div><strong>${esc(name)}</strong><span>${esc(money(p.price, lang))}</span></div><button type="button" class="btn" data-buy-bar>${esc(t.addToCart)}</button></div>`}
+${soldOut ? '' : `<div class="buy-bar"><div><strong>${esc(name)}</strong><span>${esc(money(p.price, lang))}</span></div><div class="buy-bar-actions">${settings.whatsapp ? `<a class="buy-bar-wa" href="${esc(waLink(settings.whatsapp, `${name} · ${url}`))}" rel="noopener" target="_blank" aria-label="WhatsApp">${waIcon(22)}</a>` : ''}<button type="button" class="btn" data-buy-bar>${esc(t.addToCart)}</button></div></div>`}
 ${related.length ? `<section class="section wrap">${sectionHead(t.alsoLike, category ? catName(category, lang) : t.shop, category ? `/${lang}/c/${category.slug}` : `/${lang}/shop`, t.viewAll)}${grid(related, ctx, '')}</section>` : ''}
 ${ld(productLd(ctx, p, { name, desc, images, category, url }))}`;
   const crumbs = [[t.home, `/${lang}/`], ...(category ? [[catName(category, lang), `/${lang}/c/${category.slug}`]] : []), [name, `/${lang}/p/${p.slug}`]];

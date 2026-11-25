@@ -390,7 +390,8 @@
     const thumbs = $$('.thumbs button');
     const index = () => Math.round(Math.abs(gal.scrollLeft) / gal.clientWidth);
     const goTo = (i) => gal.scrollTo({ left: (document.dir === 'rtl' ? -1 : 1) * i * gal.clientWidth, behavior: reduceMotion ? 'auto' : 'smooth' });
-    gal.addEventListener('scroll', () => thumbs.forEach((t, i) => t.classList.toggle('on', i === index())), { passive: true });
+    const count = $('[data-gal-i]');
+    gal.addEventListener('scroll', () => { const i = index(); thumbs.forEach((t, k) => t.classList.toggle('on', k === i)); if (count) count.textContent = i + 1; }, { passive: true });
     thumbs.forEach((t) => t.addEventListener('click', () => goTo(Number(t.dataset.go))));
     $$('[data-gal]').forEach((b) => b.addEventListener('click', () => goTo(Math.max(0, Math.min(thumbs.length - 1, index() + Number(b.dataset.gal))))));
   }
