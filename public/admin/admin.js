@@ -948,13 +948,13 @@
     const filters = [['', L.all, all], ...STATUS_KEYS.map((k) => [k, L.status[k], list.counts[k] || 0])];
     shell(
       L.nav.orders,
-      `<div class="toolbar">
+      `${orderSummary(list)}
+      <div class="toolbar">
         <div class="filters">${filters.map(([k, v, n]) => `<button class="pill${state.status === k ? ' on' : ''}" data-status="${k}">${k ? `<i class="dot s-${k}"></i>` : ''}${v}<span>${n}</span></button>`).join('')}</div>
         <form class="search" id="osearch">${icon('search', 18)}<input type="search" name="q" value="${esc(state.q)}" placeholder="${L.searchOrders}"></form>
       </div>
-      ${list.orders.length ? `<div class="card flush"><table class="table"><thead><tr><th class="hide-sm">${L.thOrder}</th><th>${L.thCustomer}</th><th class="hide-sm">${L.thCity}</th><th>${L.thTotal}</th><th class="hide-sm">${XL().payment}</th><th>${L.thStatus}</th></tr></thead><tbody>
-        ${list.orders.map((o) => `<tr data-order="${o.id}"><td class="hide-sm"><span class="mono" dir="ltr">${esc(o.number)}</span><small>${ago(o.created_at)}</small></td><td><strong><bdi>${esc(o.name)}</bdi></strong><small><bdi dir="ltr" class="hide-sm">${esc(o.email)}</bdi><span class="show-sm">${ago(o.created_at)}</span>${o.email ? ` · ${icon('mail', 13)}` : ''}</small></td><td class="hide-sm">${esc(o.zip)} ${esc(o.city)}${o.country !== 'DE' ? ` · ${esc(o.country)}` : ''}</td><td class="nowrap"><strong>${dh(o.total)}</strong></td><td class="hide-sm"><small>${XL().method[o.payment_method] || ''}</small><span class="chip ${o.payment_status === 'paid' ? 'chip-ok' : o.payment_method === 'cod' ? '' : 'chip-warn'}">${XL().payStatus[o.payment_status] || ''}</span></td><td><span class="status s-${o.status}">${L.status[o.status] || o.status}</span></td></tr>`).join('')}
-      </tbody></table></div>` : `<div class="card empty">${icon('orders', 36)}<p>${state.q || state.status ? L.noMatch : L.noOrdersYet}</p></div>`}`,
+      ${state.payment === 'open' ? `<p class="filter-note">${XL().openPayments} · <button type="button" class="link-btn" data-clear-pay>${L.all}</button></p>` : ''}
+      ${list.orders.length ? `<div class="order-list">${list.orders.map(orderRow).join('')}</div>` : `<div class="card empty">${icon('orders', 36)}<p>${state.q || state.status ? L.noMatch : L.noOrdersYet}</p></div>`}`,
       { sub: L.total(all), actions: `<a class="btn ghost" href="/api/admin/orders.csv?status=${state.status}">${icon('download', 18)}<span>${L.exportCsv}</span></a>` },
     );
     app.querySelectorAll('[data-status]').forEach((b) =>
@@ -969,7 +969,54 @@
       state.q = e.target.q.value.trim();
       orders();
     });
-    app.querySelectorAll('[data-order]').forEach((tr) => tr.addEventListener('click', () => (location.hash = `order-${tr.dataset.order}`)));
+    app.querySelectorAll('[data-order]').forEach((tr) => tr.addEventListener('click', (e) => { if (e.target.closest('a')) return; location.hash = `order-${tr.dataset.order}`; }));
+    app.querySelectorAll('[data-sum]').forEach((b) => b.addEventListener('click', () => {
+      const k = b.dataset.sum;
+      state.q = '';
+      if (k === 'pay') { state.status = ''; state.payment = 'open'; } else { state.status = k; state.payment = ''; }
+      orders();
+    }));
+    app.querySelector('[data-clear-pay]')?.addEventListener('click', () => { state.payment = ''; orders(); });
+  }
+
+  // ── Orders page widgets ──
+  const O = {
+    en: { toConfirm: 'To confirm', toShip: 'To ship', openPay: 'Open payments', revenue: 'Total sales', last24: (n) => `${n} in the last 24 h`, ready: 'confirmed, ready to pack', items: (n) => (n === 1 ? '1 item' : `${n} items`), awaiting: (a) => `${a} outstanding`, allTime: 'all orders, excl. cancelled' },
+    de: { toConfirm: 'Zu bestätigen', toShip: 'Zu versenden', openPay: 'Offene Zahlungen', revenue: 'Umsatz gesamt', last24: (n) => `${n} in den letzten 24 Std.`, ready: 'bestätigt, bereit zum Packen', items: (n) => (n === 1 ? '1 Artikel' : `${n} Artikel`), awaiting: (a) => `${a} ausstehend`, allTime: 'alle Bestellungen, ohne Stornos' },
+  };
+  const OL = () => O[lang] || O.en;
+  const flag = (c) => (/^[A-Z]{2}$/.test(c || '') ? String.fromCodePoint(...[...c].map((ch) => 0x1f1a5 + ch.charCodeAt(0))) : '');
+  const hue = (s) => [...String(s || '')].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) % 360, 7);
+  const PAY_ICON = { paypal: 'P', bank: '€', cod: '✉' };
+
+  function orderSummary(list) {
+    const x = OL();
+    const s = list.summary || {};
+    const c = list.counts || {};
+    const tile = (key, cls, ic, label, value, foot, on) => `<button type="button" class="osum ${cls}${on ? ' on' : ''}" data-sum="${key}"><span class="osum-ico">${icon(ic, 18)}</span><span class="osum-label">${label}</span><strong>${value}</strong><small>${foot}</small></button>`;
+    return `<section class="osums">
+      ${tile('new', 'gold', 'alert', x.toConfirm, num(c.new || 0), x.last24(s.last24 || 0), state.status === 'new')}
+      ${tile('confirmed', 'green', 'orders', x.toShip, num(c.confirmed || 0), x.ready, state.status === 'confirmed')}
+      ${tile('pay', 'terra', 'download', x.openPay, num(s.open_pay || 0), x.awaiting(dh(s.open_amount || 0)), state.payment === 'open')}
+      ${tile('', 'dark', 'up', x.revenue, dh(s.revenue || 0), x.allTime, false)}
+    </section>`;
+  }
+
+  function orderRow(o) {
+    const x = OL();
+    const name = (o.name || '').trim() || '—';
+    const initials = name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+    const thumbs = (o.thumbs || []).slice(0, 3);
+    const payCls = o.payment_status === 'paid' ? 'chip-ok' : o.payment_method === 'cod' ? '' : 'chip-warn';
+    return `<article class="orow s-row-${o.status}" data-order="${o.id}" tabindex="0">
+      <span class="orow-av" style="--h:${hue(name)}">${esc(initials)}</span>
+      <div class="orow-main"><strong><bdi>${esc(name)}</bdi></strong><small><span class="mono" dir="ltr">${esc(o.number)}</span> · ${ago(o.created_at)}</small></div>
+      <div class="orow-where hide-sm"><span class="flag">${flag(o.country)}</span><span>${esc(o.zip)} ${esc(o.city)}</span></div>
+      <div class="orow-items hide-sm">${thumbs.length ? `<span class="thumbs">${thumbs.map((t) => `<img src="${esc(t)}" alt="" loading="lazy">`).join('')}</span>` : ''}<small>${x.items(o.items_n || 0)}</small></div>
+      <div class="orow-pay hide-sm"><span class="pay-ic pay-${o.payment_method}">${PAY_ICON[o.payment_method] || '·'}</span><span><small>${XL().method[o.payment_method] || ''}</small><span class="chip ${payCls}">${XL().payStatus[o.payment_status] || ''}</span></span></div>
+      <div class="orow-end"><strong class="orow-total">${dh(o.total)}</strong><span class="status s-${o.status}">${L.status[o.status] || o.status}</span></div>
+      ${o.phone ? `<a class="orow-wa hide-sm" href="https://wa.me/${esc(String(o.phone).replace(/[^\d]/g, ''))}" target="_blank" rel="noopener" title="WhatsApp" aria-label="WhatsApp">${icon('phone', 16)}</a>` : '<span class="hide-sm"></span>'}
+    </article>`;
   }
 
   // WhatsApp message to the customer, in their language.

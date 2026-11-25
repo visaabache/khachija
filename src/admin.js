@@ -259,10 +259,16 @@ export async function handleAdmin(request, env, url, ctx) {
     }
     const pay = url.searchParams.get('payment');
     if (pay === 'open') where.push("payment_status = 'pending' AND payment_method IN ('bank', 'paypal')");
-    const sql = `SELECT id, number, status, payment_method, payment_status, first_name || ' ' || last_name AS name, phone, email, zip, city, country, total, created_at FROM orders ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY id DESC LIMIT 50 OFFSET ?`;
-    const rows = await db.prepare(sql).bind(...args, (page - 1) * 50).all();
-    const counts = await db.prepare('SELECT status, COUNT(*) AS n FROM orders GROUP BY status').all();
-    return json({ orders: rows.results.map((o) => ({ ...o, phone_display: displayPhone(o.phone) })), page, counts: Object.fromEntries(counts.results.map((r) => [r.status, r.n])) });
+    const sql = `SELECT o.id, o.number, o.status, o.payment_method, o.payment_status, o.first_name || ' ' || o.last_name AS name, o.phone, o.email, o.zip, o.city, o.country, o.total, o.created_at,
+      (SELECT COALESCE(SUM(qty), 0) FROM order_items WHERE order_id = o.id) AS items_n,
+      (SELECT json_group_array(img) FROM (SELECT json_extract(p.images, '$[0]') AS img FROM order_items i LEFT JOIN products p ON p.id = i.product_id WHERE i.order_id = o.id LIMIT 3)) AS thumbs
+      FROM orders o ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY o.id DESC LIMIT 50 OFFSET ?`;
+    const [rows, counts, sum] = await db.batch([
+      db.prepare(sql).bind(...args, (page - 1) * 50),
+      db.prepare('SELECT status, COUNT(*) AS n FROM orders GROUP BY status'),
+      db.prepare("SELECT SUM(CASE WHEN status NOT IN ('cancelled', 'returned') THEN total ELSE 0 END) AS revenue, SUM(CASE WHEN payment_status = 'pending' AND payment_method IN ('bank', 'paypal') AND status NOT IN ('cancelled', 'returned') THEN 1 ELSE 0 END) AS open_pay, SUM(CASE WHEN payment_status = 'pending' AND payment_method IN ('bank', 'paypal') AND status NOT IN ('cancelled', 'returned') THEN total ELSE 0 END) AS open_amount, SUM(CASE WHEN created_at > datetime('now', '-1 day') THEN 1 ELSE 0 END) AS last24 FROM orders"),
+    ]);
+    return json({ orders: rows.results.map((o) => ({ ...o, thumbs: JSON.parse(o.thumbs || '[]').filter(Boolean), phone_display: displayPhone(o.phone) })), page, counts: Object.fromEntries(counts.results.map((r) => [r.status, r.n])), summary: sum.results[0] || {} });
   }
 
   if (path === '/orders.csv' && method === 'GET') {

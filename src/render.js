@@ -165,7 +165,7 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=28">
+<link rel="stylesheet" href="/assets/style.css?v=30">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
 <script src="/assets/store.js?v=9" defer></script>
@@ -436,15 +436,33 @@ ${featured.length ? `<section class="section wrap">${sectionHead(t.featured, t.s
   <script type="application/json" id="finder-data">${JSON.stringify({ products: finderData, added: f.added }).replace(/</g, '\\u003c')}</script>
 </section>
 ${processStrip(lang)}
-<section class="story">
-  <div class="wrap story-grid">
-    <div class="story-img reveal"><span class="arch-frame parallax"><img src="${esc(photos.story)}" alt="" loading="lazy" width="1000" height="1250"></span></div>
-    <div class="story-text reveal" style="--d:120ms">
+<section class="saga reveal" aria-labelledby="saga-title">
+  <span class="saga-word" aria-hidden="true"><span>Khadija · Atlas · Hamburg · Khadija · Atlas · Hamburg · </span><span>Khadija · Atlas · Hamburg · Khadija · Atlas · Hamburg · </span></span>
+  <div class="wrap saga-grid">
+    <figure class="saga-medal">
+      <svg class="saga-ring" viewBox="0 0 400 400" aria-hidden="true"><defs><path id="saga-circle" d="M200,200 m-176,0 a176,176 0 1,1 352,0 a176,176 0 1,1 -352,0"/></defs><text><textPath href="#saga-circle">${esc(t.saga.ring)}</textPath></text></svg>
+      <span class="saga-orbit" aria-hidden="true"><i></i></span>
+      <span class="saga-photo"><img src="${esc(photos.story)}" alt="Khadija Hakki" loading="lazy" width="1000" height="1250"></span>
+      <span class="saga-seal" aria-hidden="true"><img src="/assets/brand/symbol-gold.svg" alt="" width="40" height="40"></span>
+    </figure>
+    <div class="saga-text">
       ${kicker(t.storyKicker)}
-      <h2>${esc(t.storyTitle)}</h2>
-      <p>${esc(t.storyText)}</p>
-      <p class="sign">${esc(t.storySign)}</p>
-      <a class="btn btn-light" href="/${lang}/about">${esc(t.storyCta)} ${icon('arrow', 20)}</a>
+      <h2 id="saga-title" class="saga-title">${esc(t.storyTitle).split(' ').map((w, i) => `<span style="--i:${i}">${w}</span>`).join(' ')}</h2>
+      <p class="saga-lead">${esc(t.storyText)}</p>
+      <div class="saga-route" aria-label="${esc(t.saga.route)}">
+        <svg viewBox="0 0 360 120" aria-hidden="true">
+          <path class="saga-path-bg" d="M24 96 C 110 96, 150 18, 336 24"/>
+          <path class="saga-path" id="saga-path" d="M24 96 C 110 96, 150 18, 336 24"/>
+          <circle class="saga-pin a" cx="24" cy="96" r="6"/><circle class="saga-pin b" cx="336" cy="24" r="6"/>
+          <circle class="saga-dot" r="5"/>
+        </svg>
+        <span class="saga-place a"><b>${esc(t.saga.from)}</b>${esc(t.saga.fromSub)}</span>
+        <span class="saga-place b"><b>Hamburg</b>${esc(t.saga.toSub)}</span>
+        <span class="saga-km">≈ 2.800 km</span>
+      </div>
+      <ul class="saga-facts">${t.trust.slice(0, 3).map(([ic, h], i) => `<li style="--i:${i}">${icon(ic, 18)}<span>${esc(h)}</span></li>`).join('')}</ul>
+      <p class="saga-sign"><span class="saga-name">Khadija</span><span>${esc(t.storySign)}</span></p>
+      <div class="saga-ctas"><a class="btn btn-gold" href="/${lang}/about">${esc(t.storyCta)} ${icon('arrow', 20)}</a><button type="button" class="btn btn-light" data-film-open><span class="play" aria-hidden="true"></span>${esc(t.heroFilm)}</button></div>
     </div>
   </div>
 </section>

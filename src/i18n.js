@@ -1086,5 +1086,11 @@ for (const [l, v] of Object.entries({
   ar: ['مرحبًا بكِ في', 'جمال طبيعي من المغرب، من صنع التعاونيات النسائية', 'اضغطي للتخطي'],
 })) T[l].welcome = v;
 
+for (const [l, v] of Object.entries({
+  de: { ring: 'KHADIJA HAKKI · GRÜNDERIN · VOM ATLAS NACH HAMBURG · HANDGEMACHT · ', route: 'Vom Atlas-Gebirge nach Hamburg', from: 'Atlas', fromSub: 'Marokko · Kooperative', toSub: 'Versand zu Ihnen' },
+  en: { ring: 'KHADIJA HAKKI · FOUNDER · FROM THE ATLAS TO HAMBURG · HANDMADE · ', route: 'From the Atlas mountains to Hamburg', from: 'Atlas', fromSub: 'Morocco · cooperative', toSub: 'shipped to you' },
+  ar: { ring: 'خديجة حقي · المؤسِّسة · من الأطلس إلى هامبورغ · صنع يدوي · ', route: 'من جبال الأطلس إلى هامبورغ', from: 'الأطلس', fromSub: 'المغرب · التعاونية', toSub: 'الشحن إليكِ' },
+})) T[l].saga = v;
+
 // Footer credit for the agency that built the shop.
 for (const [l, v] of Object.entries({ de: 'Website von', en: 'Website by', ar: 'تصميم وتطوير' })) T[l].madeBy = v;
