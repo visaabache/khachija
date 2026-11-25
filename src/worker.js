@@ -47,7 +47,11 @@ function pickLang(request) {
     const code = part.trim().slice(0, 2);
     if (LANGS.includes(code)) return code;
   }
-  return DEFAULT_LANG;
+  const country = String(request.cf?.country || '').toUpperCase();
+  if (!country) return DEFAULT_LANG;
+  if (['DE', 'AT', 'CH', 'LI', 'LU'].includes(country)) return 'de';
+  if (['MA', 'DZ', 'TN', 'LY', 'EG', 'SA', 'AE', 'QA', 'KW', 'BH', 'OM', 'JO', 'LB', 'SY', 'IQ', 'YE', 'PS', 'SD', 'MR'].includes(country)) return 'ar';
+  return 'en';
 }
 
 const PROBE = /(\.(php\d?|asp|aspx|jsp|cgi|env|ini|sql|bak|old|swp|log|yml|yaml)(\/|$)|^\/(wp-|wordpress|wp\/|phpmyadmin|pma\/|xmlrpc|\.git|\.env|\.aws|\.ssh|\.svn|\.ds_store|vendor\/|cgi-bin|boaform|hnap1|actuator|server-status|config\.json|owa\/|autodiscover|telescope|_profiler|solr\/|jenkins|console\/))/i;

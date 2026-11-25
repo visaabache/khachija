@@ -1080,5 +1080,11 @@ for (const [l, v] of Object.entries({
 
 for (const [l, v] of Object.entries({ de: 'Nach oben', en: 'Back to top', ar: 'العودة إلى الأعلى' })) T[l].toTop = v;
 
+for (const [l, v] of Object.entries({
+  de: ['Willkommen bei', 'Naturkosmetik aus Marokko, von Frauenkooperativen', 'Tippen zum Überspringen'],
+  en: ['Welcome to', 'Natural beauty from Morocco, made by women’s cooperatives', 'Tap to skip'],
+  ar: ['مرحبًا بكِ في', 'جمال طبيعي من المغرب، من صنع التعاونيات النسائية', 'اضغطي للتخطي'],
+})) T[l].welcome = v;
+
 // Footer credit for the agency that built the shop.
 for (const [l, v] of Object.entries({ de: 'Website von', en: 'Website by', ar: 'تصميم وتطوير' })) T[l].madeBy = v;
