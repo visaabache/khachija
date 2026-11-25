@@ -136,6 +136,7 @@ export function layout(ctx, { title, seoTitle = '', description = '', path, body
   const og = image || BRAND_OG;
   const fonts = lang === 'ar' ? 'family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600' : 'family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Poppins:wght@300;400;500;600';
   const nav = `<a href="/${lang}/shop">${esc(t.allProducts)}</a>${categories.map((c) => `<a href="/${lang}/c/${esc(c.slug)}">${esc(catName(c, lang))}</a>`).join('')}<a href="/${lang}/about">${esc(t.about)}</a>`;
+  const here = (p) => ((p === '/' ? path === '/' || path === '' : path === p || path.startsWith(p + '/')) ? ' class="here" aria-current="page"' : '');
   const legal = LEGAL_PAGES.map((k) => `<li><a href="/${lang}/${k}">${esc(t.legal[k])}</a></li>`).join('');
   return `<!doctype html>
 <html lang="${lang}" dir="${t.dir}">
@@ -164,7 +165,7 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=17">
+<link rel="stylesheet" href="/assets/style.css?v=19">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
 <script src="/assets/store.js?v=8" defer></script>
@@ -191,9 +192,18 @@ ${minimal ? '' : `<div class="announce" role="region" aria-label="${esc(announce
 </header>
 ${minimal ? '' : `<div class="drawer-back" data-drawer-close hidden></div>
 <aside class="drawer drawer-start" id="menu-panel" aria-label="${esc(t.menu)}" hidden>
-  <div class="drawer-head"><img src="/assets/brand/logo-horizontal.svg" alt="${esc(store)}" width="200" height="54"><button type="button" class="icon-btn" data-drawer-close aria-label="${esc(t.close)}">${icon('close', 24)}</button></div>
-  <nav class="drawer-nav"><a href="/${lang}/">${esc(t.home)}</a>${nav}<a href="/${lang}/blog">${esc(t.blog)}</a><a href="/${lang}/contact">${esc(t.contact)}</a></nav>
-  <div class="drawer-foot"><span class="langs">${langLinks}</span>${wa ? `<a class="wa-inline" href="${esc(wa)}" rel="noopener">${waIcon(18)} WhatsApp</a>` : ''}</div>
+  <div class="drawer-head menu-head"><img src="/assets/brand/logo-horizontal.svg" alt="${esc(store)}" width="200" height="54"><button type="button" class="icon-btn menu-close" data-drawer-close aria-label="${esc(t.close)}">${icon('close', 22)}</button></div>
+  <div class="menu-body">
+    <nav class="menu-nav" aria-label="${esc(t.menu)}">
+      <p class="menu-kicker">${esc(t.shop)}</p>
+      <a class="menu-all${here('/shop')}" href="/${lang}/shop"><span>${esc(t.allProducts)}</span>${icon('arrow', 20)}</a>
+      <ul class="menu-cats">${categories.map((c, i) => `<li style="--i:${i}"><a${here(`/c/${c.slug}`)} href="/${lang}/c/${esc(c.slug)}"><img src="${esc(c.image || PLACEHOLDER)}" alt="" width="56" height="56" loading="lazy"><span><small>0${i + 1}</small>${esc(catName(c, lang))}</span>${icon('arrow', 18)}</a></li>`).join('')}</ul>
+      <p class="menu-kicker">Khachija</p>
+      <div class="menu-tiles">${[['/', t.home], ['/about', t.about], ['/blog', t.blog], ['/contact', t.contact]].map(([href, label]) => `<a${here(href)} href="/${lang}${href}">${esc(label)}</a>`).join('')}</div>
+    </nav>
+    <a class="menu-promo" href="/${lang}/#ritual-finder" data-drawer-close><img src="/assets/brand/symbol-gold.svg" alt="" width="44" height="44"><span><small>${esc(t.finder.kicker)}</small><strong>${esc(t.finder.title)}</strong><em>${esc(t.finder.start)} ${icon('arrow', 16)}</em></span></a>
+  </div>
+  <div class="drawer-foot menu-foot"><span class="langs menu-langs">${langLinks}</span>${wa ? `<a class="menu-wa" href="${esc(wa)}" rel="noopener">${waIcon(18)} WhatsApp</a>` : ''}</div>
 </aside>
 <aside class="drawer drawer-search" id="search-panel" aria-label="${esc(t.search)}" hidden>
   <div class="drawer-head"><strong>${esc(t.search)}</strong><button type="button" class="icon-btn" data-drawer-close aria-label="${esc(t.close)}">${icon('close', 24)}</button></div>
