@@ -1306,3 +1306,10 @@ html.welcoming { overflow: hidden; }
 .buy-bar .buy-bar-actions { display: flex; align-items: center; gap: 8px; }
 /* The first photo is isolated for the page transition, so it blends against its own copy of the stage background. */
 .gallery-track figure.packshot { background: radial-gradient(70% 60% at 50% 40%, #fffdf8 0%, #f6ecdc 70%, #efe2cb 100%); border-radius: 22px; }
+/* Many photos: the thumbnail row scrolls instead of widening the page. */
+.product { grid-template-columns: minmax(0, 1fr); }
+.product > * { min-width: 0; }
+.thumbs { scrollbar-width: none; scroll-snap-type: x proximity; }
+.thumbs::-webkit-scrollbar { display: none; }
+.thumbs button { scroll-snap-align: start; }
+@media (min-width: 960px) { .product { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
