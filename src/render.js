@@ -165,7 +165,7 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=20">
+<link rel="stylesheet" href="/assets/style.css?v=23">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
 <script src="/assets/store.js?v=8" defer></script>
@@ -246,7 +246,7 @@ ${body}
   </div>`}
   <div class="wrap foot-bottom"><span>© ${new Date().getUTCFullYear()} ${esc(store)} · ${esc(t.rights)}</span>${minimal ? `<span class="foot-links">${LEGAL_PAGES.map((k) => `<a href="/${lang}/${k}">${esc(t.legal[k])}</a>`).join(' · ')}</span>` : ''}${pixels ? `<button type="button" class="link-btn" data-consent-open>${esc(t.cookieSettings)}</button>` : ''}<span class="langs">${langLinks}</span><a class="made-by" href="https://abachedev.com/${lang === 'ar' ? 'ar/' : 'en/'}" target="_blank" rel="noopener">${esc(t.madeBy)} <strong>AbacheDev</strong></a></div>
 </footer>
-${minimal ? '' : `<nav class="tabbar" aria-label="${esc(t.shop)}">
+${minimal ? '' : `<nav class="tabbar" aria-label="${esc(t.shop)}" style="--ti:${{ home: 0, shop: 1, category: 1, product: 1, cart: 2 }[page] ?? -1}">
   <a href="/${lang}/"${page === 'home' ? ' aria-current="page"' : ''}>${icon('home', 24)}<span>${esc(t.home)}</span></a>
   <a href="/${lang}/shop"${page === 'shop' ? ' aria-current="page"' : ''}>${icon('grid', 24)}<span>${esc(t.shop)}</span></a>
   <a href="/${lang}/cart" data-drawer="cart"${page === 'cart' ? ' aria-current="page"' : ''} class="tab-cart">${icon('bag', 24)}<span>${esc(t.cart)}</span><span class="cart-count" hidden>0</span></a>
