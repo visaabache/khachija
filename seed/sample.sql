@@ -24,3 +24,6 @@ INSERT INTO posts (slug, cover, title_de, title_en, title_ar, excerpt_de, excerp
 
 -- Nila mask photo added (Nov 2026).
 UPDATE products SET images='["/assets/p/nila-maske-pack.webp"]', active=1, subtitle_de='Klärend & aufhellend · Für alle Hauttypen · 100 g', subtitle_en='Clarifying & brightening · all skin types · 100 g', subtitle_ar='منقٍّ ومفتح · لجميع أنواع البشرة · 100 غ' WHERE slug='maske-nilla';
+
+-- Tebrima lifestyle photos (Nov 2026).
+UPDATE products SET images='["/assets/p/tebrima-pack.webp","/assets/p/tebrima-1.webp","/assets/p/tebrima-2.webp","/assets/p/tebrima-3.webp","/assets/p/tebrima-4.webp","/assets/p/tebrima-5.webp","/assets/p/tebrima-6.webp","/assets/p/tebrima-pack2.webp"]' WHERE slug='tebrima-mit-kraeutern';
