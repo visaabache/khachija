@@ -1026,3 +1026,58 @@ body::after {
 .film-play:hover .film-ring { transform: scale(1.08); }
 @media (max-width: 799px) { .about-film { min-height: 78svh; } .about-film-in { padding-inline-end: 34px; } .about-film h2 { font-size: 1.9rem; } .film-ring { width: 62px; height: 62px; } }
 @media (prefers-reduced-motion: reduce) { .film-ring::before { animation: none; } }
+
+/* ═════════ Premium surfaces: emerald silk for the dark bands, warm ivory light for the cream ones ═════════ */
+:root { --emerald-silk: radial-gradient(110% 80% at 85% 0%, #1f4a39 0%, transparent 60%), radial-gradient(90% 70% at 0% 100%, #173d30 0%, transparent 65%), linear-gradient(160deg, #10271e 0%, #0b1d16 100%); }
+
+/* Top announcement bar: emerald with a slow gold light sweep. */
+.announce { position: relative; overflow: hidden; background: linear-gradient(90deg, #0b1d16, #1a3d30 50%, #0b1d16); color: #ecd3a0; border-bottom: 1px solid rgba(214, 174, 102, 0.3); }
+.announce::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 35%, rgba(236, 211, 160, 0.22) 50%, transparent 65%); transform: translateX(-100%); animation: sweep 7s ease-in-out infinite; pointer-events: none; }
+@keyframes sweep { 0%, 35% { transform: translateX(-100%); } 75%, 100% { transform: translateX(100%); } }
+
+/* Story band (home + about mission): emerald silk, a warm glow behind the portrait, hairlines and grain. */
+.story { isolation: isolate; background: var(--emerald-silk); }
+.story::before { inset: -20%; z-index: -1; opacity: 1; filter: blur(50px); background: radial-gradient(closest-side at 28% 50%, rgba(201, 162, 92, 0.3), transparent 70%), radial-gradient(closest-side at 78% 40%, rgba(64, 140, 108, 0.35), transparent 70%); animation: aurora 30s ease-in-out infinite alternate; }
+.story::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(227, 196, 138, 0.55), transparent) top / 100% 1px no-repeat, linear-gradient(90deg, transparent, rgba(227, 196, 138, 0.35), transparent) bottom / 100% 1px no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.story h2 { background: linear-gradient(100deg, #fff 30%, #ecd3a0 70%, #fff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.story-img .arch-frame { border-color: rgba(227, 196, 138, 0.6); box-shadow: 0 0 0 1px rgba(227, 196, 138, 0.15), 0 40px 90px -40px rgba(0, 0, 0, 0.8); }
+
+/* Footer: deepest emerald, a large faint gold seal and a gold hairline on top. */
+.foot { isolation: isolate; background: radial-gradient(80% 90% at 100% 0%, #1b4033 0%, transparent 60%), linear-gradient(180deg, #0f251c 0%, #08160f 100%); }
+.foot::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(227, 196, 138, 0.7), transparent) top / 100% 1px no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.foot-pattern { inset: auto; top: -120px; inset-inline-end: -140px; width: 560px; height: 560px; background: url('/assets/brand/symbol-gold.svg') center / contain no-repeat; opacity: 0.06; filter: none; animation: spin 120s linear infinite; }
+
+/* Marquee: champagne ribbon with gold hairlines. */
+.marquee { background: linear-gradient(90deg, #efe2cb, #f7eedf 50%, #efe2cb); border-block: 0; box-shadow: inset 0 1px 0 rgba(184, 129, 47, 0.35), inset 0 -1px 0 rgba(184, 129, 47, 0.35); }
+.marquee span { color: #5a4630; }
+
+/* Cream sections: soft full-width light that falls from the top, so no band looks flat. */
+.section.wrap, .process-sec, .ritual-scroll, .hscroll { position: relative; isolation: isolate; }
+.section.wrap::before { content: ''; position: absolute; z-index: -1; top: 0; bottom: 0; left: 50%; width: 100vw; transform: translateX(-50%); pointer-events: none; background: radial-gradient(60% 55% at 50% 0%, rgba(255, 252, 245, 0.95), transparent 70%), radial-gradient(40% 40% at 8% 90%, rgba(214, 174, 102, 0.1), transparent 70%); }
+.hscroll { background: radial-gradient(70% 60% at 80% 10%, #fffaf1 0%, transparent 60%), radial-gradient(50% 50% at 0% 100%, rgba(214, 174, 102, 0.14), transparent 70%), var(--sand); }
+.ritual-scroll { background: radial-gradient(50% 45% at 90% 30%, rgba(214, 174, 102, 0.16), transparent 70%), linear-gradient(180deg, var(--sand), var(--cream)); }
+.process-sec { background: radial-gradient(60% 60% at 0% 0%, rgba(214, 174, 102, 0.16), transparent 70%), linear-gradient(180deg, #f3e9d8 0%, var(--sand) 100%); }
+.process-sec::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(184, 129, 47, 0.4), transparent) top / 100% 1px no-repeat; }
+.process-card { border-color: rgba(184, 129, 47, 0.22); box-shadow: 0 24px 50px -34px rgba(42, 33, 24, 0.45); transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease); }
+.process-card:hover { transform: translateY(-6px); box-shadow: 0 34px 60px -34px rgba(42, 33, 24, 0.55); }
+
+/* Newsletter: a small emerald jewel box next to the FAQ. */
+.newsletter { isolation: isolate; overflow: hidden; background: var(--emerald-silk); border: 1px solid rgba(227, 196, 138, 0.4); color: #f4ead8; box-shadow: 0 40px 80px -40px rgba(11, 29, 22, 0.7); }
+.newsletter::before { border-color: rgba(227, 196, 138, 0.28); }
+.newsletter::after { content: ''; position: absolute; z-index: -1; inset: -40%; background: radial-gradient(closest-side at 70% 20%, rgba(201, 162, 92, 0.32), transparent 70%); filter: blur(30px); animation: aurora 22s ease-in-out infinite alternate; pointer-events: none; }
+.newsletter h2 { color: #fff; }
+.newsletter p { color: rgba(244, 234, 216, 0.8); }
+.newsletter .news-row input { background: rgba(255, 255, 255, 0.96); border-color: transparent; }
+.newsletter .btn { background: var(--gold); border-color: var(--gold); color: #fff; }
+.newsletter .btn:hover { background: #a06f26; border-color: #a06f26; }
+.newsletter .news-done { color: #ecd3a0; }
+.newsletter a { color: #ecd3a0; }
+.accordion details { border-bottom-color: rgba(184, 129, 47, 0.25); }
+.accordion details[open] summary { color: var(--green); }
+
+/* About: quote band with a large faint seal; page heroes with warm light. */
+.quote-band { position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(60% 70% at 50% 50%, #fbf4e7 0%, transparent 70%), linear-gradient(180deg, #efe2cb, #f6efe3); box-shadow: inset 0 1px 0 rgba(184, 129, 47, 0.3), inset 0 -1px 0 rgba(184, 129, 47, 0.3); }
+.quote-band::before { content: ''; position: absolute; z-index: -1; left: 50%; top: 50%; width: 520px; height: 520px; margin: -260px 0 0 -260px; background: url('/assets/brand/symbol-gold.svg') center / contain no-repeat; opacity: 0.07; animation: spin 140s linear infinite; }
+.page-hero { background: radial-gradient(60% 90% at 90% 0%, #fdf6ea 0%, transparent 60%), radial-gradient(40% 70% at 0% 100%, rgba(214, 174, 102, 0.12), transparent 70%); border-bottom: 0; box-shadow: inset 0 -1px 0 rgba(184, 129, 47, 0.25); }
+
+@media (prefers-reduced-motion: reduce) { .announce::after, .story::before, .foot-pattern, .newsletter::after, .quote-band::before { animation: none; } }

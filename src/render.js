@@ -164,7 +164,7 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=15">
+<link rel="stylesheet" href="/assets/style.css?v=16">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
 <script src="/assets/store.js?v=7" defer></script>
