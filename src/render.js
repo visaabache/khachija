@@ -34,6 +34,8 @@ function srcset(url) {
   const s = small(url);
   return s !== url ? ` srcset="${esc(s)} 480w, ${esc(url)} 1000w"` : '';
 }
+// Gold divider with a small seal where a dark band meets a light one.
+const EDGE = '<div class="edge" aria-hidden="true"><span><img src="/assets/brand/symbol-gold.svg" alt="" width="22" height="22"></span></div>';
 const isPackshot = (url) => /-pack\d?(-sm)?\.webp$/.test(url);
 
 // Line icons (24×24, stroke = currentColor).
@@ -165,7 +167,7 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=30">
+<link rel="stylesheet" href="/assets/style.css?v=31">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
 <script src="/assets/store.js?v=9" defer></script>
@@ -227,6 +229,7 @@ ${minimal ? '' : `<div class="drawer-back" data-drawer-close hidden></div>
 <main id="main">
 ${body}
 </main>
+${minimal ? '' : EDGE}
 <footer class="foot">
   ${minimal ? '' : `<div class="foot-pattern" aria-hidden="true"></div>
   <div class="wrap foot-grid">
@@ -424,6 +427,7 @@ ${featured.length ? `<section class="section wrap">${sectionHead(t.featured, t.s
     </div>
   </div>
 </section>
+${EDGE}
 <section class="finder-sec" id="ritual-finder">
   <div class="wrap finder-wrap">
     <div class="finder-intro reveal">${kicker(f.kicker)}<h2>${esc(f.title)}</h2><p>${esc(f.text)}</p></div>
@@ -435,7 +439,9 @@ ${featured.length ? `<section class="section wrap">${sectionHead(t.featured, t.s
   </div>
   <script type="application/json" id="finder-data">${JSON.stringify({ products: finderData, added: f.added }).replace(/</g, '\\u003c')}</script>
 </section>
+${EDGE}
 ${processStrip(lang)}
+${EDGE}
 <section class="saga reveal" aria-labelledby="saga-title">
   <span class="saga-word" aria-hidden="true"><span>Khadija · Atlas · Hamburg · Khadija · Atlas · Hamburg · </span><span>Khadija · Atlas · Hamburg · Khadija · Atlas · Hamburg · </span></span>
   <div class="wrap saga-grid">
@@ -466,6 +472,7 @@ ${processStrip(lang)}
     </div>
   </div>
 </section>
+${EDGE}
 ${latest.length ? `<section class="section wrap">${sectionHead(t.newArrivals, t.shop, `/${lang}/shop`, t.viewAll)}${grid(latest, ctx, t.noProducts)}</section>` : ''}
 <section class="section wrap faq-news">
   <div class="faq reveal"><h2>${esc(t.faqTitle)}</h2><div class="accordion">${t.faq.map(([q, a]) => `<details><summary>${esc(q)}${icon('plus', 18)}</summary><div>${esc(a)}</div></details>`).join('')}</div></div>
@@ -847,6 +854,7 @@ export function aboutPage(ctx, photos, products = []) {
   ${sectionHead(ab.chaptersTitle, a.kicker)}
   <ol class="chapter-list">${ab.chapters.map(([n, h, x], i) => `<li class="reveal" style="--d:${i * 100}ms"><span class="chapter-n">${n}</span><div><h3>${esc(h)}</h3><p>${esc(x)}</p></div></li>`).join('')}</ol>
 </section>
+${EDGE}
 <section class="about-film">
   <video class="about-film-video" muted loop playsinline preload="none" poster="/assets/video/kooperative-poster.webp" aria-hidden="true" data-loop><source src="/assets/video/kooperative-loop.mp4" type="video/mp4"></video>
   <div class="about-film-in reveal">
@@ -856,9 +864,12 @@ export function aboutPage(ctx, photos, products = []) {
     <button type="button" class="film-play" data-film-open><span class="film-ring"><span class="play" aria-hidden="true"></span></span><span>${esc(t.film.cta)} <small>· ${esc(t.film.length)}</small></span></button>
   </div>
 </section>
+${EDGE}
 <section class="quote-band"><div class="wrap narrow center reveal"><img src="/assets/brand/symbol-gold.svg" alt="" width="60" height="60"><blockquote>${esc(ab.quote)}</blockquote><p class="sign">${esc(t.storySign)}</p></div></section>
 ${processStrip(lang)}
+${EDGE}
 <section class="story about-mission"><div class="wrap narrow center reveal">${kicker(a.missionTitle)}<p class="mission">${esc(a.mission)}</p></div></section>
+${EDGE}
 <section class="wrap section"><ul class="values-grid three">${a.pillars.map(([h, x], i) => `<li class="reveal" style="--d:${i * 80}ms">${ornament('val-orn')}<h3>${esc(h)}</h3><p>${esc(x)}</p></li>`).join('')}</ul></section>
 ${products.length ? `<section class="section wrap">${sectionHead(ab.shopTitle, t.shop, `/${lang}/shop`, t.viewAll)}${grid(products, ctx, '')}</section>` : ''}
 ${filmDialog(t)}`;
