@@ -167,7 +167,7 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=35">
+<link rel="stylesheet" href="/assets/style.css?v=36">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
 <script src="/assets/store.js?v=10" defer></script>
@@ -672,7 +672,7 @@ export function productPage(ctx, p, category, related) {
       <p class="form-error" role="alert" hidden></p>`}
     </form>
     ${stockLine}
-    ${soldOut ? '' : `<div class="eta">${icon('truck', 22)}<span>${esc(t.eta)} <strong data-eta="${esc(settings.delivery_days || '2-4')}"></strong></span></div>`}
+    ${soldOut ? '' : `<div class="eta">${icon('truck', 22)}<span>${esc(t.eta)} <strong data-eta="${esc(settings.delivery_days || '1-3')}"></strong></span></div>`}
     <ul class="perks">${t.perks.map(([ic, x]) => `<li>${icon(ic, 22)}<span>${esc(x)}</span></li>`).join('')}</ul>
     ${payBadges()}
     <div class="accordion product-tabs">${tabs.map(([h, html, open]) => `<details${open ? ' open' : ''}><summary>${esc(h)}${icon('plus', 18)}</summary><div>${html}</div></details>`).join('')}</div>
@@ -743,7 +743,7 @@ export function checkoutPage(ctx) {
         <p class="hint">${esc(t.emailHint)}</p>
       </fieldset>
       <fieldset class="co-step"><legend><span class="co-n">2</span>${esc(t.shippingTitle)}</legend>
-        <div class="ship-opt">${icon('truck', 26)}<div><strong>${esc(t.shippingDhl)}</strong><span>${esc(t.shippingDays(String(settings.delivery_days || '2-4').replace('-', '–')))}</span></div><b data-ship-price>…</b></div>
+        <div class="ship-opt">${icon('truck', 26)}<div><strong>${esc(t.shippingDhl)}</strong><span>${esc(t.shippingDays(String(settings.delivery_days || '1-3').replace('-', '–')))}</span></div><b data-ship-price>…</b></div>
       </fieldset>
       <fieldset class="co-step"><legend><span class="co-n">3</span>${esc(t.paymentTitle)}</legend>
         <div class="pay-opts">${methods
@@ -866,6 +866,18 @@ export function aboutPage(ctx, photos, products = []) {
 <section class="wrap section chapters">
   ${sectionHead(ab.chaptersTitle, a.kicker)}
   <ol class="chapter-list">${ab.chapters.map(([n, h, x], i) => `<li class="reveal" style="--d:${i * 100}ms"><span class="chapter-n">${n}</span><div><h3>${esc(h)}</h3><p>${esc(x)}</p></div></li>`).join('')}</ol>
+</section>
+<section class="spot">
+  <div class="wrap spot-grid">
+    <figure class="spot-img reveal"><img src="/assets/p/kaffeeseife-khadija.webp" alt="${esc(t.spot.alt)}" loading="lazy" width="1000" height="1067"><figcaption><span>${esc(t.spot.badge)}</span></figcaption></figure>
+    <div class="spot-text reveal" style="--d:150ms">
+      ${kicker(t.spot.kicker)}
+      <h2>${esc(t.spot.title)}</h2>
+      <p class="spot-lead">${esc(t.spot.text)}</p>
+      <ul class="spot-list">${t.spot.points.map((x) => `<li>${icon('check', 18)}<span>${esc(x)}</span></li>`).join('')}</ul>
+      <a class="btn btn-gold btn-lg" href="/${lang}/p/anti-cellulite-kaffeeseife">${esc(t.spot.cta)} ${icon('arrow', 20)}</a>
+    </div>
+  </div>
 </section>
 ${EDGE}
 <section class="about-film">

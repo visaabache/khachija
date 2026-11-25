@@ -2,7 +2,7 @@
 // translations and the PayPal flow (with a fake PayPal API).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { money, toCents, unitPrice, contentLabel, vatOf, shippingFor, paymentMethods, paymentFee, validZip, normalizePhone, slugify, orderNumber, shippingCountries } from '../src/lib.js';
+import { parseTiers, parcelGrams, money, toCents, unitPrice, contentLabel, vatOf, shippingFor, paymentMethods, paymentFee, validZip, normalizePhone, slugify, orderNumber, shippingCountries } from '../src/lib.js';
 import { validIban, formatIban, giroCodeSvg } from '../src/girocode.js';
 import { legalDoc, LEGAL_PAGES } from '../src/legal.js';
 import { T } from '../src/i18n.js';
@@ -167,4 +167,17 @@ test('checkout: postcode and city come from one field', async () => {
   assert.deepEqual(splitCity(' Hamburg  22337 '), { zip: '22337', city: 'Hamburg' });
   assert.deepEqual(splitCity('1012 AB Amsterdam'), { zip: '1012 AB', city: 'Amsterdam' });
   assert.deepEqual(splitCity('Hamburg'), { zip: '', city: 'Hamburg' });
+});
+
+test('DHL weight tiers: Germany and EU zone, heavier parcels, free shipping still wins', () => {
+  const s = { shipping_fee: '490', free_shipping_over: '4900', shipping_rates: '{"CH": 1990}', shipping_tiers: 'DE: 2=5,19; 5=7,69; 10=10,49\nEU: 2=10,49; 5=17,49' };
+  assert.deepEqual(parseTiers(s.shipping_tiers).DE, [[2000, 519], [5000, 769], [10000, 1049]]);
+  assert.equal(shippingFor('DE', 1500, s, 900), 519);
+  assert.equal(shippingFor('DE', 1500, s, 2500), 769);
+  assert.equal(shippingFor('DE', 1500, s, 40000), 1049);
+  assert.equal(shippingFor('DE', 5000, s, 2500), 0);
+  assert.equal(shippingFor('AT', 2000, s, 1200), 1049);
+  assert.equal(shippingFor('CH', 2000, s, 1200), 1990);
+  assert.ok(shippingCountries(s).includes('FR') && shippingCountries(s).includes('CH'));
+  assert.equal(parcelGrams([{ product: { unit_amount: 100, unit_type: 'ml' }, qty: 2 }, { product: { unit_amount: 200, unit_type: 'g' }, qty: 1 }]), 2 * 220 + 260 + 300);
 });

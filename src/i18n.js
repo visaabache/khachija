@@ -29,7 +29,7 @@ const de = {
   trust: [
     ['leaf', '100 % natürlich', 'Ohne Parabene, Silikone oder Mikroplastik'],
     ['heart', 'Von Frauenkooperativen', 'Fair hergestellt, fair bezahlt'],
-    ['truck', 'Versand in 2–4 Tagen', 'Kostenlos ab 49 € in Deutschland'],
+    ['truck', 'Versand in 1–3 Tagen', 'Kostenlos ab 49 € in Deutschland'],
     ['lock', 'Sicher bezahlen', 'PayPal, Überweisung oder Nachnahme'],
   ],
   film: {
@@ -66,8 +66,8 @@ const de = {
   bannerCta: 'Zum Shop',
   faqTitle: 'Häufige Fragen',
   faq: [
-    ['Wie schnell wird geliefert?', 'Wir versenden aus Hamburg mit DHL. Innerhalb Deutschlands kommt Ihr Paket in der Regel in 2–4 Werktagen an.'],
-    ['Was kostet der Versand?', 'Innerhalb Deutschlands 4,90 €. Ab einem Bestellwert von 49 € ist der Versand kostenlos. Lieferungen ins Ausland sind ebenfalls möglich.'],
+    ['Wie schnell wird geliefert?', 'Wir versenden aus Hamburg mit DHL. Innerhalb Deutschlands kommt Ihr Paket in der Regel in 1–3 Tagen an, ins EU-Ausland in 3–10 Tagen.'],
+    ['Was kostet der Versand?', 'Innerhalb Deutschlands ab 5,19 € mit DHL (nach Paketgewicht), ab einem Bestellwert von 49 € kostenlos. In die EU ab 10,49 €. Alle Preise finden Sie unter „Versand & Zahlung“.'],
     ['Wie kann ich bezahlen?', 'Mit PayPal (auch Kreditkarte, Lastschrift und „Später bezahlen“ über PayPal), per Vorkasse/Überweisung oder per Nachnahme bei DHL.'],
     ['Sind die Produkte wirklich natürlich?', 'Ja. Unsere Produkte werden aus natürlichen Rohstoffen hergestellt, ohne Parabene, Silikone oder Mikroplastik. Die Zutaten finden Sie bei jedem Produkt.'],
     ['Kann ich zurückgeben?', 'Sie haben ein 14-tägiges Widerrufsrecht. Aus hygienischen Gründen können geöffnete Kosmetikprodukte nicht zurückgenommen werden.'],
@@ -88,7 +88,7 @@ const de = {
   usage: 'Anwendung',
   ingredients: 'Inhaltsstoffe',
   shippingReturns: 'Versand & Rückgabe',
-  shippingReturnsText: 'Versand mit DHL in 2–4 Werktagen innerhalb Deutschlands. 4,90 € Versandkosten, kostenlos ab 49 €. 14 Tage Widerrufsrecht. Geöffnete Kosmetik ist aus hygienischen Gründen vom Umtausch ausgeschlossen.',
+  shippingReturnsText: 'Versand mit DHL in 1–3 Tagen innerhalb Deutschlands, in die EU in 3–10 Tagen. Versandkosten nach Paketgewicht ab 5,19 €, in Deutschland kostenlos ab 49 €. 14 Tage Widerrufsrecht. Geöffnete Kosmetik ist aus hygienischen Gründen vom Umtausch ausgeschlossen.',
   inclVat: 'inkl. MwSt.',
   smallBusiness: 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.',
   plusShipping: 'zzgl. Versand',
@@ -321,7 +321,7 @@ const en = {
   trust: [
     ['leaf', '100% natural', 'No parabens, silicones or microplastics'],
     ['heart', 'Women’s cooperatives', 'Made fairly, paid fairly'],
-    ['truck', 'Delivery in 2–4 days', 'Free in Germany from €49'],
+    ['truck', 'Delivery in 1–3 days', 'Free in Germany from €49'],
     ['lock', 'Secure payment', 'PayPal, bank transfer or cash on delivery'],
   ],
   film: {
@@ -358,8 +358,8 @@ const en = {
   bannerCta: 'Go to shop',
   faqTitle: 'Frequently asked questions',
   faq: [
-    ['How fast is delivery?', 'We ship from Hamburg with DHL. Within Germany your parcel usually arrives in 2–4 working days.'],
-    ['How much is shipping?', '€4.90 within Germany, free from €49. We also ship to other countries.'],
+    ['How fast is delivery?', 'We ship from Hamburg with DHL. Within Germany your parcel usually arrives in 1–3 days, within the EU in 3–10 days.'],
+    ['How much is shipping?', 'From €5.19 within Germany with DHL (by parcel weight), free from €49. To the EU from €10.49. See “Shipping & payment” for all prices.'],
     ['How can I pay?', 'With PayPal (including card, direct debit and Pay Later through PayPal), by bank transfer in advance, or cash on delivery with DHL.'],
     ['Are the products really natural?', 'Yes. Our products are made from natural raw materials, without parabens, silicones or microplastics. Each product lists its ingredients.'],
     ['Can I return items?', 'You have a 14-day right of withdrawal. For hygiene reasons, opened cosmetics cannot be returned.'],
@@ -380,7 +380,7 @@ const en = {
   usage: 'How to use',
   ingredients: 'Ingredients',
   shippingReturns: 'Shipping & returns',
-  shippingReturnsText: 'DHL delivery in 2–4 working days within Germany. €4.90 shipping, free from €49. 14-day right of withdrawal. Opened cosmetics cannot be returned for hygiene reasons.',
+  shippingReturnsText: 'DHL delivery in 1–3 days within Germany, 3–10 days within the EU. Shipping by parcel weight from €5.19, free in Germany from €49. 14-day right of withdrawal. Opened cosmetics cannot be returned for hygiene reasons.',
   inclVat: 'incl. VAT',
   smallBusiness: 'No VAT is charged under § 19 UStG (small business).',
   plusShipping: 'plus shipping',
@@ -613,7 +613,7 @@ const ar = {
   trust: [
     ['leaf', 'طبيعي 100٪', 'بدون بارابين ولا سيليكون ولا جزيئات بلاستيكية'],
     ['heart', 'من تعاونيات نسائية', 'صنع عادل وأجر عادل'],
-    ['truck', 'توصيل خلال 2 إلى 4 أيام', 'مجاني في ألمانيا ابتداءً من 49 €'],
+    ['truck', 'توصيل خلال 1 إلى 3 أيام', 'مجاني في ألمانيا ابتداءً من 49 €'],
     ['lock', 'دفع آمن', 'PayPal أو تحويل بنكي أو الدفع عند الاستلام'],
   ],
   film: {
@@ -650,8 +650,8 @@ const ar = {
   bannerCta: 'إلى المتجر',
   faqTitle: 'أسئلة شائعة',
   faq: [
-    ['متى يصل الطلب؟', 'نشحن من هامبورغ عبر DHL. داخل ألمانيا يصل الطرد عادة خلال 2 إلى 4 أيام عمل.'],
-    ['كم تكلفة الشحن؟', '4,90 € داخل ألمانيا، ومجاني ابتداءً من 49 €. نشحن أيضًا إلى دول أخرى.'],
+    ['متى يصل الطلب؟', 'نشحن من هامبورغ عبر DHL. داخل ألمانيا يصل الطرد عادة خلال 1 إلى 3 أيام، وإلى دول الاتحاد الأوروبي خلال 3 إلى 10 أيام.'],
+    ['كم تكلفة الشحن؟', 'ابتداءً من 5,19 € داخل ألمانيا مع DHL حسب وزن الطرد، ومجاني ابتداءً من 49 €. إلى الاتحاد الأوروبي ابتداءً من 10,49 €.'],
     ['كيف أدفع؟', 'عبر PayPal (يشمل البطاقة والاقتطاع البنكي والدفع لاحقًا)، أو بالتحويل البنكي المسبق، أو نقدًا عند الاستلام مع DHL.'],
     ['هل المنتجات طبيعية فعلًا؟', 'نعم. منتجاتنا مصنوعة من مواد خام طبيعية، بدون بارابين ولا سيليكون. تجدين المكونات في صفحة كل منتج.'],
     ['هل يمكنني الإرجاع؟', 'لديك حق العدول خلال 14 يومًا. لأسباب صحية لا يمكن إرجاع مستحضرات التجميل المفتوحة.'],
@@ -672,7 +672,7 @@ const ar = {
   usage: 'طريقة الاستعمال',
   ingredients: 'المكونات',
   shippingReturns: 'الشحن والإرجاع',
-  shippingReturnsText: 'توصيل عبر DHL خلال 2 إلى 4 أيام عمل داخل ألمانيا. الشحن 4,90 €، ومجاني ابتداءً من 49 €. حق العدول 14 يومًا. لا تُرجع مستحضرات التجميل المفتوحة لأسباب صحية.',
+  shippingReturnsText: 'توصيل عبر DHL خلال 1 إلى 3 أيام داخل ألمانيا و3 إلى 10 أيام إلى الاتحاد الأوروبي. الشحن حسب الوزن ابتداءً من 5,19 €، ومجاني في ألمانيا ابتداءً من 49 €. حق العدول 14 يومًا. لا تُرجع مستحضرات التجميل المفتوحة لأسباب صحية.',
   inclVat: 'شامل الضريبة',
   smallBusiness: 'لا تُحتسب ضريبة القيمة المضافة وفقًا للمادة 19 من قانون الضرائب الألماني.',
   plusShipping: 'دون الشحن',
@@ -1013,7 +1013,7 @@ for (const l of ['de', 'en', 'ar']) Object.assign(T[l], PLUS[l]);
 const SEO = {
   de: {
     shopIntro: 'Marokkanische Naturkosmetik online kaufen: Schwarze Seife, Nila, Henna, Sidr und Rizinusöl, von Hand gemacht von Frauenkooperativen in Marokko.',
-    shopText: '<h2>Marokkanische Naturkosmetik aus Frauenkooperativen</h2><p>Bei Khachija finden Sie traditionelle Schönheitsprodukte aus Marokko: schwarze Seife (Savon Beldi) für das Hammam-Ritual, blaues Nila aus der Sahara, Henna- und Sidr-Pulver für die Haarpflege, die Kräutermischung Tabrima und reines Rizinusöl. Alle Produkte werden von Frauenkooperativen in Marokko von Hand hergestellt und aus Hamburg versendet.</p><h2>Versand aus Hamburg</h2><p>Wir liefern mit DHL innerhalb von 2–4 Werktagen in ganz Deutschland, ab 49 € versandkostenfrei. Bezahlen Sie bequem mit PayPal, per Überweisung oder per Nachnahme.</p>',
+    shopText: '<h2>Marokkanische Naturkosmetik aus Frauenkooperativen</h2><p>Bei Khachija finden Sie traditionelle Schönheitsprodukte aus Marokko: schwarze Seife (Savon Beldi) für das Hammam-Ritual, blaues Nila aus der Sahara, Henna- und Sidr-Pulver für die Haarpflege, die Kräutermischung Tabrima und reines Rizinusöl. Alle Produkte werden von Frauenkooperativen in Marokko von Hand hergestellt und aus Hamburg versendet.</p><h2>Versand aus Hamburg</h2><p>Wir liefern mit DHL innerhalb von 1–3 Tagen in ganz Deutschland und in 3–10 Tagen in die EU, ab 49 € versandkostenfrei. Bezahlen Sie bequem mit PayPal, per Überweisung oder per Nachnahme.</p>',
     catIntro: {
       'seifen-hammam': 'Schwarze Seife, Nila-Seife und Aker-Fasi-Seife für das marokkanische Hammam-Ritual zu Hause.',
       'masken-peelings': 'Nila Peeling, Maske und die Kräutermischung Tabrima: traditionelle marokkanische Gesichts- und Körperpflege.',
@@ -1029,7 +1029,7 @@ const SEO = {
   },
   en: {
     shopIntro: 'Buy Moroccan natural cosmetics online: black soap, nila, henna, sidr and castor oil, handmade by women’s cooperatives in Morocco.',
-    shopText: '<h2>Moroccan natural cosmetics from women’s cooperatives</h2><p>Khachija brings you traditional beauty products from Morocco: black soap (savon beldi) for the hammam ritual, blue nila from the Sahara, henna and sidr powder for hair care, the herbal blend Tabrima and pure castor oil. Every product is handmade by women’s cooperatives in Morocco and shipped from Hamburg.</p><h2>Shipped from Hamburg</h2><p>DHL delivery in 2–4 working days across Germany, free from €49. Pay with PayPal, bank transfer or cash on delivery.</p>',
+    shopText: '<h2>Moroccan natural cosmetics from women’s cooperatives</h2><p>Khachija brings you traditional beauty products from Morocco: black soap (savon beldi) for the hammam ritual, blue nila from the Sahara, henna and sidr powder for hair care, the herbal blend Tabrima and pure castor oil. Every product is handmade by women’s cooperatives in Morocco and shipped from Hamburg.</p><h2>Shipped from Hamburg</h2><p>DHL delivery in 1–3 days across Germany and 3–10 days within the EU, free from €49. Pay with PayPal, bank transfer or cash on delivery.</p>',
     catIntro: {
       'seifen-hammam': 'Black soap, nila soap and aker fassi soap for the Moroccan hammam ritual at home.',
       'masken-peelings': 'Nila scrub, mask and the herbal blend Tabrima: traditional Moroccan face and body care.',
@@ -1097,6 +1097,12 @@ for (const [l, v] of Object.entries({
   en: { status: 'Online', today: 'Today', placeholder: 'Write a message…' },
   ar: { status: 'متصل', today: 'اليوم', placeholder: 'اكتبي رسالتك…' },
 })) T[l].waOnline = v;
+
+for (const [l, v] of Object.entries({
+  de: { kicker: 'Im Fokus', title: 'Natürlich schön mit Kaffee', text: 'Unsere Anti-Cellulite Kaffeeseife verbindet fein gemahlenen Kaffee mit traditionellem marokkanischem Seifenhandwerk. Ein Duft, der wach macht, und ein Peeling-Gefühl, das die Haut glatt und gepflegt hinterlässt.', points: ['Straffende Pflege', 'Für glatte Haut', 'Mit natürlichem Kaffee'], cta: 'Zur Kaffeeseife', badge: 'Handgemacht · 150 g', alt: 'Khadija Hakki mit der Anti-Cellulite Kaffeeseife' },
+  en: { kicker: 'In focus', title: 'Naturally beautiful with coffee', text: 'Our anti-cellulite coffee soap combines finely ground coffee with traditional Moroccan soap making. A scent that wakes you up and a gentle scrub that leaves the skin smooth and cared for.', points: ['Firming care', 'For smooth skin', 'With natural coffee'], cta: 'See the coffee soap', badge: 'Handmade · 150 g', alt: 'Khadija Hakki with the anti-cellulite coffee soap' },
+  ar: { kicker: 'في الواجهة', title: 'جمال طبيعي مع القهوة', text: 'صابون القهوة المضاد للسيلوليت يجمع بين القهوة المطحونة ناعمًا وحرفة الصابون المغربية التقليدية. رائحة منعشة وتقشير لطيف يترك البشرة ناعمة ومعتنى بها.', points: ['عناية مشدِّدة', 'لبشرة ناعمة', 'بالقهوة الطبيعية'], cta: 'اكتشفي صابون القهوة', badge: 'صنع يدوي · 150 غ', alt: 'خديجة حقي مع صابون القهوة المضاد للسيلوليت' },
+})) T[l].spot = v;
 
 // Footer credit for the agency that built the shop.
 for (const [l, v] of Object.entries({ de: 'Website von', en: 'Website by', ar: 'تصميم وتطوير' })) T[l].madeBy = v;

@@ -12,7 +12,7 @@ const SESSION_DAYS = 7;
 const LOGIN_LIMITS = [[5, 15 * 60], [20, 24 * 3600]];
 const COOKIE = 'admin_session';
 const SETTING_KEYS = [
-  'store_name', 'whatsapp', 'phone', 'contact_email', 'shipping_fee', 'shipping_rates', 'free_shipping_over', 'free_shipping_all', 'delivery_days',
+  'store_name', 'whatsapp', 'phone', 'contact_email', 'shipping_fee', 'shipping_tiers', 'shipping_rates', 'free_shipping_over', 'free_shipping_all', 'delivery_days',
   'pay_paypal', 'pay_bank', 'pay_cod', 'cod_fee', 'paypal_mode', 'bank_owner', 'bank_iban', 'bank_bic', 'bank_name', 'bank_days',
   'vat_mode', 'vat_rate', 'founder_photo',
   'announcement_de', 'announcement_en', 'announcement_ar',

@@ -4,7 +4,7 @@
 // text with a short note. These are drafts: have them checked (e.g. by a lawyer or a service such as
 // Händlerbund / IT-Recht Kanzlei) before going live.
 
-import { esc, money, countryName, shippingCountries, parseJSON } from './lib.js';
+import { esc, money, countryName, shippingCountries, parseJSON, parseTiers, EU_ZONE } from './lib.js';
 import { formatIban } from './girocode.js';
 
 export const LEGAL_PAGES = ['impressum', 'agb', 'widerruf', 'datenschutz', 'versand'];
@@ -27,6 +27,27 @@ function info(s) {
 
 const p = (...lines) => lines.map((l) => `<p>${l}</p>`).join('');
 const ul = (items) => `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+
+function tierTable(tiers, lang, head) {
+  const kg = (g) => `${String(g / 1000).replace('.', lang === 'en' ? '.' : ',')} kg`;
+  return `<table class="legal-table" aria-label="${esc(head)}"><thead><tr><th>${lang === 'en' ? 'Parcel weight' : 'Paketgewicht'}</th><th>${lang === 'en' ? 'Price (DHL, tracked)' : 'Preis (DHL, mit Sendungsverfolgung)'}</th></tr></thead><tbody>${tiers.map(([g, c]) => `<tr><td>${lang === 'en' ? 'up to' : 'bis'} ${kg(g)}</td><td>${esc(money(c, lang))}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function shippingTables(s, lang) {
+  const t = parseTiers(s.shipping_tiers);
+  if (!t.DE && !t.EU) return shippingTable(s, lang);
+  const free = Number(s.free_shipping_over) || 0;
+  const en = lang === 'en';
+  const rates = parseJSON(s.shipping_rates || '{}', {});
+  const others = shippingCountries(s).filter((c) => c !== 'DE' && !EU_ZONE.has(c) && rates[c] != null);
+  const euList = shippingCountries(s).filter((c) => EU_ZONE.has(c)).map((c) => countryName(c, en ? 'en' : 'de')).join(', ');
+  return [
+    t.DE ? `<h3>${en ? 'Germany' : 'Deutschland'}</h3>${tierTable(t.DE, lang, en ? 'Germany' : 'Deutschland')}${free ? p(en ? `Free shipping within Germany from ${esc(money(free, lang))} order value.` : `Ab ${esc(money(free, lang))} Bestellwert versenden wir innerhalb Deutschlands kostenlos.`) : ''}` : '',
+    t.EU ? `<h3>${en ? 'European Union (DHL zone 1)' : 'Europäische Union (DHL Zone 1)'}</h3>${tierTable(t.EU, lang, 'EU')}${p(`${en ? 'Countries we ship to' : 'Lieferländer'}: ${esc(euList)}. ${en ? 'No customs documents are needed within the EU.' : 'Für Sendungen in die EU sind keine Zollunterlagen nötig.'}`)}` : '',
+    others.length ? `<h3>${en ? 'Other countries' : 'Weitere Länder'}</h3><table class="legal-table"><tbody>${others.map((c) => `<tr><td>${esc(countryName(c, en ? 'en' : 'de'))}</td><td>${esc(money(Number(rates[c]) || 0, lang))}</td></tr>`).join('')}</tbody></table>` : '',
+    p(en ? 'The price depends on the total weight of your parcel and is calculated automatically in the cart and at checkout.' : 'Der Preis richtet sich nach dem Gesamtgewicht Ihres Pakets und wird im Warenkorb und an der Kasse automatisch berechnet.'),
+  ].join('');
+}
 
 function shippingTable(s, lang) {
   const rates = parseJSON(s.shipping_rates || '{}', {});
@@ -113,8 +134,8 @@ const DE = {
     return {
       title: 'Versand & Zahlung',
       sections: [
-        ['Versandkosten', `${shippingTable(s, 'de')}${p('Alle Preise sind Endpreise. Wir versenden mit DHL aus Hamburg.')}`],
-        ['Lieferzeit', p(`Innerhalb Deutschlands ${esc(s.delivery_days || '2-4').replace('-', '–')} Werktage, ins Ausland ca. 4–8 Werktage. Bei Vorkasse beginnt die Lieferzeit mit dem Zahlungseingang.`)],
+        ['Versandkosten', `${shippingTables(s, 'de')}${p(s.vat_mode === 'included' ? 'Alle angegebenen Versandkosten verstehen sich inklusive der gesetzlichen Mehrwertsteuer. Wir versenden mit DHL aus Hamburg.' : 'Alle angegebenen Versandkosten sind Endpreise. Als Kleinunternehmerin im Sinne von § 19 UStG berechnen wir keine Umsatzsteuer. Wir versenden mit DHL aus Hamburg.')}`],
+        ['Lieferzeit', p(`Soweit im jeweiligen Angebot keine andere Frist angegeben ist, erfolgt die Lieferung der Ware im Inland (Deutschland) innerhalb von ${esc(s.delivery_days || '1-3').replace('-', '–')} Tagen, bei Auslandslieferungen innerhalb von 3–10 Tagen nach Vertragsschluss (bei vereinbarter Vorauszahlung nach dem Zeitpunkt Ihrer Zahlungsanweisung). Beachten Sie, dass an Sonn- und Feiertagen keine Zustellung erfolgt.`)],
         ['Zahlungsarten', ul([
           '<strong>PayPal</strong>: auch Kreditkarte, Lastschrift und „Später bezahlen“ über PayPal. Die Zahlung erfolgt direkt bei der Bestellung.',
           `<strong>Vorkasse / Überweisung</strong>: Sie erhalten unsere Bankverbindung in der Bestellbestätigung. Bitte überweisen Sie innerhalb von ${days} Tagen und geben Sie die Bestellnummer als Verwendungszweck an. Wir versenden nach Zahlungseingang.${s.bank_iban ? ` IBAN: ${esc(formatIban(s.bank_iban))}` : ''}`,
@@ -184,8 +205,8 @@ const EN = {
   versand: (s) => ({
     title: 'Shipping & payment',
     sections: [
-      ['Shipping costs', `${shippingTable(s, 'en')}${p('We ship with DHL from Hamburg.')}`],
-      ['Delivery time', p(`Germany: ${esc(s.delivery_days || '2-4').replace('-', '–')} working days. Other countries: about 4–8 working days. With bank transfer, delivery time starts when the payment arrives.`)],
+      ['Shipping costs', `${shippingTables(s, 'en')}${p(s.vat_mode === 'included' ? 'All stated shipping costs include statutory VAT. We ship with DHL from Hamburg.' : 'All stated shipping costs are final prices. As a small business under § 19 UStG we do not charge VAT. We ship with DHL from Hamburg.')}`],
+      ['Delivery time', p(`Unless a different timeframe is specified in the respective product listing, goods will be delivered within ${esc(s.delivery_days || '1-3').replace('-', '–')} days for domestic shipments (Germany) and within 3–10 days for international shipments, following the conclusion of the contract (or, in the case of agreed-upon advance payment, from the moment you initiate the payment). Please note that no deliveries are made on Sundays or public holidays.`)],
       ['Payment methods', ul(['<strong>PayPal</strong>: including card, direct debit and Pay Later through PayPal.', `<strong>Bank transfer in advance</strong>: please pay within ${esc(s.bank_days || '7')} days using your order number as reference. We ship after the payment arrives.`, `<strong>Cash on delivery (DHL)</strong>: Germany only, fee ${esc(money(Number(s.cod_fee) || 0, 'en'))}.`])],
     ],
   }),

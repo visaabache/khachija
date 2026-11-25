@@ -55,9 +55,47 @@ export const COUNTRIES = {
   ES: { de: 'Spanien', en: 'Spain', ar: 'إسبانيا', zip: /^\d{5}$/ },
 };
 
+// DHL "Zone 1" (European Union) as in the DHL price list.
+export const EU_ZONE = new Set(['AT', 'BE', 'BG', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MC', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK']);
+
+// Weight tiers from the admin, one zone per line: "DE: 2=5,19; 5=7,69" (kg = euros) → { DE: [[2000, 519], [5000, 769]] }.
+export function parseTiers(text) {
+  const out = {};
+  for (const line of String(text || '').split(/\n+/)) {
+    const m = line.match(/^\s*([A-Za-z]{2})\s*:\s*(.+)$/);
+    if (!m) continue;
+    const tiers = m[2]
+      .split(/[;|]/)
+      .map((part) => part.split('='))
+      .map(([kg, eur]) => [Math.round(Number(String(kg).trim().replace(',', '.')) * 1000), Math.round(Number(String(eur).trim().replace(/\s|€/g, '').replace(',', '.')) * 100)])
+      .filter(([g, c]) => g > 0 && c >= 0)
+      .sort((a, b) => a[0] - b[0]);
+    if (tiers.length) out[m[1].toUpperCase()] = tiers;
+  }
+  return out;
+}
+
+export function shippingZone(country) {
+  return country === 'DE' ? 'DE' : EU_ZONE.has(country) ? 'EU' : null;
+}
+
+// Estimated parcel weight in grams: contents plus the jar or bottle, plus the box.
+export function itemGrams(p) {
+  const a = Number(p?.unit_amount) || 0;
+  if (p?.unit_type === 'g' && a > 0) return a + 60;
+  if (p?.unit_type === 'ml' && a > 0) return a + 120;
+  return 250;
+}
+export function parcelGrams(lines) {
+  const items = (lines || []).reduce((s, l) => s + itemGrams(l.product) * (l.qty || 1), 0);
+  return items ? items + 300 : 0;
+}
+
 export function shippingCountries(settings) {
   const rates = parseJSON(settings.shipping_rates || '{}', {});
-  return ['DE', ...Object.keys(rates).filter((c) => c !== 'DE' && COUNTRIES[c])];
+  const tiers = parseTiers(settings.shipping_tiers);
+  const eu = tiers.EU ? Object.keys(COUNTRIES).filter((c) => EU_ZONE.has(c)) : [];
+  return ['DE', ...new Set([...eu, ...Object.keys(rates).filter((c) => c !== 'DE' && COUNTRIES[c])])];
 }
 
 export function countryName(code, lang) {
@@ -219,10 +257,13 @@ export function orderNumber(date = new Date()) {
 }
 
 // Shipping for a country: free above the threshold (Germany only unless free_shipping_all is set), else the rate.
-export function shippingFor(country, subtotal, settings) {
+export function shippingFor(country, subtotal, settings, grams = 0) {
   const c = country || 'DE';
   const free = Number(settings.free_shipping_over) || 0;
   if (free > 0 && subtotal >= free && (c === 'DE' || settings.free_shipping_all === '1')) return 0;
+  // Weight-based DHL prices when the shop has tiers for this zone (heavier than the last tier: the last price).
+  const tiers = parseTiers(settings.shipping_tiers)[shippingZone(c)];
+  if (tiers) return (tiers.find(([max]) => grams <= max) || tiers[tiers.length - 1])[1];
   if (c === 'DE') return Math.max(0, Math.round(Number(settings.shipping_fee) || 0));
   const rates = parseJSON(settings.shipping_rates || '{}', {});
   return rates[c] != null ? Math.max(0, Math.round(Number(rates[c]) || 0)) : null;
@@ -481,7 +522,7 @@ export async function quote(db, rawItems, { country = 'DE', method = '' } = {}, 
     lines.push({ product: p, id: p.id, option: choice.key, choice, qty, price: unit, total: deal.total, bundle: deal.tier, saved: deal.saved });
   }
   const subtotal = lines.reduce((s, l) => s + l.total, 0);
-  const ship = shippingFor(country, subtotal, settings);
+  const ship = shippingFor(country, subtotal, settings, parcelGrams(lines));
   const shipping = ship == null ? 0 : ship;
   const fee = paymentFee(method, settings);
   const total = subtotal + shipping + fee;
