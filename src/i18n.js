@@ -1078,5 +1078,7 @@ for (const [l, v] of Object.entries({
   ar: ['اسحبي للأعلى', 'تابعي التمرير', 'تابعي إلى المنتجات'],
 })) [T[l].hsSwipe, T[l].hsScroll, T[l].hsDone] = v;
 
+for (const [l, v] of Object.entries({ de: 'Nach oben', en: 'Back to top', ar: 'العودة إلى الأعلى' })) T[l].toTop = v;
+
 // Footer credit for the agency that built the shop.
 for (const [l, v] of Object.entries({ de: 'Website von', en: 'Website by', ar: 'تصميم وتطوير' })) T[l].madeBy = v;

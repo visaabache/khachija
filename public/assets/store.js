@@ -248,6 +248,28 @@
   }
 
   // Share this page: the phone's share sheet, or copy the link.
+  // Back to top: appears in the side rail once the visitor has scrolled; the gold ring shows how far down the page they are.
+  const toTop = $('[data-to-top]');
+  if (toTop) {
+    const rail = toTop.parentElement;
+    let ticking = false;
+    const onScroll = () => {
+      ticking = false;
+      const max = document.documentElement.scrollHeight - innerHeight;
+      const on = scrollY > Math.min(600, innerHeight * 0.8);
+      rail.classList.toggle('top-on', on);
+      toTop.tabIndex = on ? 0 : -1;
+      toTop.style.setProperty('--p', max > 0 ? Math.min(1, scrollY / max).toFixed(3) : 0);
+    };
+    addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+    onScroll();
+    toTop.addEventListener('click', () => {
+      scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+      const skip = $('#main') || document.body;
+      setTimeout(() => { skip.setAttribute('tabindex', '-1'); skip.focus({ preventScroll: true }); }, reduceMotion ? 0 : 600);
+    });
+  }
+
   $$('[data-share-page]').forEach((b) =>
     b.addEventListener('click', async () => {
       const data = { title: document.title, url: location.href };

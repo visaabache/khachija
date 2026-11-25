@@ -164,10 +164,10 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=16">
+<link rel="stylesheet" href="/assets/style.css?v=17">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=7" defer></script>
+<script src="/assets/store.js?v=8" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
 <div class="scroll-progress" aria-hidden="true"></div>
@@ -211,6 +211,7 @@ ${minimal ? '' : `<div class="drawer-back" data-drawer-close hidden></div>
 <div class="side-rail" aria-label="${esc(t.recent)}">
   <button type="button" data-drawer="recent" aria-label="${esc(t.recent)}" title="${esc(t.recent)}">${icon('history', 24)}</button>
   <button type="button" data-share-page aria-label="${esc(t.share)}" title="${esc(t.share)}">${icon('share', 24)}</button>
+  <button type="button" class="rail-top" data-to-top aria-label="${esc(t.toTop)}" title="${esc(t.toTop)}" tabindex="-1"><svg class="rail-ring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15"/></svg><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
 </div>`}
 <main id="main">
 ${body}
