@@ -167,7 +167,7 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=31">
+<link rel="stylesheet" href="/assets/style.css?v=33">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
 <script src="/assets/store.js?v=9" defer></script>
@@ -232,6 +232,7 @@ ${body}
 ${minimal ? '' : EDGE}
 <footer class="foot">
   ${minimal ? '' : `<div class="foot-pattern" aria-hidden="true"></div>
+  <div class="wrap foot-trust">${t.trust.map(([ic, h, x]) => `<div class="ft-item">${icon(ic, 22)}<span><strong>${esc(h)}</strong><small>${esc(x)}</small></span></div>`).join('')}</div>
   <div class="wrap foot-grid">
     <div class="foot-brand">
       <img class="foot-logo" src="/assets/brand/logo-full-white.svg" alt="${esc(store)}" width="150" height="230" loading="lazy">
@@ -247,6 +248,7 @@ ${minimal ? '' : EDGE}
       ${settings.legal_address ? `<li>${icon('pin', 18)}<span>${esc(settings.legal_address)}</span></li>` : ''}
     </ul><h3>${esc(t.paymentOptions)}</h3>${payBadges()}</div>
   </div>`}
+  ${minimal ? '' : '<span class="foot-word" aria-hidden="true">Khachija</span>'}
   <div class="wrap foot-bottom"><span>© ${new Date().getUTCFullYear()} ${esc(store)} · ${esc(t.rights)}</span>${minimal ? `<span class="foot-links">${LEGAL_PAGES.map((k) => `<a href="/${lang}/${k}">${esc(t.legal[k])}</a>`).join(' · ')}</span>` : ''}${pixels ? `<button type="button" class="link-btn" data-consent-open>${esc(t.cookieSettings)}</button>` : ''}<span class="langs">${langLinks}</span><a class="made-by" href="https://abachedev.com/${lang === 'ar' ? 'ar/' : 'en/'}" target="_blank" rel="noopener">${esc(t.madeBy)} <strong>AbacheDev</strong></a></div>
 </footer>
 ${minimal ? '' : `<nav class="tabbar" aria-label="${esc(t.shop)}" style="--ti:${{ home: 0, shop: 1, category: 1, product: 1, cart: 2 }[page] ?? -1}">
