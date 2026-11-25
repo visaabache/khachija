@@ -167,10 +167,10 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=33">
+<link rel="stylesheet" href="/assets/style.css?v=35">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=9" defer></script>
+<script src="/assets/store.js?v=10" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
 ${minimal ? '' : `<template id="welcome-tpl"><div class="welcome" aria-hidden="true"><div class="welcome-in"><span class="welcome-seal"><svg class="welcome-ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56"/></svg><img src="/assets/brand/symbol-gold.svg" alt="" width="84" height="84"></span><p class="welcome-hello">${esc(t.welcome[0])}</p><p class="welcome-name">${[...'KHACHIJA'].map((ch, i) => `<span style="--i:${i}">${ch}</span>`).join('')}</p><p class="welcome-line">${esc(t.welcome[1])}</p></div><span class="welcome-skip">${esc(t.welcome[2])}</span></div></template><script src="/assets/welcome.js?v=1"></script>`}
@@ -248,7 +248,6 @@ ${minimal ? '' : EDGE}
       ${settings.legal_address ? `<li>${icon('pin', 18)}<span>${esc(settings.legal_address)}</span></li>` : ''}
     </ul><h3>${esc(t.paymentOptions)}</h3>${payBadges()}</div>
   </div>`}
-  ${minimal ? '' : '<span class="foot-word" aria-hidden="true">Khachija</span>'}
   <div class="wrap foot-bottom"><span>© ${new Date().getUTCFullYear()} ${esc(store)} · ${esc(t.rights)}</span>${minimal ? `<span class="foot-links">${LEGAL_PAGES.map((k) => `<a href="/${lang}/${k}">${esc(t.legal[k])}</a>`).join(' · ')}</span>` : ''}${pixels ? `<button type="button" class="link-btn" data-consent-open>${esc(t.cookieSettings)}</button>` : ''}<span class="langs">${langLinks}</span><a class="made-by" href="https://abachedev.com/${lang === 'ar' ? 'ar/' : 'en/'}" target="_blank" rel="noopener">${esc(t.madeBy)} <strong>AbacheDev</strong></a></div>
 </footer>
 ${minimal ? '' : `<nav class="tabbar" aria-label="${esc(t.shop)}" style="--ti:${{ home: 0, shop: 1, category: 1, product: 1, cart: 2 }[page] ?? -1}">
@@ -274,9 +273,21 @@ function waWidget(ctx, product) {
   const chips = (product ? t.waChipsProduct : t.waChips).map((c) => [c, `${c}${ref}`]);
   return `<div class="wa-widget" data-wa>
   <div class="wa-panel" id="wa-panel" role="dialog" aria-labelledby="wa-title" hidden>
-    <div class="wa-head"><img src="/assets/brand/symbol-white.svg" alt="" width="34" height="34"><div><strong id="wa-title">${esc(store)}</strong><small>${esc(t.waReplies)}</small></div><button type="button" class="wa-close" data-wa-close aria-label="${esc(t.close)}">×</button></div>
-    <div class="wa-body"><p class="wa-bubble">${esc(t.waHello)}</p><div class="wa-chips">${chips.map(([label, text]) => `<a href="${esc(waLink(number, text))}" rel="noopener" target="_blank">${esc(label)}</a>`).join('')}</div></div>
-    <a class="wa-start" href="${esc(waLink(number, ref.trim()))}" rel="noopener" target="_blank">${waIcon(18)} ${esc(t.waStart)}</a>
+    <div class="wa-head">
+      <span class="wa-avatar"><img src="/assets/brand/symbol-gold.svg" alt="" width="30" height="30"><i class="wa-online" aria-hidden="true"></i></span>
+      <div><strong id="wa-title">${esc(store)}</strong><small><span class="wa-live">${esc(t.waOnline.status)}</span> · ${esc(t.waReplies)}</small></div>
+      <button type="button" class="wa-close" data-wa-close aria-label="${esc(t.close)}">${icon('close', 18)}</button>
+    </div>
+    <div class="wa-body">
+      <span class="wa-day">${esc(t.waOnline.today)}</span>
+      <div class="wa-typing" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p class="wa-bubble"><span>${esc(t.waHello)}</span><time data-wa-time></time></p>
+      <div class="wa-chips">${chips.map(([label, text], i) => `<a href="${esc(waLink(number, text))}" rel="noopener" target="_blank" style="--i:${i}"><span>${esc(label)}</span>${icon('arrow', 16)}</a>`).join('')}</div>
+    </div>
+    <form class="wa-compose" data-wa-compose data-wa-number="${esc(String(number || '').replace(/\D/g, ''))}" data-wa-ref="${esc(ref.trim())}">
+      <input name="msg" type="text" autocomplete="off" placeholder="${esc(t.waOnline.placeholder)}" aria-label="${esc(t.waOnline.placeholder)}" maxlength="500">
+      <button type="submit" aria-label="${esc(t.waStart)}">${icon('arrow', 20)}</button>
+    </form>
   </div>
   <a class="wa-float" href="${esc(waLink(number, ref.trim()))}" rel="noopener" target="_blank" aria-label="${esc(t.whatsappUs)}" aria-controls="wa-panel" aria-expanded="false" data-wa-toggle>${waIcon(26)}</a>
 </div>`;

@@ -1092,5 +1092,11 @@ for (const [l, v] of Object.entries({
   ar: { ring: 'خديجة حقي · المؤسِّسة · من الأطلس إلى هامبورغ · صنع يدوي · ', route: 'من جبال الأطلس إلى هامبورغ', from: 'الأطلس', fromSub: 'المغرب · التعاونية', toSub: 'الشحن إليكِ' },
 })) T[l].saga = v;
 
+for (const [l, v] of Object.entries({
+  de: { status: 'Online', today: 'Heute', placeholder: 'Nachricht schreiben…' },
+  en: { status: 'Online', today: 'Today', placeholder: 'Write a message…' },
+  ar: { status: 'متصل', today: 'اليوم', placeholder: 'اكتبي رسالتك…' },
+})) T[l].waOnline = v;
+
 // Footer credit for the agency that built the shop.
 for (const [l, v] of Object.entries({ de: 'Website von', en: 'Website by', ar: 'تصميم وتطوير' })) T[l].madeBy = v;

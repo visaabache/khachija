@@ -1440,3 +1440,48 @@ html.welcoming { overflow: hidden; }
 .foot-bottom { padding-inline-start: max(0px, calc(92px - (100vw - var(--wrap)) / 2)); }
 @media (max-width: 999px) { .foot-bottom { padding-inline-start: 74px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); } }
 .minimal .foot-bottom { padding-inline-start: 0; }
+
+/* ═════════ WhatsApp: modern chat card, always inside the screen below the header ═════════ */
+.wa-panel { bottom: 72px; width: min(370px, calc(100vw - 32px)); max-height: calc(100svh - var(--hdr, 120px) - 110px); display: flex; flex-direction: column; overflow: hidden; border: 0; border-radius: 24px; background: #fbf8f2; box-shadow: 0 0 0 1px rgba(184, 129, 47, 0.25), 0 40px 80px -24px rgba(11, 29, 22, 0.55); opacity: 0; transform: translateY(14px) scale(0.96); transition: opacity 0.25s var(--ease), transform 0.3s var(--ease); }
+.wa-panel.open { opacity: 1; transform: none; }
+.wa-head { flex: none; gap: 12px; padding: 16px 16px 16px 18px; background: radial-gradient(90% 120% at 100% 0%, #2f5e4a, transparent 70%), linear-gradient(160deg, #16352a, #0b1d16); color: #fff; box-shadow: inset 0 -1px 0 rgba(227, 196, 138, 0.3); }
+.wa-avatar { position: relative; flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.08); box-shadow: inset 0 0 0 1px rgba(227, 196, 138, 0.5); }
+.wa-online { position: absolute; right: 1px; bottom: 1px; width: 12px; height: 12px; border-radius: 50%; background: #25d366; box-shadow: 0 0 0 2px #10271e; animation: pulse 2s infinite; }
+.wa-head strong { font: 500 1.2rem/1.2 var(--serif); }
+.wa-head small { opacity: 1; color: rgba(244, 234, 216, 0.7); font-size: 0.72rem; }
+.wa-live { color: #6fe3a0; font-weight: 500; }
+.wa-close { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.08); color: #fff; transition: background 0.2s, transform 0.3s var(--ease); }
+.wa-close:hover { background: rgba(255, 255, 255, 0.16); transform: rotate(90deg); }
+.wa-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 10px; padding: 16px; background: radial-gradient(120% 60% at 0% 0%, #f6eddd, transparent 70%), #f4ede0; }
+.wa-day { align-self: center; padding: 3px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.75); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+[lang='ar'] .wa-day { letter-spacing: 0; }
+.wa-typing { align-self: flex-start; display: inline-flex; gap: 4px; padding: 12px 14px; border-radius: 18px 18px 18px 4px; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06); }
+[dir='rtl'] .wa-typing { border-radius: 18px 18px 4px 18px; }
+.wa-typing i { width: 7px; height: 7px; border-radius: 50%; background: #b9ab96; animation: wtype 1s infinite ease-in-out; }
+.wa-typing i:nth-child(2) { animation-delay: 0.15s; } .wa-typing i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes wtype { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
+.wa-bubble { position: relative; align-self: flex-start; max-width: 88%; margin: 0; padding: 12px 14px 22px; border: 0; border-radius: 18px 18px 18px 4px; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06); font-size: 0.9rem; line-height: 1.5; display: none; }
+[dir='rtl'] .wa-bubble { border-radius: 18px 18px 4px 18px; }
+.wa-bubble time { position: absolute; right: 12px; bottom: 6px; font-size: 0.64rem; color: var(--muted); }
+[dir='rtl'] .wa-bubble time { right: auto; left: 12px; }
+.wa-panel.typed .wa-typing { display: none; }
+.wa-panel.typed .wa-bubble { display: block; animation: fadeUp 0.35s var(--ease); }
+.wa-chips { display: none; gap: 8px; margin-top: 4px; }
+.wa-panel.typed .wa-chips { display: grid; }
+.wa-chips a { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 14px; border: 0; border-radius: 14px; background: #fff; color: var(--green); font-size: 0.86rem; font-weight: 500; text-decoration: none; box-shadow: inset 0 0 0 1px rgba(47, 94, 74, 0.25); opacity: 0; animation: fadeUp 0.4s var(--ease) forwards; animation-delay: calc(0.15s + var(--i) * 0.08s); transition: background 0.2s, color 0.2s, box-shadow 0.2s; }
+.wa-chips a:hover { background: var(--green); color: #fff; box-shadow: none; }
+.wa-chips a .icon { flex: none; transition: transform 0.25s var(--ease); }
+.wa-chips a:hover .icon { transform: translateX(3px); }
+[dir='rtl'] .wa-chips a .icon { transform: scaleX(-1); }
+.wa-compose { flex: none; display: flex; gap: 8px; padding: 10px; background: #fbf8f2; box-shadow: inset 0 1px 0 rgba(184, 129, 47, 0.2); }
+.wa-compose input { flex: 1; min-width: 0; height: 46px; padding: 0 16px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); font: inherit; font-size: 0.9rem; }
+.wa-compose input:focus { outline: none; box-shadow: inset 0 0 0 2px #25d366; }
+.wa-compose button { flex: none; width: 46px; height: 46px; border: 0; border-radius: 50%; display: grid; place-items: center; background: #25d366; color: #fff; box-shadow: 0 10px 20px -10px rgba(37, 211, 102, 0.9); transition: transform 0.2s; }
+.wa-compose button:hover { transform: scale(1.06); }
+[dir='rtl'] .wa-compose button .icon { transform: scaleX(-1); }
+.wa-start { display: none; }
+.wa-widget.is-open .wa-float { transform: rotate(90deg) scale(0.92); }
+.wa-float { transition: transform 0.35s var(--ease); }
+@media (max-width: 999px) { .wa-panel { max-height: calc(100svh - var(--hdr, 110px) - 200px); } }
+@media (prefers-reduced-motion: reduce) { .wa-panel, .wa-chips a, .wa-bubble { transition: none; animation: none; opacity: 1; } .wa-typing i, .wa-online { animation: none; } }
+.wa-widget.is-open .wa-float { transform: scale(0.9); box-shadow: 0 0 0 4px rgba(37, 211, 102, 0.25), 0 12px 30px -8px rgba(37, 211, 102, 0.6); }

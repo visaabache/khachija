@@ -452,14 +452,35 @@
   if (wa) {
     const panel = wa.querySelector('.wa-panel');
     const toggle = wa.querySelector('[data-wa-toggle]');
+    const time = wa.querySelector('[data-wa-time]');
+    const setOpen = (on) => {
+      if (on) {
+        panel.hidden = false;
+        if (time) time.textContent = new Date().toLocaleTimeString(document.documentElement.lang || 'de', { hour: '2-digit', minute: '2-digit' });
+        panel.classList.remove('typed');
+        requestAnimationFrame(() => panel.classList.add('open'));
+        setTimeout(() => panel.classList.add('typed'), reduceMotion ? 0 : 1100);
+      } else {
+        panel.classList.remove('open');
+        setTimeout(() => { if (!panel.classList.contains('open')) panel.hidden = true; }, reduceMotion ? 0 : 260);
+      }
+      wa.classList.toggle('is-open', on);
+      toggle.setAttribute('aria-expanded', String(on));
+    };
     toggle.addEventListener('click', (e) => {
       e.preventDefault();
-      panel.hidden = !panel.hidden;
-      toggle.setAttribute('aria-expanded', String(!panel.hidden));
+      setOpen(panel.hidden);
     });
-    wa.querySelector('[data-wa-close]').addEventListener('click', () => {
-      panel.hidden = true;
-      toggle.setAttribute('aria-expanded', 'false');
+    wa.querySelector('[data-wa-close]').addEventListener('click', () => setOpen(false));
+    document.addEventListener('keydown', (e) => e.key === 'Escape' && !panel.hidden && setOpen(false));
+    const form = wa.querySelector('[data-wa-compose]');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = [form.msg.value.trim(), form.dataset.waRef].filter(Boolean).join('\n');
+      const n = form.dataset.waNumber;
+      if (!n) return;
+      window.open(`https://wa.me/${n}${text ? `?text=${encodeURIComponent(text)}` : ''}`, '_blank', 'noopener');
+      form.msg.value = '';
     });
   }
 
