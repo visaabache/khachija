@@ -759,15 +759,6 @@
     `<div class="lang-switch ${cls}" role="group" aria-label="${L.language}">${icon('globe', 18)}${ADMIN_LANGS.map(([l, t]) => `<button type="button" data-lang="${l}" lang="${l}" title="${LANG_LABEL[l]}" aria-pressed="${l === lang}"${l === lang ? ' class="on"' : ''}>${t}</button>`).join('')}</div>`;
 
   // Login
-  // Animated backdrop of the login page: drifting glows, a moving gold floor grid and rising sparks.
-  function loginBackdrop() {
-    const sparks = Array.from({ length: 22 }, () => {
-      const r = (a, b) => (a + Math.random() * (b - a)).toFixed(2);
-      return `<i class="spark" style="--x:${r(0, 100)}%;--s:${r(2, 5)}px;--d:${r(7, 14)}s;--t:-${r(0, 14)}s;--dx:${r(-40, 40)}px"></i>`;
-    }).join('');
-    return `<div class="login-fx" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i>${sparks}</div>`;
-  }
-
   // Cloudflare Turnstile on the login (when the shop has it set up): an invisible check that a
   // person is signing in, on top of the attempt limit. Its key comes from /login-config.
   let tsLogin = null;
@@ -805,16 +796,31 @@
   function login() {
     loginTurnstile();
     document.body.className = 'is-login';
-    app.innerHTML = `${loginBackdrop()}<form class="login" id="login">
-      <div class="login-top"><span class="login-logo-wrap"><img src="/assets/brand/logo-horizontal.svg" alt="Khachija" class="login-logo"></span>${langButton()}</div>
+    const X = {
+      ar: { greet: ['صباح الخير', 'مساء الخير', 'مساء الخير'], quote: '«كل منتج يحمل يدي امرأة من التعاونية وقصة قريتي.»', sign: 'خديجة حقي · هامبورغ', secure: 'دخول محمي ومشفّر', back: 'العودة إلى المتجر', show: 'إظهار كلمة المرور', caps: 'زر الأحرف الكبيرة مفعّل' },
+      fr: { greet: ['Bonjour', 'Bon après-midi', 'Bonsoir'], quote: '« Chaque produit porte les mains d’une femme de la coopérative et l’histoire de mon village. »', sign: 'Khadija Hakki · Hambourg', secure: 'Connexion protégée et chiffrée', back: 'Retour à la boutique', show: 'Afficher le mot de passe', caps: 'Verr. Maj activé' },
+      en: { greet: ['Good morning', 'Good afternoon', 'Good evening'], quote: '“Every product carries the hands of a woman from the cooperative, and the story of my village.”', sign: 'Khadija Hakki · Hamburg', secure: 'Protected, encrypted sign-in', back: 'Back to the shop', show: 'Show password', caps: 'Caps Lock is on' },
+    }[lang] || {};
+    const h = new Date().getHours();
+    const greet = X.greet[h < 12 ? 0 : h < 18 ? 1 : 2];
+    const eye = '<svg class="eye-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 5.1A9.7 9.7 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7c1.7 0 3.2-.5 4.5-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+    const lock = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    app.innerHTML = `<section class="lg-stage" aria-hidden="true">${calm ? '' : '<video autoplay muted loop playsinline preload="auto" poster="/assets/video/kooperative-poster.webp"><source src="/assets/video/kooperative-loop.mp4" type="video/mp4"></video>'}
+      <div class="lg-stage-in"><img src="/assets/brand/symbol-gold.svg" alt=""><p class="lg-quote">${X.quote}</p><p class="lg-sign">${X.sign}</p></div></section>
+    <div class="lg-panel"><form class="login" id="login">
+      <div class="login-top"><img src="/assets/brand/logo-horizontal.svg" alt="Khachija" class="login-logo">${langButton()}</div>
+      <p class="lg-greet">${greet}</p>
       <h1>${L.sellerSpace}</h1>
       <p class="muted">${L.loginHint}</p>
-      <label>${L.password}<input type="password" name="password" autocomplete="current-password" required autofocus dir="ltr"></label>
-      <label class="totp-field" hidden>${{ ar: 'رمز التحقق (تطبيق المصادقة)', fr: 'Code de vérification (application d’authentification)', en: 'Verification code (authenticator app)' }[lang]}<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" dir="ltr" placeholder="123456"></label>
+      <label>${L.password}<span class="pw-wrap"><input type="password" name="password" autocomplete="current-password" required autofocus dir="ltr"><button type="button" class="pw-eye" aria-label="${X.show}" aria-pressed="false">${eye}</button></span></label>
+      <p class="caps" hidden>${X.caps}</p>
+      <label class="totp-field" hidden>${{ ar: 'رمز التحقق (تطبيق المصادقة)', fr: 'Code de vérification (application d’authentification)', en: 'Verification code (authenticator app)' }[lang]}<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" dir="ltr" placeholder="••••••"></label>
       <div class="ts-box"></div>
       <button class="btn btn-lg login-go"><span>${L.signIn}</span></button>
       <p class="error" hidden></p>
-    </form>`;
+      <div class="lg-foot"><span>${lock} ${X.secure}</span><a href="/">${lang === 'ar' ? '→' : '←'} ${X.back}</a></div>
+    </form></div>`;
     const f = document.getElementById('login');
     fetch('/api/admin/login-config', { credentials: 'same-origin' }).then((r) => r.json()).then((c) => {
       if (!c.totp) return;
@@ -822,18 +828,21 @@
       box.hidden = false;
       box.querySelector('input').required = true;
     }).catch(() => {});
-    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // A slight 3D tilt of the card that follows the mouse (computers only).
-    if (!calm && matchMedia('(pointer: fine)').matches) {
-      const tilt = (e) => {
-        if (!f.isConnected) return document.removeEventListener('pointermove', tilt);
-        const x = e.clientX / innerWidth - 0.5;
-        const y = e.clientY / innerHeight - 0.5;
-        f.style.setProperty('--ry', `${(x * 7).toFixed(2)}deg`);
-        f.style.setProperty('--rx', `${(-y * 7).toFixed(2)}deg`);
-      };
-      document.addEventListener('pointermove', tilt);
-    }
+    const eyeBtn = f.querySelector('.pw-eye');
+    eyeBtn.addEventListener('click', () => {
+      const on = f.password.type === 'password';
+      f.password.type = on ? 'text' : 'password';
+      eyeBtn.classList.toggle('on', on);
+      eyeBtn.setAttribute('aria-pressed', String(on));
+      f.password.focus();
+    });
+    const caps = f.querySelector('.caps');
+    f.password.addEventListener('keyup', (e) => { if (e.getModifierState) caps.hidden = !e.getModifierState('CapsLock'); });
+    // The 2FA box: digits only, and sign in by itself once the sixth digit is typed.
+    f.code.addEventListener('input', () => {
+      f.code.value = f.code.value.replace(/\D/g, '').slice(0, 6);
+      if (f.code.value.length === 6 && f.password.value) f.requestSubmit();
+    });
     f.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = f.querySelector('.login-go');
