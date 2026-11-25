@@ -517,3 +517,88 @@ details summary { cursor: pointer; }
 @keyframes lg-shake { 10%, 90% { translate: -2px 0; } 20%, 80% { translate: 4px 0; } 30%, 50%, 70% { translate: -9px 0; } 40%, 60% { translate: 9px 0; } }
 @keyframes lg-open { to { opacity: 0; scale: 1.04; filter: blur(6px); } }
 @media (prefers-reduced-motion: reduce) { .is-login .login, .is-login .login > *, .lg-stage-in img, .is-login .login-go::before { animation: none !important; } }
+
+/* ═════════ Khachija admin theme: deep emerald, warm ivory, argan gold ═════════ */
+:root { --ink: #10271e; --ink-2: #1f4a39; --majorelle: #2f5e4a; --majorelle-2: #4f8a70; --gold: #c9a25c; --gold-soft: #f3e3c0;
+  --text: #22201b; --muted: #7d6c5a; --line: #ece3d3; --bg: #f7f2e9; --card: #fffdf9; --mint: #2f6b45;
+  --shadow: 0 1px 2px rgb(42 33 24 / 0.04), 0 12px 30px -18px rgb(42 33 24 / 0.22); }
+body:not(.is-login) { background: radial-gradient(60% 40% at 100% 0%, #fdf6ea, transparent 70%), var(--bg); }
+.side { background: radial-gradient(90% 50% at 0% 0%, #1f4a39, transparent 70%), linear-gradient(180deg, #10271e, #0a1a13) !important; box-shadow: inset -1px 0 0 rgb(201 162 92 / 0.25); }
+.side-logo img { filter: none; }
+.nav-item.on { background: linear-gradient(135deg, #e3c48a, #c9a25c) !important; color: #10271e !important; box-shadow: 0 10px 20px -12px rgb(201 162 92 / 0.9); }
+.card, .kpi { border: 1px solid rgb(201 162 92 / 0.16); }
+.card-head h2 { font-size: 1.02rem; }
+.kpi-hero { background: radial-gradient(80% 90% at 100% 0%, #2f5e4a, transparent 70%), linear-gradient(160deg, #16352a, #0b1d16) !important; border-color: rgb(201 162 92 / 0.35); }
+.kpi-hero .kpi-value { color: #f3e3c0; }
+.kpi-hero::after { background: radial-gradient(circle, rgb(227 196 138 / 0.28), transparent 70%); }
+.btn { background: var(--ink); border-color: var(--ink); }
+.btn.ghost { background: var(--card); color: var(--text); border-color: var(--line); }
+.callout { border: 1px solid rgb(201 162 92 / 0.35); background: linear-gradient(90deg, #fbf1dc, #fdf8ee); }
+.chart .fill { fill: url(#none); fill: #2f5e4a; }
+.chart .bar.on .fill, .chart .bar:hover .fill { fill: #c9a25c; }
+.hb-track span { background: linear-gradient(90deg, #2f5e4a, #4f8a70); }
+.hbars li:first-child .hb-track span { background: linear-gradient(90deg, #b8812f, #e3c48a); }
+.tabbar { background: rgb(16 39 30 / 0.96); }
+
+/* Mini KPI row */
+.kpis-mini { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.kpi-mini { padding: 14px 16px; }
+.kpi-mini .kpi-value { font-size: 1.3rem; }
+.kpi-ico { position: absolute; top: 14px; inset-inline-end: 14px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: rgb(201 162 92 / 0.14); color: #9c6c24; }
+@media (min-width: 760px) { .kpis-mini { grid-template-columns: repeat(4, minmax(0, 1fr)); } .kpis-mini .kpi:last-child { grid-column: auto; } }
+
+/* 12-month bars */
+.months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; align-items: end; height: 190px; padding-top: 8px; }
+.mbar { height: 100%; display: grid; grid-template-rows: 1fr auto; gap: 6px; cursor: default; }
+.mbar span { align-self: end; width: 100%; min-height: 0; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, #4f8a70, #2f5e4a); transition: filter 0.2s; }
+.mbar.now span { background: linear-gradient(180deg, #e3c48a, #b8812f); }
+.mbar.on span, .mbar:hover span { filter: brightness(1.15); }
+.mbar small { text-align: center; font-size: 0.68rem; color: var(--muted); }
+
+/* Donut */
+.donut-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.donut { position: relative; width: 130px; height: 130px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.donut::before { content: ''; position: absolute; inset: 18px; border-radius: 50%; background: var(--card); }
+.donut b { position: relative; font: 700 1.5rem 'Outfit', sans-serif; }
+.donut-wrap .legend { flex: 1; min-width: 140px; }
+
+/* Rings + health list */
+.rings { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rings > .ring { justify-self: center; }
+.ring { position: relative; width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(#2f5e4a calc(var(--v) * 1%), #efe6d6 0); }
+.ring::before { content: ''; position: absolute; inset: 9px; border-radius: 50%; background: var(--card); }
+.ring b { position: relative; font: 700 1.15rem 'Outfit', sans-serif; }
+.ring b small { font-size: 0.7rem; }
+.ring-label { text-align: center; font-size: 0.75rem; color: var(--muted); }
+.rings { grid-template-rows: auto auto; grid-auto-flow: column; justify-items: center; }
+.health { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.health li { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 10px; background: #f8f2e7; font-size: 0.88rem; }
+.health li.warn { background: #fbeee6; color: #8f3b1f; }
+
+/* Heatmap */
+.heat { display: grid; grid-template-columns: 34px repeat(6, minmax(0, 1fr)); gap: 5px; }
+.heat .hh { font-size: 0.68rem; color: var(--muted); text-align: center; }
+.heat .hd { font-size: 0.75rem; font-weight: 700; color: var(--muted); align-self: center; }
+.heat .hc { height: 30px; border-radius: 7px; display: grid; place-items: center; font-size: 0.72rem; font-weight: 700; color: #fff; background: rgb(47 94 74 / var(--a)); box-shadow: inset 0 0 0 1px rgb(47 94 74 / 0.08); }
+.heat .hc[style*="--a:0;"] { background: #f4ede0; }
+/* Status colours in the brand palette (pipeline, legend dots and badges). */
+.dot.s-new, .seg.s-new { background: #d6ae66; }
+.dot.s-confirmed, .seg.s-confirmed { background: #4f8a70; }
+.dot.s-shipped, .seg.s-shipped { background: #7fb3a0; }
+.dot.s-delivered, .seg.s-delivered { background: #1f4a39; }
+.dot.s-cancelled, .seg.s-cancelled { background: #c0613b; }
+.dot.s-returned, .seg.s-returned { background: #8f3a28; }
+.status.s-new, .chip.s-new { background: #f8ecd2; color: #7a5212; }
+.status.s-confirmed { background: #e2efe8; color: #2f5e4a; }
+.status.s-shipped { background: #e6f2ed; color: #2f6b5a; }
+.status.s-delivered { background: #d9ebe1; color: #1a4a35; }
+.status.s-cancelled, .status.s-returned { background: #fbe6dd; color: #8f3b1f; }
+.stack { height: 14px; border-radius: 999px; overflow: hidden; gap: 3px; }
+/* Fill gaps in the card grid, and keep the payment legend inside its card. */
+.grid-2 { grid-auto-flow: row dense; }
+.donut-wrap { flex-wrap: nowrap; gap: 16px; }
+.donut-wrap .legend { grid-template-columns: 1fr; min-width: 0; }
+.donut { width: 110px; height: 110px; }
+.donut::before { inset: 15px; }
+@media (max-width: 420px) { .donut-wrap { flex-wrap: wrap; justify-content: center; } }
+.kpi-mini .kpi-label { padding-inline-end: 42px; }

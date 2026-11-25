@@ -463,6 +463,8 @@
     en: { payment: 'Payment', payStatus: { pending: 'Pending', paid: 'Paid', failed: 'Failed', refunded: 'Refunded' }, method: { paypal: 'PayPal', bank: 'Bank transfer', cod: 'Cash on delivery' }, markPaid: 'Mark as paid', markRefunded: 'Mark refunded', paidOk: 'Payment saved', tracking: 'Parcel tracking', carrier: 'Carrier', trackingNo: 'Tracking number', saveTracking: 'Save tracking', trackingSaved: 'Tracking saved', codFee: 'Cash-on-delivery fee', vat: 'incl. VAT', openPayments: 'Awaiting payment', awaiting: (b, p) => `${b} bank transfer(s) and ${p} PayPal awaiting payment`, events: 'History', subtitle: 'Subtitle (under the name)', usage: 'How to use', ingredients: 'Ingredients (INCI)', ingredientsHint: 'The ingredient list as printed on the pack (required for cosmetics).', unitAmount: 'Contents (for the price per litre/kilo)', unitType: 'Unit', priceEur: 'Price (€, incl. VAT)', compareEur: 'Old price (€, crossed out)', extraEur: 'Price difference (€)', bunEur: 'Bundle price (€)', pay: 'Payment methods', payHint: 'PayPal shows once the PAYPAL_CLIENT_ID and PAYPAL_SECRET secrets are added (Cloudflare → Variables and Secrets). Cash on delivery is offered in Germany only.', payPaypal: 'PayPal (also card, direct debit, Pay Later)', payBank: 'Bank transfer in advance (Vorkasse)', payCod: 'DHL cash on delivery (Nachnahme)', codFeeEur: 'Cash-on-delivery fee (€)', paypalMode: 'PayPal mode', sandbox: 'Test (sandbox)', live: 'Real (live)', paypalOn: 'PayPal keys installed', paypalOff: 'PayPal keys missing', bank: 'Bank account (shown after a bank-transfer order)', bankOwner: 'Account holder', iban: 'IBAN', bic: 'BIC', bankName: 'Bank', bankDays: 'Payment term (days)', ship: 'Shipping', shipFee: 'Germany (€)', freeOver: 'Free shipping from (€, 0 = never)', freeAll: 'Free shipping abroad too', rates: 'Other countries (€), one per line: AT=9,90', deliveryDays: 'Delivery time (working days, e.g. 2-4)', vatTitle: 'VAT', vatMode: 'Status', vatSmall: 'Small business (§ 19 UStG, no VAT)', vatIncl: 'VAT included in prices', vatRate: 'Rate (%)', legalDe: 'Legal details (Impressum, terms, withdrawal)', legalCompany: 'Trading name', legalOwner: 'Owner’s name', legalAddress: 'Address', legalVat: 'VAT ID (USt-IdNr.), if you have one', legalRegister: 'Commercial register (if registered)', phoneLabel: 'Phone shown on the site', founderPhoto: 'Photo of Khadija (link, About page)', subscribers: (n) => `${n} newsletter subscriber(s)`, exportSubs: 'Export newsletter' },
     de: { payment: 'Zahlung', payStatus: { pending: 'Offen', paid: 'Bezahlt', failed: 'Fehlgeschlagen', refunded: 'Erstattet' }, method: { paypal: 'PayPal', bank: 'Überweisung', cod: 'Nachnahme' }, markPaid: 'Als bezahlt markieren', markRefunded: 'Als erstattet markieren', paidOk: 'Zahlung gespeichert', tracking: 'Sendungsverfolgung', carrier: 'Versanddienst', trackingNo: 'Sendungsnummer', saveTracking: 'Sendungsnummer speichern', trackingSaved: 'Sendungsnummer gespeichert', codFee: 'Nachnahmegebühr', vat: 'inkl. MwSt.', openPayments: 'Offene Zahlungen', awaiting: (b, p) => `${b} Überweisung(en) und ${p} PayPal-Zahlung(en) offen`, events: 'Verlauf', subtitle: 'Untertitel (unter dem Namen)', usage: 'Anwendung', ingredients: 'Inhaltsstoffe (INCI)', ingredientsHint: 'Die Liste der Inhaltsstoffe wie auf der Verpackung gedruckt (für Kosmetik Pflicht).', unitAmount: 'Inhalt (für den Preis pro Liter/Kilo)', unitType: 'Einheit', priceEur: 'Preis (€, inkl. MwSt.)', compareEur: 'Alter Preis (€, durchgestrichen)', extraEur: 'Preisunterschied (€)', bunEur: 'Paketpreis (€)', pay: 'Zahlungsarten', payHint: 'PayPal erscheint, sobald die Secrets PAYPAL_CLIENT_ID und PAYPAL_SECRET hinterlegt sind (Cloudflare → Variables and Secrets). Nachnahme wird nur in Deutschland angeboten.', payPaypal: 'PayPal (auch Karte, Lastschrift, später bezahlen)', payBank: 'Vorkasse per Überweisung', payCod: 'DHL Nachnahme', codFeeEur: 'Nachnahmegebühr (€)', paypalMode: 'PayPal-Modus', sandbox: 'Test (Sandbox)', live: 'Echt (Live)', paypalOn: 'PayPal-Schlüssel hinterlegt', paypalOff: 'PayPal-Schlüssel fehlen', bank: 'Bankkonto (wird nach einer Bestellung per Überweisung angezeigt)', bankOwner: 'Kontoinhaberin', iban: 'IBAN', bic: 'BIC', bankName: 'Bank', bankDays: 'Zahlungsfrist (Tage)', ship: 'Versand', shipFee: 'Deutschland (€)', freeOver: 'Kostenloser Versand ab (€, 0 = nie)', freeAll: 'Kostenloser Versand auch ins Ausland', rates: 'Andere Länder (€), eines pro Zeile: AT=9,90', deliveryDays: 'Lieferzeit (Werktage, z. B. 2-4)', vatTitle: 'Umsatzsteuer', vatMode: 'Status', vatSmall: 'Kleinunternehmerin (§ 19 UStG, keine MwSt.)', vatIncl: 'MwSt. in den Preisen enthalten', vatRate: 'Satz (%)', legalDe: 'Rechtliches (Impressum, AGB, Widerruf)', legalCompany: 'Firmenname', legalOwner: 'Name der Inhaberin', legalAddress: 'Adresse', legalVat: 'USt-IdNr., falls vorhanden', legalRegister: 'Handelsregister (falls eingetragen)', phoneLabel: 'Angezeigte Telefonnummer', founderPhoto: 'Foto von Khadija (Link, Seite „Über uns“)', subscribers: (n) => `${n} Newsletter-Abonnent(en)`, exportSubs: 'Newsletter exportieren' },
   };
+  X.en.legalWid = 'Business ID (W-IdNr., e.g. DE123456789-00001)';
+  X.de.legalWid = 'Wirtschafts-Identifikationsnummer (W-IdNr.)';
   const XL = () => X[lang] || X.en;
   const date = (s) => new Date(`${s.replace(' ', 'T')}Z`);
   const when = (s) => date(s).toLocaleString(L.locale, { dateStyle: 'short', timeStyle: 'short', numberingSystem: 'latn' });
@@ -775,7 +777,7 @@
       c.addEventListener('pointermove', (e) => {
         const g = e.target.closest('[data-tip]');
         if (!g) return (tip.hidden = true);
-        c.querySelectorAll('.bar.on').forEach((b) => b.classList.remove('on'));
+        c.querySelectorAll('.bar.on, .mbar.on').forEach((b) => b.classList.remove('on'));
         g.classList.add('on');
         tip.textContent = g.dataset.tip;
         tip.dir = 'ltr';
@@ -803,6 +805,87 @@
     if (!rows.length) return `<p class="empty-small">${L.nothingYet}</p>`;
     const max = Math.max(...rows.map(value), 1);
     return `<ul class="hbars">${rows.map((r) => `<li><span class="hb-label">${label(r)}</span><span class="hb-track"><span style="width:${(value(r) / max) * 100}%"></span></span><b>${fmt(r)}</b></li>`).join('')}</ul>`;
+  }
+
+  // ── Advanced dashboard widgets ──
+  const D = {
+    en: { customers: 'Customers · 30 d', customersFoot: 'different buyers', returning: 'Returning customers', returningFoot: (n, t) => `${n} of ${t} bought more than once`, basket: 'Items per order', basketFoot: 'average, 30 days', subs: 'Newsletter', subsFoot: (n) => `+${n} in 30 days`, months: 'Sales by month', months12: 'Last 12 months', payments: 'Payment methods', countries: 'Countries', categories: 'Sales by category', heat: 'When customers order', heatSub: 'Last 90 days', heatHint: 'The darker the cell, the more orders. Good times for posts and newsletters.', health: 'Shop health', active: 'Products online', soldOut: 'Sold out', noPhoto: 'Without photo', hiddenP: 'Hidden', emailRate: 'Orders with email', freeShip: 'Free shipping', days: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'], slots: ['0–4', '4–8', '8–12', '12–16', '16–20', '20–24'], share: 'of sales' },
+    de: { customers: 'Kundinnen · 30 T.', customersFoot: 'verschiedene Käuferinnen', returning: 'Stammkundinnen', returningFoot: (n, t) => `${n} von ${t} haben mehrmals bestellt`, basket: 'Artikel pro Bestellung', basketFoot: 'Durchschnitt, 30 Tage', subs: 'Newsletter', subsFoot: (n) => `+${n} in 30 Tagen`, months: 'Umsatz pro Monat', months12: 'Letzte 12 Monate', payments: 'Zahlungsarten', countries: 'Länder', categories: 'Umsatz nach Kategorie', heat: 'Wann bestellt wird', heatSub: 'Letzte 90 Tage', heatHint: 'Je dunkler das Feld, desto mehr Bestellungen. Gute Zeiten für Beiträge und Newsletter.', health: 'Shop-Zustand', active: 'Produkte online', soldOut: 'Ausverkauft', noPhoto: 'Ohne Foto', hiddenP: 'Ausgeblendet', emailRate: 'Bestellungen mit E-Mail', freeShip: 'Kostenloser Versand', days: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'], slots: ['0–4', '4–8', '8–12', '12–16', '16–20', '20–24'], share: 'vom Umsatz' },
+  };
+  const DL = () => D[lang] || D.en;
+  const COUNTRY_DE = { DE: 'Deutschland', AT: 'Österreich', CH: 'Schweiz', NL: 'Niederlande', BE: 'Belgien', FR: 'Frankreich', LU: 'Luxemburg', DK: 'Dänemark', IT: 'Italien', ES: 'Spanien', PL: 'Polen' };
+  const countryLabel = (c) => { try { return new Intl.DisplayNames([lang], { type: 'region' }).of(c); } catch { return COUNTRY_DE[c] || c; } };
+  const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+
+  function ring(value, label) {
+    const v = Math.max(0, Math.min(100, value));
+    return `<span class="ring" style="--v:${v}"><b>${v}<small>%</small></b></span><span class="ring-label">${label}</span>`;
+  }
+
+  // Twelve months of sales, oldest first.
+  function monthsChart(rows) {
+    const by = Object.fromEntries(rows.map((r) => [r.m, r]));
+    const now = new Date();
+    const months = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      months.push({ k, label: d.toLocaleDateString(L.locale, { month: 'short' }), sales: by[k]?.sales || 0, n: by[k]?.n || 0 });
+    }
+    const max = Math.max(...months.map((m) => m.sales), 1);
+    return `<div class="chart months" dir="ltr">${months.map((m, i) => `<div class="mbar${i === 11 ? ' now' : ''}" data-tip="${esc(m.label)} · ${dh(m.sales)} · ${L.ordersN(m.n)}"><span style="height:${Math.max(m.sales ? 4 : 0, (m.sales / max) * 100)}%"></span><small>${esc(m.label)}</small></div>`).join('')}<div class="tip" hidden></div></div>`;
+  }
+
+  // Donut of payment methods.
+  function payDonut(rows) {
+    const total = rows.reduce((a, r) => a + r.n, 0);
+    if (!total) return `<p class="empty-small">${L.nothingYet}</p>`;
+    const colors = { paypal: '#2f5e4a', bank: '#c9a25c', cod: '#a9532f' };
+    let acc = 0;
+    const stops = rows.map((r) => { const a = acc; acc += (r.n / total) * 100; return `${colors[r.m] || '#999'} ${a}% ${acc}%`; }).join(', ');
+    return `<div class="donut-wrap"><span class="donut" style="background:conic-gradient(${stops})"><b>${total}</b></span><ul class="legend">${rows.map((r) => `<li><i class="dot" style="background:${colors[r.m] || '#999'}"></i>${esc(XL().method[r.m] || r.m)}<b>${pct(r.n, total)} %</b></li>`).join('')}</ul></div>`;
+  }
+
+  // Weekday × 4-hour heatmap.
+  function heatmap(rows) {
+    const g = Array.from({ length: 7 }, () => Array(6).fill(0));
+    rows.forEach((r) => { g[r.wd][Math.floor(r.h / 4)] += r.n; });
+    const max = Math.max(1, ...g.flat());
+    const order = [1, 2, 3, 4, 5, 6, 0];
+    return `<div class="heat" dir="ltr"><span></span>${DL().slots.map((s) => `<span class="hh">${s}</span>`).join('')}${order.map((d) => `<span class="hd">${DL().days[d]}</span>${g[d].map((n, k) => `<span class="hc" style="--a:${n ? 0.15 + 0.85 * (n / max) : 0}" title="${DL().days[d]} ${DL().slots[k]} h · ${n}">${n || ''}</span>`).join('')}`).join('')}</div><p class="muted small">${DL().heatHint}</p>`;
+  }
+
+  function advancedCards(s) {
+    const x = DL();
+    const c = s.catalog || {};
+    const cu = s.customers || {};
+    const catTotal = (s.categories || []).reduce((a, r) => a + (r.sales || 0), 0);
+    return `
+      <div class="card span-2"><div class="card-head"><h2>${x.months}</h2><span class="muted small">${x.months12}</span></div>${monthsChart(s.monthly || [])}</div>
+      <div class="card"><div class="card-head"><h2>${x.payments}</h2><span class="muted small">${L.days30}</span></div>${payDonut(s.payments || [])}</div>
+      <div class="card span-2"><div class="card-head"><h2>${x.heat}</h2><span class="muted small">${x.heatSub}</span></div>${heatmap(s.heat || [])}</div>
+      <div class="card"><div class="card-head"><h2>${x.health}</h2></div>
+        <div class="rings">${ring(pct(cu.with_email || 0, cu.n || 0), x.emailRate)}${ring(pct(cu.free_ship || 0, cu.n || 0), x.freeShip)}</div>
+        <ul class="health"><li><span>${x.active}</span><b>${c.active || 0}</b></li><li class="${c.sold_out ? 'warn' : ''}"><span>${x.soldOut}</span><b>${c.sold_out || 0}</b></li><li class="${c.no_photo ? 'warn' : ''}"><span>${x.noPhoto}</span><b>${c.no_photo || 0}</b></li><li><span>${x.hiddenP}</span><b>${c.hidden || 0}</b></li></ul>
+        <a href="#products" class="link-arrow">${L.nav.products} ${icon('arrow', 16)}</a></div>
+      <div class="card"><div class="card-head"><h2>${x.categories}</h2><span class="muted small">${L.days30}</span></div>${hbars(s.categories || [], (r) => esc((lang === 'en' && r.name_en) || r.name_de || '—'), (r) => r.sales || 0, (r) => `${pct(r.sales, catTotal)} %`)}</div>
+      <div class="card"><div class="card-head"><h2>${x.countries}</h2><span class="muted small">${L.ordersShort30}</span></div>${hbars(s.countries || [], (r) => esc(countryLabel(r.c)), (r) => r.n, (r) => r.n)}</div>`;
+  }
+
+  function miniKpis(s) {
+    const x = DL();
+    const cu = s.customers || {};
+    const re = s.returning || {};
+    const live = (s.orders_30d || 0) - (s.failed_30d || 0);
+    const basket = live > 0 ? (s.items_30d / live).toFixed(1).replace('.', lang === 'de' ? ',' : '.') : '0';
+    const sub = s.subscribers || {};
+    const tile = (ic, label, value, foot) => `<div class="kpi kpi-mini"><span class="kpi-ico">${icon(ic, 18)}</span><span class="kpi-label">${label}</span><strong class="kpi-value">${value}</strong><span class="kpi-foot">${foot}</span></div>`;
+    return `<section class="kpis kpis-mini">
+      ${tile('orders', x.customers, num(cu.customers || 0), x.customersFoot)}
+      ${tile('up', x.returning, `${pct(re.repeaters || 0, re.customers || 0)} %`, x.returningFoot(re.repeaters || 0, re.customers || 0))}
+      ${tile('products', x.basket, basket, x.basketFoot)}
+      ${tile('mail', x.subs, num(sub.total || 0), x.subsFoot(sub.new30 || 0))}
+    </section>`;
   }
 
   function emailCard() {
@@ -834,6 +917,7 @@
         <div class="kpi"><span class="kpi-label">${L.aov}</span><strong class="kpi-value">${dh(aov)}</strong><span class="kpi-foot">${L.excludingCancelled}</span></div>
         <div class="kpi"><span class="kpi-label">${L.collected30}</span><strong class="kpi-value">${dh(s.revenue_30d)}</strong><span class="kpi-foot">${rate == null ? L.deliveredOrders : L.deliveredRate(rate)}</span></div>
       </section>
+      ${miniKpis(s)}
       <section class="grid-2">
         <div class="card span-2"><div class="card-head"><h2>${L.salesPerDay}</h2><span class="muted small">${L.last30dh}</span></div>${salesChart(s.daily)}</div>
         <div class="card"><div class="card-head"><h2>${L.pipeline}</h2><span class="muted small">${L.days30}</span></div>${pipeline(s.by_status)}</div>
@@ -845,6 +929,7 @@
           ${s.recent.length ? `<ul class="recent">${s.recent.map((o) => `<li><a href="#order-${o.id}"><span class="avatar">${esc((o.name || '?').trim().charAt(0).toUpperCase())}</span><span class="grow"><strong><bdi>${esc(o.name)}</bdi></strong><small><bdi>${esc(o.city)}</bdi> · ${ago(o.created_at)}</small></span><span class="end"><b>${dh(o.total)}</b><span class="status s-${o.status}">${L.status[o.status]}</span></span></a></li>`).join('')}</ul>` : `<p class="empty-small">${L.noOrdersYet}</p>`}
         </div>
         ${s.low_stock.length ? `<div class="card"><div class="card-head"><h2>${icon('alert')} ${L.lowStock}</h2></div><ul class="recent">${s.low_stock.map((p) => `<li><a href="#products"><img class="thumb" src="${esc(JSON.parse(p.images || '[]')[0] || '/assets/placeholder.svg')}" alt=""><span class="grow"><strong>${esc(prodName(p))}</strong></span><span class="chip ${p.stock ? 'chip-warn' : 'chip-bad'}">${p.stock ? L.left(p.stock) : L.soldOut}</span></a></li>`).join('')}</ul></div>` : ''}
+        ${advancedCards(s)}
         ${emailCard()}
       </section>`,
       { sub: today.charAt(0).toUpperCase() + today.slice(1), actions: `<a class="btn ghost" href="/api/admin/orders.csv">${icon('download', 18)}<span>${L.exportCsv}</span></a>` },
@@ -2041,7 +2126,7 @@
         ${field('vat_rate', x.vatRate, 'type="number" min="0" max="30" dir="ltr"')}
       </div></div>
       <div class="card"><h2>${x.legalDe}</h2><div class="cols">
-        ${field('legal_company', x.legalCompany)}${field('legal_name', x.legalOwner)}${field('legal_vat_id', x.legalVat, 'dir="ltr"')}${field('legal_register', x.legalRegister)}
+        ${field('legal_company', x.legalCompany)}${field('legal_name', x.legalOwner)}${field('legal_vat_id', x.legalVat, 'dir="ltr"')}${field('legal_wid', x.legalWid || 'W-IdNr.', 'dir="ltr"')}${field('legal_register', x.legalRegister)}
       </div>${field('legal_address', x.legalAddress)}
         <p class="muted small">${['impressum', 'agb', 'widerruf', 'datenschutz', 'versand'].map((k) => `<a href="/de/${k}" target="_blank" rel="noopener">/de/${k}</a>`).join(' · ')}</p>
         <p class="actions"><a class="btn ghost" href="/api/admin/subscribers.csv">${icon('download', 18)}<span>${x.exportSubs}</span></a></p>

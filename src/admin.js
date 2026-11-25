@@ -19,7 +19,7 @@ const SETTING_KEYS = [
   'hero_title_de', 'hero_title_en', 'hero_title_ar', 'hero_text_de', 'hero_text_en', 'hero_text_ar',
   'email_from', 'notify_email', 'email_status_updates',
   'instagram', 'facebook', 'tiktok', 'meta_pixel_id', 'tiktok_pixel_id', 'google_verify', 'turnstile_site_key',
-  'legal_name', 'legal_company', 'legal_address', 'legal_vat_id', 'legal_register',
+  'legal_name', 'legal_company', 'legal_address', 'legal_vat_id', 'legal_wid', 'legal_register',
 ];
 
 // Two-factor login (TOTP, RFC 6238): a 6-digit code from an authenticator app, on top of the password.
@@ -163,7 +163,8 @@ export async function handleAdmin(request, env, url, ctx) {
     // Dashboard numbers. Days are counted in German winter time (UTC+1).
     const day = "date(created_at, '+1 hour')";
     const live = "status NOT IN ('cancelled', 'returned')";
-    const [kpi, daily, byStatus, top, cities, recent, low] = await db.batch([
+    const d30 = "created_at > datetime('now', '-30 days')";
+    const [kpi, daily, byStatus, top, cities, recent, low, pay, countries, heat, cats, monthly, cust, repeat, items, subs, catalog] = await db.batch([
       db.prepare(
         `SELECT
           SUM(CASE WHEN status = 'new' THEN 1 ELSE 0 END) AS new_orders,
@@ -191,6 +192,16 @@ export async function handleAdmin(request, env, url, ctx) {
       db.prepare(`SELECT city, COUNT(*) AS n, SUM(total) AS sales FROM orders WHERE created_at > datetime('now', '-30 days') AND ${live} GROUP BY city ORDER BY n DESC LIMIT 5`),
       db.prepare("SELECT id, number, status, payment_method, payment_status, first_name || ' ' || last_name AS name, city, total, created_at FROM orders ORDER BY id DESC LIMIT 6"),
       db.prepare('SELECT id, name_de, name_ar, name_en, stock, images FROM products WHERE active = 1 AND stock IS NOT NULL AND stock <= 3 ORDER BY stock LIMIT 10'),
+      db.prepare(`SELECT payment_method AS m, COUNT(*) AS n, SUM(total) AS sales FROM orders WHERE ${d30} AND ${live} GROUP BY m ORDER BY n DESC`),
+      db.prepare(`SELECT country AS c, COUNT(*) AS n, SUM(total) AS sales FROM orders WHERE ${d30} AND ${live} GROUP BY c ORDER BY n DESC LIMIT 6`),
+      db.prepare("SELECT CAST(strftime('%w', created_at, '+1 hour') AS INTEGER) AS wd, CAST(strftime('%H', created_at, '+1 hour') AS INTEGER) AS h, COUNT(*) AS n FROM orders WHERE created_at > datetime('now', '-90 days') GROUP BY wd, h"),
+      db.prepare(`SELECT c.id, c.name_de, c.name_en, SUM(i.qty * i.price) AS sales, SUM(i.qty) AS qty FROM order_items i JOIN orders o ON o.id = i.order_id LEFT JOIN products p ON p.id = i.product_id LEFT JOIN categories c ON c.id = p.category_id WHERE o.${d30} AND o.${live} GROUP BY c.id ORDER BY sales DESC LIMIT 6`),
+      db.prepare(`SELECT strftime('%Y-%m', created_at, '+1 hour') AS m, COUNT(*) AS n, SUM(CASE WHEN ${live} THEN total ELSE 0 END) AS sales FROM orders WHERE created_at > datetime('now', '-365 days') GROUP BY m ORDER BY m`),
+      db.prepare(`SELECT COUNT(DISTINCT CASE WHEN phone <> '' THEN phone ELSE email END) AS customers, SUM(CASE WHEN email <> '' THEN 1 ELSE 0 END) AS with_email, SUM(CASE WHEN shipping = 0 THEN 1 ELSE 0 END) AS free_ship, COUNT(*) AS n FROM orders WHERE ${d30} AND ${live}`),
+      db.prepare(`SELECT COUNT(*) AS customers, SUM(CASE WHEN n > 1 THEN 1 ELSE 0 END) AS repeaters FROM (SELECT COUNT(*) AS n FROM orders WHERE ${live} GROUP BY CASE WHEN phone <> '' THEN phone ELSE email END)`),
+      db.prepare(`SELECT COALESCE(SUM(i.qty), 0) AS items FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.${d30} AND o.${live}`),
+      db.prepare(`SELECT COUNT(*) AS total, SUM(CASE WHEN ${d30} THEN 1 ELSE 0 END) AS new30 FROM subscribers`),
+      db.prepare("SELECT COUNT(*) AS active, SUM(CASE WHEN stock IS NOT NULL AND stock <= 0 THEN 1 ELSE 0 END) AS sold_out, SUM(CASE WHEN images = '[]' OR images = '' THEN 1 ELSE 0 END) AS no_photo, (SELECT COUNT(*) FROM products WHERE active = 0) AS hidden FROM products WHERE active = 1"),
     ]);
     return json({
       ...kpi.results[0],
@@ -200,6 +211,16 @@ export async function handleAdmin(request, env, url, ctx) {
       top_cities: cities.results,
       recent: recent.results,
       low_stock: low.results,
+      payments: pay.results,
+      countries: countries.results,
+      heat: heat.results,
+      categories: cats.results,
+      monthly: monthly.results,
+      customers: cust.results[0],
+      returning: repeat.results[0],
+      items_30d: items.results[0]?.items || 0,
+      subscribers: subs.results[0],
+      catalog: catalog.results[0],
     });
   }
 

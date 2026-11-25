@@ -18,6 +18,7 @@ function info(s) {
     email: esc(s.contact_email || ''),
     phone: esc(s.phone || ''),
     vatId: esc(s.legal_vat_id || ''),
+    wid: esc(s.legal_wid || ''),
     register: esc(s.legal_register || ''),
     small: s.vat_mode !== 'included',
     store: esc(s.store_name || 'Khachija'),
@@ -46,7 +47,7 @@ const DE = {
       sections: [
         ['Angaben gemäß § 5 DDG', p(`${i.company}<br>Inhaberin: ${i.name}<br>${i.address.replace(/, /g, '<br>')}`)],
         ['Kontakt', p(`${i.phone ? `Telefon: ${i.phone}<br>` : ''}E-Mail: <a href="mailto:${i.email}">${i.email}</a>`)],
-        ...(i.vatId ? [['Umsatzsteuer-ID', p(`Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz: ${i.vatId}`)]] : []),
+        ...(i.vatId || i.wid ? [['Umsatzsteuer-ID', p(`${i.vatId ? `Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz: ${i.vatId}` : ''}${i.vatId && i.wid ? '<br>' : ''}${i.wid ? `Wirtschafts-Identifikationsnummer gemäß § 139c AO: ${i.wid}` : ''}`)]] : []),
         ...(i.register ? [['Registereintrag', p(i.register)]] : []),
         ...(i.small ? [['Umsatzsteuer', p('Kleinunternehmerin im Sinne von § 19 UStG. Es wird keine Umsatzsteuer berechnet und ausgewiesen.')]] : []),
         ['Verantwortlich für den Inhalt', p(`${i.name}, ${i.address}`)],
@@ -132,7 +133,8 @@ const EN = {
       sections: [
         ['Information according to § 5 DDG', p(`${i.company}<br>Owner: ${i.name}<br>${i.address.replace(/, /g, '<br>')}`)],
         ['Contact', p(`${i.phone ? `Phone: ${i.phone}<br>` : ''}Email: <a href="mailto:${i.email}">${i.email}</a>`)],
-        ...(i.vatId ? [['VAT ID', p(i.vatId)]] : []),
+        ...(i.vatId || i.wid ? [['VAT ID', p(`${i.vatId ? `VAT identification number (§ 27 a UStG): ${i.vatId}` : ''}${i.vatId && i.wid ? '<br>' : ''}${i.wid ? `Business identification number (W-IdNr., § 139c AO): ${i.wid}` : ''}`)]] : []),
+        ...(i.register ? [['Commercial register', p(i.register === 'Kein Handelsregistereintrag' ? 'Not entered in the commercial register' : i.register)]] : []),
         ...(i.small ? [['VAT', p('Small business under § 19 UStG: no VAT is charged or shown.')]] : []),
         ['Consumer dispute resolution', p('We are neither willing nor obliged to take part in dispute resolution proceedings before a consumer arbitration board.')],
       ],
