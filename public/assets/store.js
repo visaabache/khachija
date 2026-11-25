@@ -588,8 +588,7 @@
 
   // Cooperative film: the silent loop plays only while it is on screen (never for visitors who asked for less motion);
   // the full film opens in a dialog and loads only when asked for.
-  const loop = $('[data-loop]');
-  if (loop) {
+  $$('[data-loop]').forEach((loop) => {
     if (reduceMotion || !('IntersectionObserver' in window)) loop.removeAttribute('data-loop');
     else {
       new IntersectionObserver(([e]) => {
@@ -599,7 +598,7 @@
         } else loop.pause();
       }, { rootMargin: '200px 0px' }).observe(loop);
     }
-  }
+  });
   const filmDialog = $('.film-dialog');
   if (filmDialog) {
     const film = filmDialog.querySelector('video');

@@ -164,10 +164,10 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=11">
+<link rel="stylesheet" href="/assets/style.css?v=14">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=6" defer></script>
+<script src="/assets/store.js?v=7" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
 <div class="scroll-progress" aria-hidden="true"></div>
@@ -816,13 +816,23 @@ export function aboutPage(ctx, photos, products = []) {
   ${sectionHead(ab.chaptersTitle, a.kicker)}
   <ol class="chapter-list">${ab.chapters.map(([n, h, x], i) => `<li class="reveal" style="--d:${i * 100}ms"><span class="chapter-n">${n}</span><div><h3>${esc(h)}</h3><p>${esc(x)}</p></div></li>`).join('')}</ol>
 </section>
+<section class="about-film">
+  <video class="about-film-video" muted loop playsinline preload="none" poster="/assets/video/kooperative-poster.webp" aria-hidden="true" data-loop><source src="/assets/video/kooperative-loop.mp4" type="video/mp4"></video>
+  <div class="about-film-in reveal">
+    ${kicker(t.film.kicker)}
+    <h2>${esc(t.film.title)}</h2>
+    <p>${esc(t.film.text)}</p>
+    <button type="button" class="film-play" data-film-open><span class="film-ring"><span class="play" aria-hidden="true"></span></span><span>${esc(t.film.cta)} <small>· ${esc(t.film.length)}</small></span></button>
+  </div>
+</section>
 <section class="quote-band"><div class="wrap narrow center reveal"><img src="/assets/brand/symbol-gold.svg" alt="" width="60" height="60"><blockquote>${esc(ab.quote)}</blockquote><p class="sign">${esc(t.storySign)}</p></div></section>
 ${processStrip(lang)}
 <section class="story about-mission"><div class="wrap narrow center reveal">${kicker(a.missionTitle)}<p class="mission">${esc(a.mission)}</p></div></section>
 <section class="wrap section"><ul class="values-grid three">${a.pillars.map(([h, x], i) => `<li class="reveal" style="--d:${i * 80}ms">${ornament('val-orn')}<h3>${esc(h)}</h3><p>${esc(x)}</p></li>`).join('')}</ul></section>
 ${products.length ? `<section class="section wrap">${sectionHead(ab.shopTitle, t.shop, `/${lang}/shop`, t.viewAll)}${grid(products, ctx, '')}</section>` : ''}
 ${filmDialog(t)}`;
-  return layout(ctx, { title: a.title, description: a.lead.slice(0, 160), path: '/about', body, page: 'about', lds: [orgLd(ctx)], image: portrait });
+  const film = { '@context': 'https://schema.org', '@type': 'VideoObject', name: t.film.title, description: t.film.text, thumbnailUrl: `${ctx.origin}/assets/video/kooperative-poster.webp`, contentUrl: `${ctx.origin}/assets/video/kooperative-film.mp4`, uploadDate: '2026-11-24', duration: 'PT5M7S' };
+  return layout(ctx, { title: a.title, description: a.lead.slice(0, 160), path: '/about', body, page: 'about', lds: [orgLd(ctx), film], image: portrait });
 }
 
 export function contactPage(ctx) {
