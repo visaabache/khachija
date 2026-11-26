@@ -1582,3 +1582,6 @@ html.welcoming { overflow: hidden; }
   .place-order { font-size: 0.78rem; }
 }
 @media (prefers-reduced-motion: reduce) { .place-order::after { animation: none; } }
+
+.grid-note { margin: 14px 0 0; text-align: center; font-size: 0.74rem; color: var(--muted); }
+.grid-note a { color: inherit; }

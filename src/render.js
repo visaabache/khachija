@@ -116,7 +116,7 @@ function sectionHead(title, kick = '', link = '', linkText = '', center = true) 
 function priceNote(ctx) {
   const t = T[ctx.lang];
   const vat = ctx.settings.vat_mode === 'included' ? t.inclVat : t.smallBusiness;
-  return `<p class="price-note">${esc(vat)} <a href="/${ctx.lang}/versand">${esc(t.plusShipping)}</a></p>`;
+  return `<p class="price-note">${esc(vat)}, <a href="/${ctx.lang}/versand">${esc(t.plusShipping)}</a></p>`;
 }
 
 function payBadges() {
@@ -168,10 +168,10 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=40">
+<link rel="stylesheet" href="/assets/style.css?v=41">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=11" defer></script>
+<script src="/assets/store.js?v=12" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
 ${minimal ? '' : `<template id="welcome-tpl"><div class="welcome" aria-hidden="true"><div class="welcome-in"><span class="welcome-seal"><svg class="welcome-ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56"/></svg><img src="/assets/brand/symbol-gold.svg" alt="" width="84" height="84"></span><p class="welcome-hello">${esc(t.welcome[0])}</p><p class="welcome-name">${[...'KHACHIJA'].map((ch, i) => `<span style="--i:${i}">${ch}</span>`).join('')}</p><p class="welcome-line">${esc(t.welcome[1])}</p></div><span class="welcome-skip">${esc(t.welcome[2])}</span></div></template><script src="/assets/welcome.js?v=1"></script>`}
@@ -328,7 +328,9 @@ export function productCard(p, ctx, i = 0) {
 }
 
 function grid(products, ctx, emptyText, cls = '') {
-  return products.length ? `<div class="grid ${cls}">${products.map((p, i) => productCard(p, ctx, i)).join('')}</div>` : `<p class="empty">${esc(emptyText)}</p>`;
+  const t = T[ctx.lang];
+  const vat = ctx.settings?.vat_mode === 'included' ? t.inclVat : t.smallBusiness;
+  return products.length ? `<div class="grid ${cls}">${products.map((p, i) => productCard(p, ctx, i)).join('')}</div><p class="grid-note">* ${esc(t.allPrices)} ${esc(vat)}, <a href="/${ctx.lang}/versand">${esc(t.plusShipping)}</a></p>` : `<p class="empty">${esc(emptyText)}</p>`;
 }
 
 function trustStrip(lang) {
@@ -762,7 +764,6 @@ export function checkoutPage(ctx) {
         <h2>${esc(t.summaryTitle)}</h2>
         <div id="cart" data-view="summary"><div class="skeleton"></div></div>
         <label class="check"><input type="checkbox" name="terms" required><span>${t.terms(`/${lang}/agb`, `/${lang}/widerruf`, `/${lang}/datenschutz`)}</span></label>
-        <label class="check"><input type="checkbox" name="newsletter"><span>${esc(t.newsletterOpt)}</span></label>
         <button class="btn btn-lg btn-block place-order" type="submit" data-label-default="${esc(t.placeOrder)}" data-label-paypal="${esc(t.placeOrderPaypal)}">${icon('lock', 18)}<span>${esc(t.placeOrder)}</span><b class="po-total" data-co-total></b></button>
         <p class="form-error" role="alert" hidden></p>
         <ul class="co-trust">${t.coX.trust.map(([ic, x]) => `<li>${icon(ic, 18)}<span>${esc(x)}</span></li>`).join('')}</ul>

@@ -606,7 +606,7 @@
           note: f.note.value,
           payment: method(),
           terms: f.terms.checked,
-          newsletter: f.newsletter.checked,
+          newsletter: f.newsletter?.checked === true,
           website: f.website.value,
           lang,
           cf_token: await botToken(co),
