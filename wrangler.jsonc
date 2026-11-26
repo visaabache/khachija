@@ -20,7 +20,7 @@
   ],
   // The shop's public address, used for canonical links, the sitemap, PayPal's return address and emails.
   // Once khachija-shop.de is on this Cloudflare account, set it and uncomment the routes.
-  "vars": { "SITE_URL": "" },
+  "vars": { "SITE_URL": "https://khachija-shop.de" },
   "routes": [
     { "pattern": "khachija-shop.de", "custom_domain": true },
     { "pattern": "www.khachija-shop.de", "custom_domain": true }
