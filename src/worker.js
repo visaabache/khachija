@@ -19,7 +19,7 @@ const ORDER_BY = { price_asc: 'price ASC, id DESC', price_desc: 'price DESC, id 
 // Photos used by the home and about pages (the product photos in public/assets/p).
 const PHOTOS = {
   hero: ['/assets/p/serum-1.webp', '/assets/p/henna-1.webp', '/assets/p/rizinusoel-1.webp'],
-  story: '/assets/p/khadija.webp',
+  story: '/assets/p/khadija-portrait.webp',
   banner: ['/assets/p/kaffeeseife-1.webp', '/assets/p/sidr-2.webp', '/assets/p/aker-fassi-seife-1.webp'],
   about: ['/assets/p/khadija-portrait.webp', '/assets/p/kaffeeseife-3.webp', '/assets/p/serum-2.webp', '/assets/p/henna-2.webp', '/assets/p/sidr-1.webp', '/assets/p/rizinusoel-2.webp'],
 };
