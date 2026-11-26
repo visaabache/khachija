@@ -1104,5 +1104,11 @@ for (const [l, v] of Object.entries({
   ar: { kicker: 'في الواجهة', title: 'جمال طبيعي مع القهوة', text: 'صابون القهوة المضاد للسيلوليت يجمع بين القهوة المطحونة ناعمًا وحرفة الصابون المغربية التقليدية. رائحة منعشة وتقشير لطيف يترك البشرة ناعمة ومعتنى بها.', points: ['عناية مشدِّدة', 'لبشرة ناعمة', 'بالقهوة الطبيعية'], cta: 'اكتشفي صابون القهوة', badge: 'صنع يدوي · 150 غ', alt: 'خديجة حقي مع صابون القهوة المضاد للسيلوليت' },
 })) T[l].spot = v;
 
+for (const [l, v] of Object.entries({
+  de: { show: 'Bestellung anzeigen', trust: [['lock', 'SSL-verschlüsselt'], ['truck', 'DHL ab Hamburg'], ['heart', '14 Tage Widerruf']] },
+  en: { show: 'Show order', trust: [['lock', 'SSL encrypted'], ['truck', 'DHL from Hamburg'], ['heart', '14-day returns']] },
+  ar: { show: 'عرض الطلب', trust: [['lock', 'اتصال مشفر'], ['truck', 'DHL من هامبورغ'], ['heart', 'إرجاع خلال 14 يومًا']] },
+})) T[l].coX = v;
+
 // Footer credit for the agency that built the shop.
 for (const [l, v] of Object.entries({ de: 'Website von', en: 'Website by', ar: 'تصميم وتطوير' })) T[l].madeBy = v;

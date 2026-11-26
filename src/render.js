@@ -40,6 +40,7 @@ const isPackshot = (url) => /-pack\d?(-sm)?\.webp$/.test(url);
 
 // Line icons (24×24, stroke = currentColor).
 const ICONS = {
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
   menu: '<path d="M4 7h16M4 12h11M4 17h16"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
   search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
@@ -167,10 +168,10 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=39">
+<link rel="stylesheet" href="/assets/style.css?v=40">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=10" defer></script>
+<script src="/assets/store.js?v=11" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
 ${minimal ? '' : `<template id="welcome-tpl"><div class="welcome" aria-hidden="true"><div class="welcome-in"><span class="welcome-seal"><svg class="welcome-ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56"/></svg><img src="/assets/brand/symbol-gold.svg" alt="" width="84" height="84"></span><p class="welcome-hello">${esc(t.welcome[0])}</p><p class="welcome-name">${[...'KHACHIJA'].map((ch, i) => `<span style="--i:${i}">${ch}</span>`).join('')}</p><p class="welcome-line">${esc(t.welcome[1])}</p></div><span class="welcome-skip">${esc(t.welcome[2])}</span></div></template><script src="/assets/welcome.js?v=1"></script>`}
@@ -726,10 +727,12 @@ export function checkoutPage(ctx) {
   const available = paymentMethods(settings, env, 'DE');
   const anyMethod = paymentMethods(settings, env, 'XX');
   const fee = Number(settings.cod_fee) || 0;
-  const field = (name, label, attrs = '', cls = '') => `<label class="fl ${cls}"><input name="${name}" placeholder=" " ${attrs}><span>${esc(label)}</span></label>`;
+  const FI = { name: 'user', phone: 'phone', street: 'pin', city: 'home', email: 'mail' };
+  const field = (name, label, attrs = '', cls = '') => `<label class="fl fl-ico ${cls}"><input name="${name}" placeholder=" " ${attrs}><span>${esc(label)}</span><i class="fl-i" aria-hidden="true">${icon(FI[name] || 'pin', 18)}</i><i class="fl-ok" aria-hidden="true">${icon('check', 14)}</i></label>`;
   const payIcon = { paypal: '<span class="pb pb-paypal"><b>Pay</b><i>Pal</i></span>', bank: icon('bank', 26), cod: icon('cash', 26) };
   const body = `<section class="wrap section checkout-wrap">
   ${stepsBar(lang, 1)}
+  <a class="co-mini" href="#co-summary" data-co-mini><span class="co-mini-thumbs" data-co-thumbs></span><span class="co-mini-label">${esc(t.coX.show)}</span><b data-co-total>…</b>${icon('chevronD', 18)}</a>
   <form id="checkout" class="checkout" novalidate>
     <div class="co-main">
       <fieldset class="co-step"><legend><span class="co-n">1</span>${esc(t.addressTitle)}</legend>
@@ -755,13 +758,14 @@ export function checkoutPage(ctx) {
       <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
     </div>
     <aside class="co-side">
-      <div class="card-box summary">
+      <div class="card-box summary" id="co-summary">
         <h2>${esc(t.summaryTitle)}</h2>
         <div id="cart" data-view="summary"><div class="skeleton"></div></div>
         <label class="check"><input type="checkbox" name="terms" required><span>${t.terms(`/${lang}/agb`, `/${lang}/widerruf`, `/${lang}/datenschutz`)}</span></label>
         <label class="check"><input type="checkbox" name="newsletter"><span>${esc(t.newsletterOpt)}</span></label>
-        <button class="btn btn-lg btn-block place-order" type="submit" data-label-default="${esc(t.placeOrder)}" data-label-paypal="${esc(t.placeOrderPaypal)}">${icon('lock', 18)}<span>${esc(t.placeOrder)}</span></button>
+        <button class="btn btn-lg btn-block place-order" type="submit" data-label-default="${esc(t.placeOrder)}" data-label-paypal="${esc(t.placeOrderPaypal)}">${icon('lock', 18)}<span>${esc(t.placeOrder)}</span><b class="po-total" data-co-total></b></button>
         <p class="form-error" role="alert" hidden></p>
+        <ul class="co-trust">${t.coX.trust.map(([ic, x]) => `<li>${icon(ic, 18)}<span>${esc(x)}</span></li>`).join('')}</ul>
         <p class="hint center">${esc(t.hygiene)}</p>
         ${payBadges()}
       </div>

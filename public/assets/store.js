@@ -535,6 +535,9 @@
         <li class="vat"><span>${esc(s.vat ? i18n.vatIncl.replace('{amount}', money(s.vat)) : i18n.vatSmall)}</span></li></ul>
         ${s.shipsTo ? '' : `<p class="form-error">${esc(i18n.noShipping)}</p>`}`;
         btn.disabled = !s.shipsTo;
+        $$('[data-co-total]').forEach((el) => (el.textContent = money(s.total)));
+        const thumbs = $('[data-co-thumbs]');
+        if (thumbs) thumbs.innerHTML = s.lines.slice(0, 3).map((l) => `<img src="${esc(small(l.image))}" alt="" width="34" height="42">`).join('') + (s.lines.length > 3 ? `<i>+${s.lines.length - 3}</i>` : '');
       } catch {
         summary.innerHTML = `<p class="form-error">${esc(i18n.error)}</p>`;
       }

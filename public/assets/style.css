@@ -1520,3 +1520,65 @@ html.welcoming { overflow: hidden; }
   .secure-note .sn-short { display: inline; }
   .minimal .logo img { height: 40px; }
 }
+
+/* ═════════ Checkout: premium cards, field icons with a green tick, summary bar on phones, total on the button ═════════ */
+.checkout-wrap { position: relative; }
+.co-step { position: relative; padding: 24px 22px 10px; border: 0; border-radius: 22px; background: #fffdf9; box-shadow: 0 0 0 1px rgba(184, 129, 47, 0.18), 0 24px 50px -36px rgba(42, 33, 24, 0.45); }
+.co-step legend { font-size: 1.55rem; }
+.co-n { width: 34px; height: 34px; background: linear-gradient(135deg, #2f5e4a, #10271e); box-shadow: 0 0 0 3px #fffdf9, 0 0 0 4px rgba(201, 162, 92, 0.7); }
+.co-step:focus-within { box-shadow: 0 0 0 1px rgba(184, 129, 47, 0.45), 0 30px 60px -36px rgba(42, 33, 24, 0.55); }
+.fl input, .fl select, .fl textarea { border-radius: 14px; background: #fbf8f2; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; }
+.fl-ico input { padding-inline-start: 46px; padding-inline-end: 40px; }
+.fl-ico > span { inset-inline-start: 46px; }
+.fl-i { position: absolute; inset-inline-start: 15px; top: 19px; color: #b9a585; pointer-events: none; transition: color 0.2s; }
+.fl-ico input:focus ~ .fl-i { color: var(--gold); }
+.fl-ok { position: absolute; inset-inline-end: 14px; top: 18px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: #2f6b45; color: #fff; opacity: 0; transform: scale(0.5); transition: 0.25s var(--ease); pointer-events: none; }
+.fl-ico input:not(:placeholder-shown):valid ~ .fl-ok { opacity: 1; transform: none; }
+.fl-ico input:not(:placeholder-shown):valid { border-color: rgba(47, 107, 69, 0.45); }
+.fl-select select, .fl-area textarea { border-radius: 14px; }
+.ship-opt { border: 0; border-radius: 16px; background: linear-gradient(135deg, #fffdf9, #f6ecdc); box-shadow: inset 0 0 0 1.5px #2f5e4a; }
+.ship-opt .icon { width: 44px; height: 44px; padding: 10px; border-radius: 50%; color: #fff; background: linear-gradient(135deg, #2f5e4a, #10271e); }
+.ship-opt b { font: 700 1.1rem 'Poppins', sans-serif; color: var(--green); }
+.pay-opt { border: 0; border-radius: 16px; background: #fbf8f2; box-shadow: inset 0 0 0 1px var(--line); transition: box-shadow 0.25s, background 0.25s, transform 0.2s; }
+.pay-opt:hover { box-shadow: inset 0 0 0 1px rgba(184, 129, 47, 0.5); }
+.pay-opt:has(input:checked), .pay-opt.on { background: #fffdf9; box-shadow: inset 0 0 0 2px #2f5e4a, 0 14px 28px -20px rgba(16, 39, 30, 0.6); }
+.pay-opt .pay-icon .icon { color: var(--gold); }
+.pay-radio { transition: border-color 0.2s; }
+.fl-area textarea { background: #fffdf9; box-shadow: 0 0 0 1px rgba(184, 129, 47, 0.18); border: 0; }
+
+/* Summary card */
+.summary { border: 0; border-radius: 22px; background: #fffdf9; box-shadow: 0 0 0 1px rgba(184, 129, 47, 0.22), 0 30px 60px -36px rgba(42, 33, 24, 0.5); overflow: hidden; position: relative; }
+.summary::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, #10271e, #2f5e4a 40%, #c9a25c); }
+.summary .line-img img { border-radius: 10px; }
+.free-bar { padding: 12px 14px; border-radius: 14px; background: #f8efe0; }
+.free-bar p { font-weight: 500; color: var(--ink-2); }
+.free-bar span { height: 6px; border-radius: 999px; background: #ecdfc8; }
+.free-bar i { border-radius: 999px; background: linear-gradient(90deg, #b8812f, #e3c48a); box-shadow: 0 0 10px rgba(227, 196, 138, 0.8); }
+.totals .total { font-size: 1.3rem; }
+.place-order { position: relative; overflow: hidden; display: flex; justify-content: center; gap: 10px; min-height: 60px; border: 0; border-radius: 16px; background: linear-gradient(135deg, #2f5e4a, #10271e); box-shadow: 0 20px 36px -20px rgba(16, 39, 30, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.12); }
+.place-order:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 26px 44px -22px rgba(16, 39, 30, 0.95), inset 0 0 0 1px rgba(227, 196, 138, 0.6); }
+.place-order::after { content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, transparent, rgba(236, 211, 160, 0.3), transparent); transform: skewX(-20deg); animation: btnsweep 4.5s ease-in-out 2s infinite; }
+.po-total { margin-inline-start: 6px; padding-inline-start: 12px; border-inline-start: 1px solid rgba(255, 255, 255, 0.3); font-weight: 600; letter-spacing: 0.02em; color: #ecd3a0; }
+.po-total:empty { display: none; }
+.co-trust { list-style: none; margin: 14px 0 6px; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.co-trust li { display: grid; justify-items: center; gap: 4px; padding: 10px 4px; border-radius: 12px; background: #f8f2e7; text-align: center; font-size: 0.7rem; line-height: 1.3; color: var(--ink-2); }
+.co-trust .icon { color: var(--green); }
+.summary .check { padding: 10px 12px; border-radius: 12px; background: #fbf8f2; margin-bottom: 8px; }
+.summary .check:has(input:checked) { background: #eef5f0; }
+
+/* Phone: compact order bar at the top that jumps to the summary */
+.co-mini { display: none; }
+@media (max-width: 959px) {
+  .co-mini { position: sticky; top: var(--hdr, 64px); z-index: 20; display: flex; align-items: center; gap: 10px; margin: -6px 0 18px; padding: 10px 14px; border-radius: 16px; text-decoration: none; color: #fff; background: linear-gradient(135deg, #1f4a39, #10271e); box-shadow: 0 14px 30px -18px rgba(16, 39, 30, 0.9), inset 0 0 0 1px rgba(227, 196, 138, 0.35); }
+  .co-mini-thumbs { display: flex; }
+  .co-mini-thumbs img { width: 30px; height: 36px; object-fit: cover; border-radius: 7px; border: 2px solid #10271e; background: #f4ede0; }
+  .co-mini-thumbs img + img, .co-mini-thumbs i { margin-inline-start: -10px; }
+  .co-mini-thumbs i { width: 30px; height: 36px; display: grid; place-items: center; border-radius: 7px; border: 2px solid #10271e; background: #c9a25c; color: #10271e; font: 700 0.7rem 'Poppins', sans-serif; font-style: normal; }
+  .co-mini-label { flex: 1; font-size: 0.82rem; color: rgba(244, 234, 216, 0.85); }
+  .co-mini b { font: 600 1.05rem 'Poppins', sans-serif; color: #ecd3a0; }
+  .co-mini .icon { color: #e3c48a; }
+  .co-step { padding: 20px 16px 8px; border-radius: 20px; }
+  .co-trust li { font-size: 0.66rem; }
+  .place-order { font-size: 0.78rem; }
+}
+@media (prefers-reduced-motion: reduce) { .place-order::after { animation: none; } }
