@@ -21,10 +21,10 @@
   // The shop's public address, used for canonical links, the sitemap, PayPal's return address and emails.
   // Once khachija-shop.de is on this Cloudflare account, set it and uncomment the routes.
   "vars": { "SITE_URL": "" },
-  // "routes": [
-  //   { "pattern": "khachija-shop.de", "custom_domain": true },
-  //   { "pattern": "www.khachija-shop.de", "custom_domain": true }
-  // ],
+  "routes": [
+    { "pattern": "khachija-shop.de", "custom_domain": true },
+    { "pattern": "www.khachija-shop.de", "custom_domain": true }
+  ],
   // Cloudflare rate limiter: at most 120 API requests a minute per visitor (stricter limits for orders and
   // logins are in the code). Free on all plans.
   "ratelimits": [{ "name": "RATE_LIMIT", "namespace_id": "4210", "simple": { "limit": 120, "period": 60 } }],
