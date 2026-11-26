@@ -658,3 +658,51 @@ body:not(.is-login) { background: radial-gradient(60% 40% at 100% 0%, #fdf6ea, t
   .osum small { line-height: 1.3; }
   .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
 }
+
+/* ═════════ Printable receipt / delivery note ═════════ */
+.print-btn { margin-inline-start: auto; margin-inline-end: 8px; }
+.print-sheet { display: none; }
+@media print {
+  @page { size: A4; margin: 14mm 14mm 16mm; }
+  body.printing > *:not(.print-sheet), body.printing dialog { display: none !important; }
+  body.printing { background: #fff !important; }
+  body.printing .print-sheet { display: block; color: #22201b; font: 10pt/1.45 'Manrope', 'Helvetica Neue', Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+.print-sheet .ps-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.print-sheet .ps-head img { height: 58px; width: auto; }
+.print-sheet .ps-seller { text-align: right; font-size: 8.5pt; line-height: 1.5; color: #5a4a3a; }
+.print-sheet .ps-seller b { color: #10271e; font-size: 10pt; }
+.print-sheet .ps-rule { position: relative; height: 2px; margin: 14px 0 22px; background: linear-gradient(90deg, transparent, #c9a25c 15%, #b8812f 50%, #c9a25c 85%, transparent); }
+.print-sheet .ps-rule span { position: absolute; left: 50%; top: -6px; width: 12px; height: 12px; margin-left: -6px; transform: rotate(45deg); background: #10271e; border: 1.5px solid #c9a25c; }
+.print-sheet .ps-meta { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+.print-sheet .ps-to small { display: block; font-size: 7.5pt; letter-spacing: 0.14em; text-transform: uppercase; color: #9c6c24; margin-bottom: 4px; }
+.print-sheet .ps-to p { margin: 0; font-size: 11pt; line-height: 1.5; }
+.print-sheet .ps-doc h1 { margin: 0 0 8px; font: 600 17pt/1.1 'Cormorant Garamond', Georgia, serif; color: #10271e; text-align: right; }
+.print-sheet .ps-doc table { border-collapse: collapse; margin-left: auto; font-size: 9pt; }
+.print-sheet .ps-doc td { padding: 2px 0 2px 14px; }
+.print-sheet .ps-doc td:first-child { color: #7d6c5a; }
+.print-sheet .ps-items { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+.print-sheet .ps-items th { text-align: left; font-size: 7.5pt; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: #10271e; padding: 7px 8px; }
+.print-sheet .ps-items td { padding: 8px; border-bottom: 1px solid #ece3d3; vertical-align: top; }
+.print-sheet .ps-items tr:nth-child(even) td { background: #faf6ee; }
+.print-sheet .ps-items small { color: #7d6c5a; }
+.print-sheet .n { text-align: right; white-space: nowrap; }
+.print-sheet .c { text-align: center; width: 28px; }
+.print-sheet .ps-check { display: inline-block; padding: 0; width: 11px; height: 11px; border: 1.2px solid #10271e; border-radius: 2px; }
+.print-sheet .ps-totals { display: flex; flex-direction: column; align-items: flex-end; margin-top: 12px; }
+.print-sheet .ps-totals table { border-collapse: collapse; min-width: 240px; font-size: 9.5pt; }
+.print-sheet .ps-totals td { padding: 3px 8px; }
+.print-sheet .ps-totals td:last-child { text-align: right; white-space: nowrap; }
+.print-sheet .ps-totals .grand td { padding-top: 8px; border-top: 2px solid #c9a25c; font-weight: 800; font-size: 12pt; color: #10271e; }
+.print-sheet .vat { margin: 6px 8px 0; font-size: 8pt; color: #7d6c5a; }
+.print-sheet .pay { margin: 18px 0 0; padding: 10px 14px; border-radius: 8px; font-size: 9.5pt; }
+.print-sheet .pay p { margin: 0; }
+.print-sheet .pay.ok { background: #e2efe8; color: #1a4a35; font-weight: 700; }
+.print-sheet .pay.due { background: #fbf1dc; color: #6b4a12; }
+.print-sheet .bank { margin-top: 4px !important; font-family: ui-monospace, Menlo, monospace; font-size: 9pt; }
+.print-sheet .ps-note { margin: 14px 0 0; font-size: 9pt; }
+.print-sheet .ps-foot { margin-top: 30px; padding-top: 14px; border-top: 1px solid #ece3d3; text-align: center; font-size: 8pt; color: #7d6c5a; }
+.print-sheet .ps-foot img { width: 26px; height: 26px; }
+.print-sheet .ps-foot p { margin: 4px 0; }
+.print-sheet .ps-foot .thanks { font: italic 500 12pt 'Cormorant Garamond', Georgia, serif; color: #10271e; }
+.print-sheet .ps-foot .legal { font-size: 7pt; }

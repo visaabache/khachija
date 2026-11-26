@@ -1023,6 +1023,73 @@
     </article>`;
   }
 
+  // ── Printable receipt and delivery note (A4) ──
+  const PR = () => ({
+    de: { button: 'Beleg drucken', title: 'Rechnung & Lieferschein', no: 'Rechnungs-/Bestellnr.', date: 'Datum', delivery: 'Lieferdatum', customer: 'Lieferadresse', seller: 'Inhaberin', pos: 'Pos.', item: 'Artikel', qty: 'Menge', unit: 'Einzelpreis', sum: 'Summe', subtotal: 'Zwischensumme', discount: 'Mengenrabatt', shipping: 'Versand', codFee: 'Nachnahmegebühr', total: 'Gesamtbetrag', vatSmall: 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.', vatIncl: (r, v) => `Im Gesamtbetrag enthaltene Umsatzsteuer (${r} %): ${v}`, pay: 'Zahlungsart', paid: 'Bezahlt – vielen Dank!', open: 'Noch offen', cod: 'Bitte bei Lieferung bar an den DHL-Boten zahlen.', bank: 'Bitte überweisen Sie den Betrag auf folgendes Konto:', ref: 'Verwendungszweck', check: 'Vom Kunden geprüft', thanks: 'Vielen Dank für Ihren Einkauf! Handgemacht von Frauenkooperativen in Marokko, versandt aus Hamburg.', returns: 'Widerrufsrecht: 14 Tage. Geöffnete Kosmetik ist aus hygienischen Gründen vom Umtausch ausgeschlossen. Details unter', page: 'Seite', note: 'Hinweis der Kundin' },
+    en: { button: 'Print receipt', title: 'Invoice & delivery note', no: 'Invoice / order no.', date: 'Date', delivery: 'Delivery date', customer: 'Delivery address', seller: 'Owner', pos: 'No.', item: 'Item', qty: 'Qty', unit: 'Unit price', sum: 'Amount', subtotal: 'Subtotal', discount: 'Quantity discount', shipping: 'Shipping', codFee: 'Cash-on-delivery fee', total: 'Total', vatSmall: 'No VAT is charged under § 19 UStG (small business).', vatIncl: (r, v) => `VAT included in the total (${r} %): ${v}`, pay: 'Payment', paid: 'Paid – thank you!', open: 'Outstanding', cod: 'Please pay the DHL courier in cash on delivery.', bank: 'Please transfer the amount to this account:', ref: 'Reference', check: 'Checked by customer', thanks: 'Thank you for your order! Handmade by women’s cooperatives in Morocco, shipped from Hamburg.', returns: 'Right of withdrawal: 14 days. Opened cosmetics cannot be returned for hygiene reasons. Details at', page: 'Page', note: 'Customer note' },
+  })[lang === 'de' ? 'de' : 'en'];
+
+  function printReceipt(o, items) {
+    const t = PR();
+    const s = state.settings || {};
+    const money = (c) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format((Math.round(c) || 0) / 100);
+    const day = (d) => new Date(`${String(d).replace(' ', 'T')}Z`).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const lineSum = items.reduce((a, i) => a + i.price * i.qty, 0);
+    const discount = Math.max(0, lineSum - (o.subtotal || lineSum));
+    const sellerAddr = String(s.legal_address || '').split(/,\s*/).map(esc).join('<br>');
+    const country = (c) => { try { return new Intl.DisplayNames(['de'], { type: 'region' }).of(c); } catch { return c; } };
+    const iban = String(s.bank_iban || '').replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim();
+    const payBlock = o.payment_status === 'paid'
+      ? `<p class="pay ok">✓ ${t.paid}</p>`
+      : o.payment_method === 'cod'
+        ? `<p class="pay due">${t.cod}</p>`
+        : o.payment_method === 'bank' && iban
+          ? `<div class="pay due"><p>${t.bank}</p><p class="bank">${esc(s.bank_owner || s.legal_name || '')}<br>IBAN ${esc(iban)}${s.bank_bic ? `<br>BIC ${esc(s.bank_bic)}` : ''}${s.bank_name ? ` · ${esc(s.bank_name)}` : ''}<br>${t.ref}: <b>${esc(o.number)}</b></p></div>`
+          : `<p class="pay due">${t.open}</p>`;
+    const sheet = document.createElement('div');
+    sheet.className = 'print-sheet';
+    sheet.innerHTML = `
+      <header class="ps-head">
+        <img src="/assets/brand/logo-horizontal.svg" alt="${esc(s.store_name || 'Khachija')}">
+        <div class="ps-seller"><b>${esc(s.legal_company || s.store_name || 'Khachija')}</b><br>${t.seller}: ${esc(s.legal_name || '')}<br>${sellerAddr}${s.phone ? `<br>${esc(s.phone)}` : ''}${s.contact_email ? `<br>${esc(s.contact_email)}` : ''}</div>
+      </header>
+      <div class="ps-rule"><span></span></div>
+      <section class="ps-meta">
+        <div class="ps-to"><small>${t.customer}</small><p><b>${esc(o.first_name)} ${esc(o.last_name || '')}</b><br>${esc(o.street)}${o.address2 ? `<br>${esc(o.address2)}` : ''}<br>${esc(o.zip)} ${esc(o.city)}<br>${esc(country(o.country))}${o.phone ? `<br>Tel. ${esc(o.phone_display || o.phone)}` : ''}</p></div>
+        <div class="ps-doc"><h1>${t.title}</h1><table><tr><td>${t.no}</td><td><b>${esc(o.number)}</b></td></tr><tr><td>${t.date}</td><td>${day(o.created_at)}</td></tr><tr><td>${t.delivery}</td><td>${day(new Date().toISOString().slice(0, 19).replace('T', ' '))}</td></tr><tr><td>${t.pay}</td><td>${esc(XL().method[o.payment_method] || o.payment_method)}</td></tr></table></div>
+      </section>
+      <table class="ps-items">
+        <thead><tr><th>${t.pos}</th><th>${t.item}</th><th class="n">${t.qty}</th><th class="n">${t.unit}</th><th class="n">${t.sum}</th><th class="c">✓</th></tr></thead>
+        <tbody>${items.map((i, k) => `<tr><td>${k + 1}</td><td>${esc(i.name)}${i.option ? `<br><small>${esc(i.option)}</small>` : ''}</td><td class="n">${i.qty}</td><td class="n">${money(i.price)}</td><td class="n">${money(i.price * i.qty)}</td><td class="c"><span class="ps-check"></span></td></tr>`).join('')}</tbody>
+      </table>
+      <section class="ps-totals">
+        <table>
+          <tr><td>${t.subtotal}</td><td>${money(lineSum)}</td></tr>
+          ${discount ? `<tr><td>${t.discount}</td><td>− ${money(discount)}</td></tr>` : ''}
+          <tr><td>${t.shipping}</td><td>${o.shipping ? money(o.shipping) : '0,00 €'}</td></tr>
+          ${o.payment_fee ? `<tr><td>${t.codFee}</td><td>${money(o.payment_fee)}</td></tr>` : ''}
+          <tr class="grand"><td>${t.total}</td><td>${money(o.total)}</td></tr>
+        </table>
+        <p class="vat">${s.vat_mode === 'included' ? t.vatIncl(esc(s.vat_rate || '19'), money(o.vat || 0)) : t.vatSmall}</p>
+      </section>
+      ${payBlock}
+      ${o.note ? `<p class="ps-note"><b>${t.note}:</b> „${esc(o.note)}“</p>` : ''}
+      <footer class="ps-foot">
+        <img src="/assets/brand/symbol-gold.svg" alt="">
+        <p class="thanks">${t.thanks}</p>
+        <p>${t.returns} ${esc(location.host)}/de/widerruf</p>
+        <p class="legal">${esc(s.legal_company || s.store_name || 'Khachija')} · ${esc(s.legal_name || '')} · ${esc(s.legal_address || '')}${s.legal_vat_id ? ` · USt-IdNr. ${esc(s.legal_vat_id)}` : ''}${s.legal_wid ? ` · W-IdNr. ${esc(s.legal_wid)}` : ''}${s.legal_register ? ` · ${esc(s.legal_register)}` : ''}</p>
+      </footer>`;
+    document.querySelector('.print-sheet')?.remove();
+    document.body.append(sheet);
+    document.body.classList.add('printing');
+    const done = () => { document.body.classList.remove('printing'); sheet.remove(); removeEventListener('afterprint', done); };
+    addEventListener('afterprint', done);
+    // Print once the logo has loaded, so it is never missing on paper.
+    const imgs = [...sheet.querySelectorAll('img')];
+    Promise.all(imgs.map((im) => (im.complete ? null : new Promise((r) => { im.onload = im.onerror = r; })))).then(() => window.print());
+  }
+
   // WhatsApp message to the customer, in their language.
   function confirmMessage(o) {
     const store = state.settings.store_name || '';
@@ -1043,7 +1110,7 @@
     const paid = o.payment_status === 'paid';
     const dialog = document.createElement('dialog');
     dialog.className = 'drawer';
-    dialog.innerHTML = `<form method="dialog" class="drawer-head"><div><p class="muted small">${L.orderAt} · <bdi>${when(o.created_at)}</bdi></p><h2 class="mono" dir="ltr">${esc(o.number)}</h2></div><button class="close" aria-label="${L.close}">✕</button></form>
+    dialog.innerHTML = `<form method="dialog" class="drawer-head"><div><p class="muted small">${L.orderAt} · <bdi>${when(o.created_at)}</bdi></p><h2 class="mono" dir="ltr">${esc(o.number)}</h2></div><button type="button" class="btn ghost print-btn" data-print>${icon('download', 18)}<span>${PR().button}</span></button><button class="close" aria-label="${L.close}">✕</button></form>
       <ol class="steps">${flow.map((k, i) => `<li class="${at >= i ? 'done' : ''}${o.status === k ? ' now' : ''}"><span>${at >= i ? icon('check', 12) : ''}</span>${L.status[k]}</li>`).join('')}</ol>
       ${at < 0 ? `<p><span class="status s-${o.status}">${L.status[o.status]}</span></p>` : ''}
       <section class="box">
@@ -1082,6 +1149,7 @@
       ${emailNote ? `<p class="muted small">${icon('mail', 14)} ${L.statusEmailHint}</p>` : ''}</div>
       ${events.length ? `<details><summary class="muted small">${x.events}</summary><ul class="lines">${events.map((e) => `<li class="muted small"><span>${esc(e.kind)} · ${esc(e.value)}</span><span>${when(e.created_at)}</span></li>`).join('')}</ul></details>` : ''}`;
     document.body.append(dialog);
+    dialog.querySelector('[data-print]').addEventListener('click', () => printReceipt(o, items));
     dialog.addEventListener('close', () => {
       dialog.remove();
       if (location.hash === `#order-${id}`) history.replaceState(null, '', '#orders');
