@@ -167,7 +167,7 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=38">
+<link rel="stylesheet" href="/assets/style.css?v=39">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
 <script src="/assets/store.js?v=10" defer></script>
@@ -185,7 +185,7 @@ ${minimal ? '' : `<div class="announce" role="region" aria-label="${esc(announce
       ${settings.phone ? `<a class="top-phone only-lg" href="tel:${esc(String(settings.phone).replace(/[^\d+]/g, ''))}" dir="ltr">${icon('phone', 16)} ${esc(settings.phone)}</a>` : ''}
     </div>`}
     <a class="logo" href="/${lang}/" aria-label="${esc(store)}"><img src="/assets/brand/logo-horizontal.svg" alt="" width="300" height="80"></a>
-    ${minimal ? `<p class="secure-note">${icon('lock', 18)} ${esc(t.secureCheckout)}</p>` : `<div class="top-actions">
+    ${minimal ? `<p class="secure-note" title="${esc(t.secureCheckout)}">${icon('lock', 16)}<span class="sn-long">${esc(t.secureCheckout)}</span><span class="sn-short">SSL</span></p>` : `<div class="top-actions">
       <button type="button" class="icon-btn only-sm" data-drawer="search" aria-label="${esc(t.search)}" aria-controls="search-panel">${icon('search', 22)}</button>
       <details class="lang-menu"><summary aria-label="${esc(t.langName)}">${icon('globe', 20)}<span>${lang === 'ar' ? 'ع' : lang.toUpperCase()}</span></summary><div>${LANGS.map((l) => `<a href="/${l}${esc(path)}" lang="${l}"${l === lang ? ' aria-current="true"' : ''}>${esc(T[l].langName)}</a>`).join('')}</div></details>
       <a class="icon-btn cart-link" href="/${lang}/cart" data-drawer="cart" aria-label="${esc(t.cart)}">${icon('bag', 24)}<span class="cart-count" hidden>0</span></a>
