@@ -21,7 +21,7 @@ const PHOTOS = {
   hero: ['/assets/p/serum-1.webp', '/assets/p/henna-1.webp', '/assets/p/rizinusoel-1.webp'],
   story: '/assets/p/khadija.webp',
   banner: ['/assets/p/kaffeeseife-1.webp', '/assets/p/sidr-2.webp', '/assets/p/aker-fassi-seife-1.webp'],
-  about: ['/assets/p/khadija.webp', '/assets/p/kaffeeseife-3.webp', '/assets/p/serum-2.webp', '/assets/p/henna-2.webp', '/assets/p/sidr-1.webp', '/assets/p/rizinusoel-2.webp'],
+  about: ['/assets/p/khadija-portrait.webp', '/assets/p/kaffeeseife-3.webp', '/assets/p/serum-2.webp', '/assets/p/henna-2.webp', '/assets/p/sidr-1.webp', '/assets/p/rizinusoel-2.webp'],
 };
 
 const CSP =
