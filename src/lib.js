@@ -335,7 +335,9 @@ export function cleanOptions(raw) {
       seen.add(label);
       const price = Math.max(-100000, Math.min(100000, Math.round(Number(v?.price) || 0)));
       const color = /^#[0-9a-f]{6}$/i.test(v?.color || '') ? v.color.toLowerCase() : '';
-      values.push({ label, ...(type === 'color' ? { color: color || '#cccccc' } : {}), price });
+      // Optional display names in English/Arabic; the German label stays the key saved with the order.
+      const tr = v?.tr && typeof v.tr === 'object' ? Object.fromEntries(['en', 'ar'].map((l) => [l, String(v.tr[l] ?? '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 60)]).filter(([, x]) => x)) : null;
+      values.push({ label, ...(type === 'color' ? { color: color || '#cccccc' } : {}), price, ...(tr && Object.keys(tr).length ? { tr } : {}) });
     }
     if (values.length) groups.push({ name, type, values });
   }

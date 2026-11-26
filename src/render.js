@@ -168,10 +168,10 @@ ${preload ? `<link rel="preload" as="image" href="${esc(preload)}" fetchpriority
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fonts}&display=swap">
-<link rel="stylesheet" href="/assets/style.css?v=41">
+<link rel="stylesheet" href="/assets/style.css?v=42">
 <script src="/assets/js-on.js"></script>
 ${pixels ? `<script type="application/json" id="pixels">${JSON.stringify({ ...px, page: track }).replace(/</g, '\\u003c')}</script><script src="/assets/pixels.js?v=2" defer></script>` : ''}
-<script src="/assets/store.js?v=12" defer></script>
+<script src="/assets/store.js?v=13" defer></script>
 </head>
 <body data-lang="${lang}"${turnstileKey(settings) ? ` data-ts="${esc(turnstileKey(settings))}"` : ''} class="page-${page || 'default'}${minimal ? ' minimal' : ''}">
 ${minimal ? '' : `<template id="welcome-tpl"><div class="welcome" aria-hidden="true"><div class="welcome-in"><span class="welcome-seal"><svg class="welcome-ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56"/></svg><img src="/assets/brand/symbol-gold.svg" alt="" width="84" height="84"></span><p class="welcome-hello">${esc(t.welcome[0])}</p><p class="welcome-name">${[...'KHACHIJA'].map((ch, i) => `<span style="--i:${i}">${ch}</span>`).join('')}</p><p class="welcome-line">${esc(t.welcome[1])}</p></div><span class="welcome-skip">${esc(t.welcome[2])}</span></div></template><script src="/assets/welcome.js?v=1"></script>`}
@@ -296,7 +296,9 @@ function waWidget(ctx, product) {
 
 function priceHtml(ctx, p) {
   const onSale = p.compare_price && p.compare_price > p.price;
-  return `${onSale ? `<s>${esc(money(p.compare_price, ctx.lang))}</s> ` : ''}<span class="now">${esc(money(p.price, ctx.lang))}</span>`;
+  // Choices that cost more than the base price (e.g. "set" vs. single piece): show "ab 12,50 €".
+  const from = productOptions(p).some((g) => g.values.some((v) => v.price > 0)) ? `${esc(T[ctx.lang].priceFrom)} ` : '';
+  return `${onSale ? `<s>${esc(money(p.compare_price, ctx.lang))}</s> ` : ''}<span class="now">${from}${esc(money(p.price, ctx.lang))}</span>`;
 }
 
 export function productCard(p, ctx, i = 0) {
@@ -560,13 +562,24 @@ export function listingPage(ctx, { title, path, products, q = '', sort = '', des
   return layout(ctx, { title, seoTitle, description: metaDescription, path: query.size ? `${path}?${query}` : path, body, noindex: Boolean(q || sort), image, page: 'shop', lds });
 }
 
-export function optionFieldset(ctx, g, gi) {
+const optLabel = (v, lang) => v.tr?.[lang] || v.label;
+
+// Text choices with their own prices become cards that show the full price of each choice (first one preselected).
+const pricedChoices = (g) => g.type !== 'color' && g.values.length > 1 && g.values.some((v) => v.price);
+
+export function optionFieldset(ctx, g, gi, base = 0) {
   const t = T[ctx.lang];
   const name = optionGroupName(g, ctx.lang);
+  if (pricedChoices(g)) {
+    const top = Math.max(...g.values.map((v) => v.price));
+    return `<fieldset class="options opt-cards"><legend>${esc(name || t.choose)}<em class="picked" data-picked>: ${esc(optLabel(g.values[0], ctx.lang))}</em></legend><div>${g.values
+      .map((v, i) => `<label><input type="radio" name="opt${gi}" value="${esc(v.label)}" data-extra="${v.price}" data-show="${esc(optLabel(v, ctx.lang))}"${i ? '' : ' checked'} required><span><i class="oc-radio" aria-hidden="true"></i><b>${esc(optLabel(v, ctx.lang))}</b>${v.price === top && i === 0 ? `<em class="oc-tag">${esc(t.setBest)}</em>` : ''}<strong>${esc(money(base + v.price, ctx.lang))}</strong></span></label>`)
+      .join('')}</div></fieldset>`;
+  }
   const only = g.values.length === 1;
   const extra = (n) => (n ? `<small class="opt-extra">${n > 0 ? '+' : '−'}${esc(money(Math.abs(n), ctx.lang))}</small>` : '');
-  return `<fieldset class="options${g.type === 'color' ? ' swatches' : ''}"><legend>${esc(name || t.choose)}<em class="picked" data-picked>${only ? `: ${esc(g.values[0].label)}` : ''}</em></legend><div>${g.values
-    .map((v) => `<label title="${esc(v.label)}"><input type="radio" name="opt${gi}" value="${esc(v.label)}" data-extra="${v.price}"${only ? ' checked' : ''} required><span>${g.type === 'color' ? `<i class="dot" style="background:${esc(v.color)}"></i>` : ''}${esc(v.label)}${extra(v.price)}</span></label>`)
+  return `<fieldset class="options${g.type === 'color' ? ' swatches' : ''}"><legend>${esc(name || t.choose)}<em class="picked" data-picked>${only ? `: ${esc(optLabel(g.values[0], ctx.lang))}` : ''}</em></legend><div>${g.values
+    .map((v) => `<label title="${esc(optLabel(v, ctx.lang))}"><input type="radio" name="opt${gi}" value="${esc(v.label)}" data-extra="${v.price}" data-show="${esc(optLabel(v, ctx.lang))}"${only ? ' checked' : ''} required><span>${g.type === 'color' ? `<i class="dot" style="background:${esc(v.color)}"></i>` : ''}${esc(optLabel(v, ctx.lang))}${extra(v.price)}</span></label>`)
     .join('')}</div></fieldset>`;
 }
 
@@ -660,12 +673,12 @@ export function productPage(ctx, p, category, related) {
     <h1>${esc(name)}</h1>
     ${sub ? `<p class="subtitle sub-chips">${sub.split(/\s+·\s+/).filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join('')}</p>` : ''}
     <div class="price-block">
-      <p class="price big"><span data-unit>${esc(money(p.price, lang))}</span>${onSale ? ` <s>${esc(money(p.compare_price, lang))}</s> <span class="save">−${Math.round((1 - p.price / p.compare_price) * 100)} %</span>` : ''}</p>
+      <p class="price big"><span data-unit>${esc(money(p.price + options.filter(pricedChoices).reduce((x, g) => x + g.values[0].price, 0), lang))}</span>${onSale ? ` <s>${esc(money(p.compare_price, lang))}</s> <span class="save">−${Math.round((1 - p.price / p.compare_price) * 100)} %</span>` : ''}</p>
       ${unit ? `<p class="unit">${esc(t.contents)}: ${esc(content)} · ${esc(t.unit)}: ${esc(unit)}</p>` : ''}
       ${priceNote(ctx)}
     </div>
     <form class="buy" novalidate data-product="${p.id}" data-name="${esc(name)}" data-price="${p.price}" data-image="${esc(images[0])}" data-slug="${esc(p.slug)}">
-      ${options.map((g, gi) => optionFieldset(ctx, g, gi)).join('')}
+      ${options.map((g, gi) => optionFieldset(ctx, g, gi, p.price)).join('')}
       ${bundles.length && !soldOut ? `${offerCards(ctx, p, bundles, images[0])}<input type="hidden" name="qty" value="1">` : ''}
       ${soldOut ? `<button class="btn btn-block" type="button" disabled>${esc(t.outOfStock)}</button>` : `<div class="buy-row">
         ${bundles.length ? '' : `<div class="qty" role="group" aria-label="${esc(t.quantity)}"><button type="button" data-step="-1" aria-label="−">${icon('minus', 16)}</button><input name="qty" type="number" inputmode="numeric" min="1" max="${p.stock != null ? Math.max(1, Math.min(20, p.stock)) : 20}" value="1" aria-label="${esc(t.quantity)}"><button type="button" data-step="1" aria-label="+">${icon('plus', 16)}</button></div>`}
@@ -682,7 +695,7 @@ export function productPage(ctx, p, category, related) {
     <div class="share-row"><span>${esc(t.share)}</span><a class="share-btn" href="https://wa.me/?text=${encodeURIComponent(`${name} · ${url}`)}" rel="noopener" target="_blank" aria-label="WhatsApp">${waIcon(18)}</a><button class="share-btn" type="button" data-copy="${esc(url)}" aria-label="${esc(t.copyLink)}">${icon('link', 18)}</button></div>
   </div>
 </section>
-${soldOut ? '' : `<div class="buy-bar"><div><strong>${esc(name)}</strong><span>${esc(money(p.price, lang))}</span></div><div class="buy-bar-actions">${settings.whatsapp ? `<a class="buy-bar-wa" href="${esc(waLink(settings.whatsapp, `${name} · ${url}`))}" rel="noopener" target="_blank" aria-label="WhatsApp">${waIcon(22)}</a>` : ''}<button type="button" class="btn" data-buy-bar>${esc(t.addToCart)}</button></div></div>`}
+${soldOut ? '' : `<div class="buy-bar"><div><strong>${esc(name)}</strong><span data-unit>${esc(money(p.price + options.filter(pricedChoices).reduce((x, g) => x + g.values[0].price, 0), lang))}</span></div><div class="buy-bar-actions">${settings.whatsapp ? `<a class="buy-bar-wa" href="${esc(waLink(settings.whatsapp, `${name} · ${url}`))}" rel="noopener" target="_blank" aria-label="WhatsApp">${waIcon(22)}</a>` : ''}<button type="button" class="btn" data-buy-bar>${esc(t.addToCart)}</button></div></div>`}
 ${related.length ? `<section class="section wrap">${sectionHead(t.alsoLike, category ? catName(category, lang) : t.shop, category ? `/${lang}/c/${category.slug}` : `/${lang}/shop`, t.viewAll)}${grid(related, ctx, '')}</section>` : ''}
 ${ld(productLd(ctx, p, { name, desc, images, category, url }))}`;
   const crumbs = [[t.home, `/${lang}/`], ...(category ? [[catName(category, lang), `/${lang}/c/${category.slug}`]] : []), [name, `/${lang}/p/${p.slug}`]];

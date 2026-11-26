@@ -1585,3 +1585,16 @@ html.welcoming { overflow: hidden; }
 
 .grid-note { margin: 14px 0 0; text-align: center; font-size: 0.74rem; color: var(--muted); }
 .grid-note a { color: inherit; }
+
+/* Priced choices (set or single pieces): full-width cards with the total price of each choice */
+.opt-cards > div { display: grid; gap: 10px; }
+.opt-cards label { display: block; }
+.opt-cards span { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 4px 14px; min-height: 64px; padding: 14px 18px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg, #fff, var(--cream)); color: var(--ink); transition: border-color .2s, box-shadow .2s, transform .2s; }
+.opt-cards span:hover { border-color: var(--gold-2); }
+.opt-cards b { font-weight: 500; font-size: 15px; line-height: 1.35; }
+.opt-cards strong { font-family: var(--serif); font-size: 24px; font-weight: 600; color: var(--green); white-space: nowrap; }
+.opt-cards .oc-radio { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--gold-2); background: #fff; position: relative; }
+.opt-cards .oc-tag { grid-column: 2; grid-row: 2; justify-self: start; font-style: normal; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: #fff; background: linear-gradient(135deg, var(--gold), var(--gold-2)); padding: 3px 9px; border-radius: 99px; }
+.opt-cards input:checked + span { border-color: var(--green); background: linear-gradient(180deg, #fff, #f2f6f3); color: var(--ink); box-shadow: 0 0 0 1px var(--green), 0 14px 30px -20px rgba(36, 73, 58, .55); }
+.opt-cards input:checked + span .oc-radio { border-color: var(--green); background: radial-gradient(circle, var(--green) 0 45%, #fff 50%); }
+.opt-cards input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }

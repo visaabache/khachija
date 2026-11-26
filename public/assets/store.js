@@ -336,11 +336,10 @@
     buy.querySelectorAll('fieldset.options').forEach((fs) =>
       fs.addEventListener('change', (e) => {
         const picked = fs.querySelector('[data-picked]');
-        if (picked) picked.textContent = `: ${e.target.value}`;
+        if (picked) picked.textContent = `: ${e.target.dataset.show || e.target.value}`;
         fs.classList.remove('missing');
         const extra = [...buy.querySelectorAll('fieldset.options input:checked')].reduce((s, i) => s + Number(i.dataset.extra || 0), 0);
-        const unit = $('[data-unit]');
-        if (unit) unit.textContent = money(Number(buy.dataset.price) + extra);
+        document.querySelectorAll('[data-unit]').forEach((u) => (u.textContent = money(Number(buy.dataset.price) + extra)));
       }),
     );
     buy.querySelectorAll('input[name="offer"]').forEach((r) => r.addEventListener('change', () => (qtyInput.value = r.value)));
