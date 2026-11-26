@@ -1504,3 +1504,8 @@ html.welcoming { overflow: hidden; }
 .spot-list li { display: flex; align-items: center; gap: 12px; font-weight: 500; }
 .spot-list .icon { flex: none; width: 30px; height: 30px; padding: 6px; border-radius: 50%; color: #fff; background: linear-gradient(135deg, #d6ae66, #b8812f); box-shadow: 0 8px 16px -8px rgba(184, 129, 47, 0.9); }
 .spot .btn { border-radius: 14px; background: linear-gradient(135deg, #d6ae66, #b8812f 55%, #a06f26); border-color: transparent; }
+/* iPhone Safari zooms into any field under 16 px when it is tapped, which makes the page jump sideways.
+   Keep every text field at 16 px or more on touch screens. */
+@media (hover: none) and (pointer: coarse) {
+  input:not([type=checkbox]):not([type=radio]), select, textarea { font-size: max(16px, 1em) !important; }
+}
