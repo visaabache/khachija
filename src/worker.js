@@ -111,6 +111,8 @@ const ADMIN_CSP = "default-src 'self'; img-src 'self' data: blob: https:; media-
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    // webmail.<domain> only forwards to netcup's webmail, which has a valid certificate.
+    if (url.hostname.startsWith('webmail.')) return Response.redirect('https://webmail.netcup.net/', 302);
     const path = url.pathname;
     const agent = request.headers.get('user-agent') || '';
     if (BAD_AGENT.test(agent)) return new Response('Forbidden', { status: 403 });

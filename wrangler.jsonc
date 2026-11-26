@@ -23,7 +23,8 @@
   "vars": { "SITE_URL": "https://khachija-shop.de" },
   "routes": [
     { "pattern": "khachija-shop.de", "custom_domain": true },
-    { "pattern": "www.khachija-shop.de", "custom_domain": true }
+    { "pattern": "www.khachija-shop.de", "custom_domain": true },
+    { "pattern": "webmail.khachija-shop.de", "custom_domain": true }
   ],
   // Cloudflare rate limiter: at most 120 API requests a minute per visitor (stricter limits for orders and
   // logins are in the code). Free on all plans.
