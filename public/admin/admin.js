@@ -47,6 +47,7 @@
         no_email_from: 'Enter the sender address (verified in Brevo).',
         no_notify_email: 'Enter the address that receives the alerts.',
         email_failed: 'Brevo refused to send.',
+        weak_new_password: 'The new password needs at least 12 characters with letters and numbers.', same_password: 'The new password must differ from the current one.',
         generic: 'Error',
       },
       ago: { now: 'just now', min: (n) => `${n} min ago`, hour: (n) => `${n} h ago`, day: (n) => `${n} d ago` },
@@ -179,7 +180,7 @@
       countdownOn: 'Show the countdown “The offer ends in…” (24 h)',
       offerLeftAll: 'Pieces left in the offer (all products)', offerLeftAllHint: 'e.g. 7. Leave empty to hide the line. Can be changed for each product.',
       currencyHint: 'The customer always pays in euros: converted prices are a guide, with rates updated every 12 hours. Orders and the admin stay in euros.',
-      weakPassword: 'The admin password is short. Use at least 12 characters (npx wrangler secret put ADMIN_PASSWORD).',
+      weakPassword: 'The admin password is short. Change it under Settings → Change password.',
       social: 'Social networks',
       socialHint: 'Paste the page link or just the account name (e.g. @khachija). The icons show at the bottom of the store.',
       pixels: 'Ad pixels',
@@ -259,6 +260,7 @@
         no_email_from: 'Geben Sie die Absenderadresse ein (in Brevo bestätigt).',
         no_notify_email: 'Geben Sie die Adresse ein, die die Benachrichtigungen erhält.',
         email_failed: 'Brevo hat den Versand abgelehnt.',
+        weak_new_password: 'Das neue Passwort braucht mindestens 12 Zeichen mit Buchstaben und Zahlen.', same_password: 'Das neue Passwort muss sich vom aktuellen unterscheiden.',
         generic: 'Fehler',
       },
       ago: { now: 'gerade eben', min: (n) => `vor ${n} Min.`, hour: (n) => `vor ${n} Std.`, day: (n) => `vor ${n} T.` },
@@ -391,7 +393,7 @@
       countdownOn: 'Countdown „Das Angebot endet in…“ zeigen (24 Std.)',
       offerLeftAll: 'Verbleibende Stück im Angebot (alle Produkte)', offerLeftAllHint: 'z. B. 7. Leer lassen, um die Zeile auszublenden. Kann pro Produkt geändert werden.',
       currencyHint: 'Die Kundin bezahlt immer in Euro: umgerechnete Preise sind nur eine Orientierung, die Kurse werden alle 12 Stunden aktualisiert. Bestellungen und Verwaltung bleiben in Euro.',
-      weakPassword: 'Das Admin-Passwort ist kurz. Verwenden Sie mindestens 12 Zeichen (npx wrangler secret put ADMIN_PASSWORD).',
+      weakPassword: 'Das Admin-Passwort ist kurz. Ändern Sie es unter Einstellungen → Passwort ändern.',
       social: 'Soziale Netzwerke',
       socialHint: 'Fügen Sie den Link zur Seite oder nur den Kontonamen ein (z. B. @khachija). Die Symbole erscheinen unten im Shop.',
       pixels: 'Werbe-Pixel',
@@ -469,6 +471,10 @@
   X.de.tiersHint = 'Format: kg=Preis, getrennt durch ; z. B. DE: 2=5,19; 5=7,69; 10=10,49. Der Shop addiert das Gewicht der Produkte (plus Verpackung) und wählt den passenden Preis. Der kostenlose Versand ab dem Betrag oben gilt in Deutschland weiterhin.';
   X.en.legalWid = 'Business ID (W-IdNr., e.g. DE123456789-00001)';
   X.de.legalWid = 'Wirtschafts-Identifikationsnummer (W-IdNr.)';
+  const PW = () => ({
+    de: { title: 'Passwort ändern', hint: 'Mindestens 12 Zeichen mit Buchstaben und Zahlen. Danach werden alle anderen Geräte automatisch abgemeldet.', current: 'Aktuelles Passwort', code: 'Bestätigungscode (Authenticator-App)', next: 'Neues Passwort', repeat: 'Neues Passwort wiederholen', show: 'Passwörter anzeigen', save: 'Passwort ändern', mismatch: 'Die neuen Passwörter stimmen nicht überein.', rules: 'Mindestens 12 Zeichen, mit Buchstaben und Zahlen.', done: 'Passwort geändert. Andere Geräte wurden abgemeldet.', levels: ['Schwach', 'Gut', 'Sehr stark'] },
+    en: { title: 'Change password', hint: 'At least 12 characters with letters and numbers. All other devices are signed out afterwards.', current: 'Current password', code: 'Verification code (authenticator app)', next: 'New password', repeat: 'Repeat new password', show: 'Show passwords', save: 'Change password', mismatch: 'The new passwords do not match.', rules: 'At least 12 characters, with letters and numbers.', done: 'Password changed. Other devices were signed out.', levels: ['Weak', 'Good', 'Very strong'] },
+  })[lang === 'de' ? 'de' : 'en'];
   const XL = () => X[lang] || X.en;
   const date = (s) => new Date(`${s.replace(' ', 'T')}Z`);
   const when = (s) => date(s).toLocaleString(L.locale, { dateStyle: 'short', timeStyle: 'short', numberingSystem: 'latn' });
@@ -709,6 +715,7 @@
       state.ai = me.ai;
       state.turnstile = me.turnstile;
       state.paypal = me.paypal;
+      state.totp = me.totp;
       state.settings = (await api('/settings')).settings;
       state.categories = (await api('/categories')).categories;
       route();
@@ -2285,8 +2292,49 @@
         ${contentLangs().map((l) => field(`hero_title_${l}`, `${L.heroTitle} · ${LANG_LABEL[l]}`, dirOf(l)) + field(`hero_text_${l}`, `${L.heroText} · ${LANG_LABEL[l]}`, dirOf(l))).join('')}
       </div></div>
       <div class="sticky-actions"><button class="btn">${L.saveSettings}</button></div>
+    </form>
+    <form class="card pw-card" id="pwform" autocomplete="off">
+      <div class="card-head"><h2>${icon('settings')} ${PW().title}</h2></div>
+      <p class="muted small">${PW().hint}</p>
+      <div class="cols">
+        <label>${PW().current}<input type="password" name="current" autocomplete="current-password" required dir="ltr"></label>
+        ${state.totp ? `<label>${PW().code}<input name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required dir="ltr" placeholder="••••••"></label>` : ''}
+      </div>
+      <div class="cols">
+        <label>${PW().next}<input type="password" name="next" autocomplete="new-password" minlength="12" required dir="ltr"><small class="pw-meter" data-meter></small></label>
+        <label>${PW().repeat}<input type="password" name="repeat" autocomplete="new-password" minlength="12" required dir="ltr"></label>
+      </div>
+      <label class="switch"><input type="checkbox" data-pw-show><span></span> ${PW().show}</label>
+      <div class="actions"><button class="btn">${PW().save}</button></div>
     </form>`,
     );
+    const pf = document.getElementById('pwform');
+    const meter = pf.querySelector('[data-meter]');
+    pf.next.addEventListener('input', () => {
+      const v = pf.next.value;
+      const score = (v.length >= 12) + (v.length >= 16) + /[a-z]/.test(v) + /[A-Z]/.test(v) + /\d/.test(v) + /[^A-Za-z0-9]/.test(v);
+      meter.textContent = v ? PW().levels[score >= 6 ? 2 : score >= 4 ? 1 : 0] : '';
+      meter.dataset.level = score >= 6 ? 'strong' : score >= 4 ? 'ok' : 'weak';
+    });
+    pf.querySelector('[data-pw-show]').addEventListener('change', (e) => pf.querySelectorAll('input[type=password], input[data-was-pw]').forEach((i) => { i.dataset.wasPw = '1'; i.type = e.target.checked ? 'text' : 'password'; }));
+    pf.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const v = pf.next.value;
+      if (v !== pf.repeat.value) return toast(PW().mismatch, true);
+      if (v.length < 12 || !/[A-Za-z]/.test(v) || !/\d/.test(v)) return toast(PW().rules, true);
+      const btn = pf.querySelector('.btn');
+      btn.disabled = true;
+      try {
+        await api('/password', { method: 'POST', body: { current: pf.current.value, next: v, code: pf.code?.value || '' } });
+        pf.reset();
+        meter.textContent = '';
+        toast(PW().done);
+      } catch (err) {
+        toast(err.message, true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
     const f = document.getElementById('sform');
     const save = async () => {
       const data = Object.fromEntries(new FormData(f));

@@ -181,3 +181,14 @@ test('DHL weight tiers: Germany and EU zone, heavier parcels, free shipping stil
   assert.ok(shippingCountries(s).includes('FR') && shippingCountries(s).includes('CH'));
   assert.equal(parcelGrams([{ product: { unit_amount: 100, unit_type: 'ml' }, qty: 2 }, { product: { unit_amount: 200, unit_type: 'g' }, qty: 1 }]), 2 * 220 + 260 + 300);
 });
+
+test('admin password hash: verify right, reject wrong, unique salts', async () => {
+  const { hashPassword, checkPassword } = await import('../src/admin.js');
+  const h1 = await hashPassword('Neues-Passwort-2026');
+  const h2 = await hashPassword('Neues-Passwort-2026');
+  assert.ok(h1.startsWith('pbkdf2$100000$'));
+  assert.notEqual(h1, h2);
+  assert.equal(await checkPassword('Neues-Passwort-2026', h1), true);
+  assert.equal(await checkPassword('neues-passwort-2026', h1), false);
+  assert.equal(await checkPassword('x', ''), false);
+});

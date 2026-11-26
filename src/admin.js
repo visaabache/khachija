@@ -86,6 +86,32 @@ async function samePassword(a, b) {
   return diff === 0;
 }
 
+// A password changed in the admin is kept as a PBKDF2-SHA256 hash in settings (key admin_pw_hash) and then
+// replaces the ADMIN_PASSWORD secret. Deleting that row brings the secret back (emergency reset).
+const PW_ITER = 100000;
+async function pbkdf2(password, salt, iter = PW_ITER) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, key, 256));
+}
+export async function hashPassword(password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  return `pbkdf2$${PW_ITER}$${b64(salt)}$${b64(await pbkdf2(password, salt))}`;
+}
+export async function checkPassword(password, stored) {
+  const [kind, iter, salt, hash] = String(stored || '').split('$');
+  if (kind !== 'pbkdf2' || !salt || !hash) return false;
+  const got = await pbkdf2(password, unb64(salt), Number(iter) || PW_ITER);
+  const want = unb64(hash);
+  if (got.length !== want.length) return false;
+  let diff = 0;
+  for (let i = 0; i < got.length; i++) diff |= got[i] ^ want[i];
+  return diff === 0;
+}
+async function storedHash(db) {
+  const row = await db.prepare("SELECT value FROM settings WHERE key = 'admin_pw_hash'").first();
+  return row?.value || '';
+}
+
 function getCookie(request, name) {
   const m = (request.headers.get('cookie') || '').match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
   return m ? m[1] : '';
@@ -126,21 +152,48 @@ export async function handleAdmin(request, env, url, ctx) {
       return json({ error: 'bot' }, 403);
     }
     // Wrong password or wrong 2FA code get the same answer, so a guesser can't tell which one failed.
-    const passOk = await samePassword(String(b.password || '').slice(0, 200), secret);
+    const pwHash = await storedHash(env.DB);
+    const given = String(b.password || '').slice(0, 200);
+    const passOk = pwHash ? await checkPassword(given, pwHash) : await samePassword(given, secret);
     const codeOk = !env.ADMIN_TOTP_SECRET || (await validTotp(env.ADMIN_TOTP_SECRET, b.code));
     if (!passOk || !codeOk) {
       await addHit(env.DB, bucket);
       await new Promise((r) => setTimeout(r, 800));
       return json({ error: 'wrong_password' }, 401);
     }
-    const token = await makeSession(secret + (env.ADMIN_TOTP_SECRET || ''));
+    const token = await makeSession((pwHash || secret) + (env.ADMIN_TOTP_SECRET || ''));
     await env.DB.prepare('DELETE FROM rate_hits WHERE bucket = ?').bind(bucket).run();
     return json({ ok: true }, 200, { 'set-cookie': `${COOKIE}=${token}; Path=/api/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_DAYS * 86400}` });
   }
   if (path === '/logout' && method === 'POST') {
     return json({ ok: true }, 200, { 'set-cookie': `${COOKIE}=; Path=/api/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=0` });
   }
-  if (!(await validSession(getCookie(request, COOKIE), secret + (env.ADMIN_TOTP_SECRET || '')))) return json({ error: 'unauthorized' }, 401);
+  const pwHashNow = await storedHash(env.DB);
+  const sessionSecret = (pwHashNow || secret) + (env.ADMIN_TOTP_SECRET || '');
+  if (!(await validSession(getCookie(request, COOKIE), sessionSecret))) return json({ error: 'unauthorized' }, 401);
+
+  // Change the admin password: needs the current password and, when 2FA is on, a fresh code.
+  if (path === '/password' && method === 'POST') {
+    const bucket = `pwchange:${await visitorId(request, secret)}`;
+    if ((await recentHits(env.DB, bucket, 900)) >= 5) return json({ error: 'locked', minutes: 15 }, 429);
+    const b = await body(request);
+    const current = String(b?.current || '').slice(0, 200);
+    const next = String(b?.next || '');
+    const currentOk = pwHashNow ? await checkPassword(current, pwHashNow) : await samePassword(current, secret);
+    const codeOk = !env.ADMIN_TOTP_SECRET || (await validTotp(env.ADMIN_TOTP_SECRET, b?.code));
+    if (!currentOk || !codeOk) {
+      await addHit(env.DB, bucket);
+      await new Promise((r) => setTimeout(r, 800));
+      return json({ error: 'wrong_password' }, 401);
+    }
+    if (next.length < 12 || next.length > 200 || !/[A-Za-z]/.test(next) || !/\d/.test(next)) return json({ error: 'weak_new_password' }, 400);
+    if (next === current) return json({ error: 'same_password' }, 400);
+    const hash = await hashPassword(next);
+    await env.DB.prepare("INSERT INTO settings (key, value) VALUES ('admin_pw_hash', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(hash).run();
+    // New session for this device; every other device is signed out because the signing key changed.
+    const token = await makeSession(hash + (env.ADMIN_TOTP_SECRET || ''));
+    return json({ ok: true }, 200, { 'set-cookie': `${COOKIE}=${token}; Path=/api/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_DAYS * 86400}` });
+  }
   // Writes must be JSON (or an image upload), which a cross-site form cannot send; the cookie is SameSite=Strict too.
   if (method !== 'GET' && path !== '/images' && !(request.headers.get('content-type') || '').includes('application/json')) {
     return json({ error: 'bad_request' }, 400);
@@ -149,7 +202,7 @@ export async function handleAdmin(request, env, url, ctx) {
   const db = env.DB;
   let m;
 
-  if (path === '/me') return json({ ok: true, images: true, r2: Boolean(env.IMAGES), emails: Boolean(env.BREVO_API_KEY), ai: Boolean(env.ANTHROPIC_API_KEY), turnstile: Boolean(env.TURNSTILE_SECRET), paypal: Boolean(env.PAYPAL_CLIENT_ID && env.PAYPAL_SECRET), totp: Boolean(env.ADMIN_TOTP_SECRET), weak_password: secret.length < 12 });
+  if (path === '/me') return json({ ok: true, images: true, r2: Boolean(env.IMAGES), emails: Boolean(env.BREVO_API_KEY), ai: Boolean(env.ANTHROPIC_API_KEY), turnstile: Boolean(env.TURNSTILE_SECRET), paypal: Boolean(env.PAYPAL_CLIENT_ID && env.PAYPAL_SECRET), totp: Boolean(env.ADMIN_TOTP_SECRET), weak_password: !pwHashNow && secret.length < 12 });
 
   // AI description writer: the seller reviews the text before saving it.
   if (path === '/ai/describe' && method === 'POST') {
@@ -412,7 +465,11 @@ export async function handleAdmin(request, env, url, ctx) {
   }
 
   // Settings
-  if (path === '/settings' && method === 'GET') return json({ settings: await getSettings(db) });
+  if (path === '/settings' && method === 'GET') {
+    const all = await getSettings(db);
+    delete all.admin_pw_hash;
+    return json({ settings: all });
+  }
   if (path === '/settings' && method === 'PUT') {
     const b = await body(request);
     if (!b) return json({ error: 'bad_request' }, 400);
